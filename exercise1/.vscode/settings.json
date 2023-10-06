@@ -1,0 +1,79 @@
+{
+	"c_project": {
+		// Όνομα του εκτελέσιμου προγράμματος (μόνο για μεταγλώττιση πολλών αρχείων & make)
+		"program": "lsh",
+
+		// Directory στο οποίο βρίσκεται το πρόγραμμα (μόνο για μεταγλώτισση με make)
+		"dir": "A/LSH",
+
+		// Οι τιμές που δηλώνονται στα arg1 - arg8 παρακάτω δίνονται αυτόματα σαν ορίσματα
+		// σε οποιοδήποτε πρόγραμμα τρέχουμε (είτε με Ctrl-Shift-B είτε στον debugger).
+		//
+		// Ο ευκολότερος τρόπος να τις αλλάξουμε: Terminal / Run task / Set program arguments
+		//
+		// - Για ανακατεύθυνση εισόδου βάζουμε ορίσματα: "<", "input-file"
+		// - Για ανακατεύθυνση εξόδου  βάζουμε ορίσματα: ">", "output-file"
+		//
+		// Τερματίζουμε τη λίστα με "#", το όρισμα αυτό και τα επόμενά του αγνοούνται.
+		//
+		// ΠΡΟΣΟΧΗ: Ολα τα arg1 - arg8 πρέπει να δηλώνονται, αν τα βάλουμε σε σχόλια θα
+		//          πάρουμε μήνυμα λάθους. Αν θέλουμε λιγότερα απλά τερματίζουμε με "#".
+		//
+		"arg1": "#",
+		"arg2": "#",
+		"arg3": "#",
+		"arg4": "#",
+		"arg5": "#",
+		"arg6": "#",
+		"arg7": "#",
+		"arg8": "#",
+	},
+	"files.associations": {
+		"stdio.h": "c",
+		"type_traits": "c",
+		"array": "cpp",
+		"atomic": "cpp",
+		"bit": "cpp",
+		"*.tcc": "cpp",
+		"cctype": "cpp",
+		"clocale": "cpp",
+		"cmath": "cpp",
+		"cstdarg": "cpp",
+		"cstddef": "cpp",
+		"cstdint": "cpp",
+		"cstdio": "cpp",
+		"cstdlib": "cpp",
+		"cwchar": "cpp",
+		"cwctype": "cpp",
+		"deque": "cpp",
+		"unordered_map": "cpp",
+		"vector": "cpp",
+		"exception": "cpp",
+		"algorithm": "cpp",
+		"functional": "cpp",
+		"iterator": "cpp",
+		"memory": "cpp",
+		"memory_resource": "cpp",
+		"numeric": "cpp",
+		"optional": "cpp",
+		"random": "cpp",
+		"string": "cpp",
+		"string_view": "cpp",
+		"system_error": "cpp",
+		"tuple": "cpp",
+		"utility": "cpp",
+		"fstream": "cpp",
+		"initializer_list": "cpp",
+		"iosfwd": "cpp",
+		"iostream": "cpp",
+		"istream": "cpp",
+		"limits": "cpp",
+		"new": "cpp",
+		"ostream": "cpp",
+		"sstream": "cpp",
+		"stdexcept": "cpp",
+		"streambuf": "cpp",
+		"typeinfo": "cpp",
+		"complex": "cpp"
+	},
+}

@@ -1,32 +1,22 @@
-# Prerequisites
-*.d
+# Αγνοούμε όλα τα αρχεία (όχι τα directories)
+*
+!*/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Εκτός από τα παρακάτω
+!*.cpp
+!*.cc
+!*.h
+!*.hpp
+!Makefile
+!README.md
+!*.mk
+!*.yml
+!*.tex
+!*.txt
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# vscode directory
+!launch.json
+!tasks.json
+!settings.json
+!set_program_args.pl
+!visualize*
