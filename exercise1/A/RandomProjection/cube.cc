@@ -4,7 +4,11 @@
 #include <limits>
 #include <algorithm>
 #include <map>
+
+#include "metrics.hpp"
 #include "h.hpp"
+
+#include <random>
 
 using namespace std;
 
@@ -16,6 +20,7 @@ int f(int x) {
 }
 
 // preprocess: store points p -> [f-i(h_i(p))] for i = 1, ..., d'=k
+// respect order of p (not shuffled)
 vector<vector<int>> preprocess(vector<vector<double>> p, int k) {
 	vector<vector<int>> result(p.size(), vector<int>(k));
 	for (int i = 0; i < (int) p.size(); i++) {
@@ -77,15 +82,6 @@ vector<vector<int>> pack(vector<vector<int>> p_proj, int n, vector<int> q_proj) 
 	}
 	return vertices;	
 }
-
-double euclidean_distance(vector<double> a, vector<double> b) {
-	double result = 0;
-	for (int i = 0; i < (int) a.size(); i++) {
-		result += (a[i] - b[i]) * (a[i] - b[i]);
-	}
-	return sqrt(result);
-}
-
 
 // query for nearest neighbor of q, where q is a vector of dimension d, k is the dimension of the projected space, 
 // M is the maximum number of points to check, and probes is the maximum number of vertices to check (not Hamming distance), distance function (default: euclidean)

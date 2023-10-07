@@ -29,6 +29,7 @@
 		"arg8": "#",
 	},
 	"files.associations": {
+		"\"*.m\":\"matlab\"": "",
 		"stdio.h": "c",
 		"type_traits": "c",
 		"array": "cpp",
@@ -74,6 +75,7 @@
 		"stdexcept": "cpp",
 		"streambuf": "cpp",
 		"typeinfo": "cpp",
-		"complex": "cpp"
+		"complex": "cpp",
+		"chrono": "cpp"
 	},
 }
