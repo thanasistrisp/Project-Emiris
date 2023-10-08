@@ -6,6 +6,7 @@
 // random   is used for std::default_random_engine generator, std::normal_distribution, std::uniform_real_distribution and rand().
 
 #include "lsh.h"
+#include "list.h"
 
 using std::vector;
 
