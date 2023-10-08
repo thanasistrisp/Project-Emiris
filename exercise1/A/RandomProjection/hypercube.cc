@@ -23,11 +23,14 @@ hypercube::hypercube(std::vector<std::vector<double>> p, std::vector<double> q, 
 	for (int i = 0; i < k; i++) {
 		q_proj.push_back(f(h(q)));
 	}
+	cout << "Preprocessing..." << endl;
 	p_proj = preprocess(p, k);
+	cout << "Adding to hypercube..." << endl;
 	vertices = pack(p_proj, p.size(), q_proj);
 }
 
 vector<vector<double>> hypercube::query_n_nearest_neighbors() {
+	cout << "Querying n nearest neighbors..." << endl;
 	int num_points = 0;
 	int num_vertices = 0;
 
@@ -58,6 +61,7 @@ vector<vector<double>> hypercube::query_n_nearest_neighbors() {
 }
 
 vector<vector<double>> hypercube::query_range() {
+	cout << "Querying range..." << endl;
 	vector<vector<double>> r_candidates;
 	int num_points = 0;
 	int num_vertices = 0;
