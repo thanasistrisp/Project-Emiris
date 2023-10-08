@@ -4,11 +4,10 @@
 #include <limits>
 #include <algorithm>
 #include <map>
+#include <random>
 
 #include "metrics.hpp"
 #include "h.hpp"
-
-#include <random>
 
 using namespace std;
 
@@ -85,7 +84,8 @@ vector<vector<int>> pack(vector<vector<int>> p_proj, int n, vector<int> q_proj) 
 
 // query for nearest neighbor of q, where q is a vector of dimension d, k is the dimension of the projected space, 
 // M is the maximum number of points to check, and probes is the maximum number of vertices to check (not Hamming distance), distance function (default: euclidean)
-vector<double> query(vector<vector<double>> p, vector<double> q, int k, int M, int probes, double (*distance)(vector<double>, vector<double>) = euclidean_distance) {
+vector<vector<double>> query(vector<vector<double>> p, vector<double> q, int k, int M, int probes, int N, double R,
+							 double (*distance)(vector<double>, vector<double>) = euclidean_distance) {
 	// project q to d_ dimensions
 	vector<int> q_proj(k);
 	for (int i = 0; i < k; i++) {
@@ -93,16 +93,27 @@ vector<double> query(vector<vector<double>> p, vector<double> q, int k, int M, i
 	}
 	vector<vector<int>> p_proj = preprocess(p, k);
 	vector<vector<int>> vertices = pack(p_proj, p.size(), q_proj);
-	vector<double> ANN = p[vertices[0][0]];
 	int num_points = 0;
 	int num_vertices = 0;
-	// Check points in same vertex and find the best Approximate Nearest Neighbor
+	cout << R << endl;
+	// Check points in same vertex and find the N nearest neighbors
+	// initialize N nearest neighbors and distances (best)
+	vector<vector<double>> best_candidates(N, vector<double>(p[0].size()));
+	vector<double> best_distances(N, numeric_limits<double>::max());
+
 	for (int i = 0; i < (int) vertices.size(); i++) {
 		for (int j = 0; j < (int) vertices[i].size(); j++) {
 			if (num_points >= M)
 				break;
-			if (distance(p[vertices[i][j]], q) < distance(ANN, q)) {
-				ANN = p[vertices[i][j]];
+			if (distance(p[vertices[i][j]], q) < best_distances[N-1]) {
+				best_candidates[N-1] = p[vertices[i][j]];
+				best_distances[N-1] = distance(p[vertices[i][j]], q);
+				for (int k = N-1; k > 0; k--) {
+					if (best_distances[k] < best_distances[k-1]) {
+						swap(best_distances[k], best_distances[k-1]);
+						swap(best_candidates[k], best_candidates[k-1]);
+					}
+				}
 			}
 			num_points++;
 		}
@@ -110,5 +121,6 @@ vector<double> query(vector<vector<double>> p, vector<double> q, int k, int M, i
 		if (num_vertices >= probes)
 			break;
 	}
-	return ANN;
+
+	return best_candidates;
 }

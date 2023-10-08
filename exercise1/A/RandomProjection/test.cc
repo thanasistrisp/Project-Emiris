@@ -5,19 +5,14 @@
 using namespace std;
 
 // brute force nearest neighbor search
-void brute_force(vector<vector<double>> p, vector<double> q) {
-	// compute distance of q to every point in p
-	vector<double> distances(p.size());
+void brute_force(vector<vector<double>> p, vector<double> q, int K) { // find k exact nearest neighbors to q by brute force
+	vector<pair<double, int>> distances(p.size());
 	for (int i = 0; i < (int) p.size(); i++) {
-		distances[i] = euclidean_distance(p[i], q);
+		distances[i] = make_pair(euclidean_distance(p[i], q), i);
 	}
-	// sort distances
 	sort(distances.begin(), distances.end());
-	// print nearest neighbor point in 3d
-	for (int i = 0; i < (int) p.size(); i++) {
-		if (euclidean_distance(p[i], q) == distances[0]) { // print all of them if equal
-			cout << p[i][0] << " " << p[i][1] << " " << p[i][2] << endl;
-		}
+	for (int i = 0; i < K; i++) {
+		cout << p[distances[i].second][0] << " " << p[distances[i].second][1] << " " << p[distances[i].second][2] << endl;
 	}
 }
 
@@ -37,15 +32,17 @@ int main(void) {
 	// define k
 	int k = 3; // log(1000)
 	// define M
-	int M = 20; // there are more than 100 in one vertex
+	int M = 100; // there are more than 100 in one vertex
 	// define probes
 	int probes = 2;
 	// query
-	vector<double> result = query(p, q, k, M, probes);
+	vector<vector<double>> result = query(p, q, k, M, probes, 3, 100);
 	// print result
 	for (int i = 0; i < (int) result.size(); i++) {
-		cout << result[i] << " ";
+		cout << result[i][0] << " " << result[i][1] << " " << result[i][2] << endl;
 	}
-	cout << endl;
-	brute_force(p, q);
+	cout << "Brute force: " << endl;
+	// brute force
+	brute_force(p, q, 3);
+	return 0;
 }
