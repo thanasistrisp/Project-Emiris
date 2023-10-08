@@ -39,7 +39,7 @@ int HashFunction::hash(vector<double>& p)
 
     // Use hash function h_i(p) = floor((p * v + t) / w)
     double result = std::inner_product(p.begin(), p.end(), v.begin(), t);
-    return floor(result / window);
+    return floor(abs(result) / window);
 }
 
 // todo: find a way to fix case p * v < 0
@@ -71,9 +71,10 @@ int HashFunctionFamily::hash(int i, vector<double>& p)
 
 // ---------- Public functions for class LSH ----------
 
-LSH::LSH(int number_of_dimensions, int number_of_hash_functions, int window, int number_of_hash_tables, int number_of_buckets)
+LSH::LSH(int number_of_dimensions, int number_of_points, int number_of_hash_functions, int number_of_hash_tables, int number_of_buckets, int window)
 : number_of_dimensions(number_of_dimensions), number_of_hash_functions(number_of_hash_functions),
-  number_of_hash_tables(number_of_hash_tables), number_of_buckets(number_of_buckets),
+  table_size(number_of_points / 4), number_of_hash_tables(number_of_hash_tables),
+  number_of_buckets(number_of_buckets),
   hash_function_family(number_of_dimensions, number_of_hash_functions, window)
 {
     // Calculate factors for hash function g.
@@ -102,12 +103,12 @@ int LSH::hash(int j, vector<double>& p)
         return -1;
     }
 
-    // Use hash function g_j(p) = sum (r_i * h_i(p)) mod M
+    // Use hash function g_j(p) = [sum (r_i * h_i(p)) mod M] mod table_size
     int r_i, h_i, sum = 0;
     for(int i = 0; i < number_of_hash_functions; i++){
         r_i = factors.at(j).at(i);
         h_i = hash_function_family.hash(i, p);
         sum += r_i * h_i;
     }
-    return sum % number_of_buckets;
+    return (sum % M) % table_size;
 }

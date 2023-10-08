@@ -1,6 +1,10 @@
 #include <vector>
 // #include <unordered_map>
 
+
+#define M ((1ULL << 32) - 5) // Large prime number for fast hashing.
+
+// Hash function in Euclidean space.
 class HashFunction
 {
     private:
@@ -35,8 +39,9 @@ class LSH
         const int number_of_dimensions;     // Number of dimensions d.
         const int number_of_hash_functions; // Number of hash functions k for each hash function g_j, j = 0, ..., M.
 
+        const int table_size;            // Hash table size.
         const int number_of_hash_tables; // Number of hash tables L.
-        const int number_of_buckets;     // Number of buckets for each hash table M.
+        const int number_of_buckets;     // Number of buckets for each hash table.
 
         HashFunctionFamily hash_function_family; // Hash function family H = {h_1, h_2, ..., h_k}.
         // std::vector<std::unordered_map<std::vector<double>, int>> hash_tables; // Hash tables.
@@ -44,7 +49,7 @@ class LSH
         std::vector<std::vector<int>> factors; // Factors for hash functions g_j.
     
     public:
-        LSH(int, int, int, int, int);
+        LSH(int, int, int, int, int, int);
         ~LSH();
 
         int hash(int, std::vector<double>&);
