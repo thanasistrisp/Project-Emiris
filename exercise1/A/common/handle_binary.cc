@@ -58,16 +58,19 @@ static int reverse_int(int i) {
 }
 
 void export_image(vector<double> image, string filename) {
-  // export image to image.ppm
-  ofstream file(filename);
+  // export image to file
+  ofstream file(filename, ios::binary);
 
   // write header
-  file << "P3" << endl;
+  file << "P6" << endl;
   file << 28 << " " << 28 << endl;
   file << 255 << endl;
 
   // write data
   for (int i = 0; i < (int) image.size(); i++) {
-    file << (int)image[i] << " " << (int)image[i] << " " << (int)image[i] << " ";
+    unsigned char temp = (unsigned char) image[i];
+    file.write((char*)&temp, sizeof(unsigned char));
+    file.write((char*)&temp, sizeof(unsigned char));
+    file.write((char*)&temp, sizeof(unsigned char));
   }
 }

@@ -15,10 +15,10 @@ int main() {
 
   vector<vector<double>> query_data = read_mnist_data("../../MNIST/t10k-images-idx3-ubyte");
 
-  vector<double> query = query_data[15];
+  vector<double> query = query_data[169];
 
   // create hypercube
-  hypercube cube(mnist_data, query, 14, 10, 2, 10, 10000);
+  hypercube cube(mnist_data, query, 14, 2000, 2000, 10, 10000);
 
   // query hypercube
   vector<vector<double>> k_candidates = cube.query_n_nearest_neighbors();
@@ -26,7 +26,7 @@ int main() {
   // export results
   export_image(query, "../../output/query.ppm");
   for (int i = 0; i < (int) k_candidates.size(); i++) {
-    export_image(k_candidates[i], "../../output/candidate_" + to_string(i) + ".png");
+    export_image(k_candidates[i], "../../output/candidate_" + to_string(i) + ".ppm");
   }
 
   cout << "Done!" << endl;
