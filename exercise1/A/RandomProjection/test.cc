@@ -31,13 +31,13 @@ int main(void) {
 	}
 	// define query point
 	vector<double> q(3);
-	q[0] = 5;
-	q[1] = 15;
-	q[2] = 20;
+	q[0] = 500;
+	q[1] = 250;
+	q[2] = 970;
 	// define k
-	int k = 2;
+	int k = 3; // log(1000)
 	// define M
-	int M = 11;
+	int M = 20; // there are more than 100 in one vertex
 	// define probes
 	int probes = 2;
 	// query
