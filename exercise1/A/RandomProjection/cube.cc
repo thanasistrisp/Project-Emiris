@@ -11,7 +11,7 @@
 
 using namespace std;
 
-int f(int x) {
+int f(int x) { // uniform mapping to {0,1}
 	if (x % 2 == 0)
 		return 0;
 	else
@@ -19,7 +19,6 @@ int f(int x) {
 }
 
 // preprocess: store points p -> [f-i(h_i(p))] for i = 1, ..., d'=k
-// respect order of p (not shuffled)
 vector<vector<int>> preprocess(vector<vector<double>> p, int k) {
 	vector<vector<int>> result(p.size(), vector<int>(k));
 	for (int i = 0; i < (int) p.size(); i++) {
@@ -84,7 +83,7 @@ vector<vector<int>> pack(vector<vector<int>> p_proj, int n, vector<int> q_proj) 
 
 // query for nearest neighbor of q, where q is a vector of dimension d, k is the dimension of the projected space, 
 // M is the maximum number of points to check, and probes is the maximum number of vertices to check (not Hamming distance), distance function (default: euclidean)
-vector<vector<double>> query(vector<vector<double>> p, vector<double> q, int k, int M, int probes, int N, double R,
+tuple<vector<vector<double>>,vector<vector<double>>> query(vector<vector<double>> p, vector<double> q, int k, int M, int probes, int N, double R,
 							 double (*distance)(vector<double>, vector<double>) = euclidean_distance) {
 	// project q to d_ dimensions
 	vector<int> q_proj(k);
@@ -95,23 +94,21 @@ vector<vector<double>> query(vector<vector<double>> p, vector<double> q, int k, 
 	vector<vector<int>> vertices = pack(p_proj, p.size(), q_proj);
 	int num_points = 0;
 	int num_vertices = 0;
-	cout << R << endl;
-	// Check points in same vertex and find the N nearest neighbors
-	// initialize N nearest neighbors and distances (best)
-	vector<vector<double>> best_candidates(N, vector<double>(p[0].size()));
-	vector<double> best_distances(N, numeric_limits<double>::max());
+
+	vector<vector<double>> k_candidates(N, vector<double>(p[0].size()));
+	vector<double> k_distances(N, numeric_limits<double>::max());
 
 	for (int i = 0; i < (int) vertices.size(); i++) {
 		for (int j = 0; j < (int) vertices[i].size(); j++) {
 			if (num_points >= M)
 				break;
-			if (distance(p[vertices[i][j]], q) < best_distances[N-1]) {
-				best_candidates[N-1] = p[vertices[i][j]];
-				best_distances[N-1] = distance(p[vertices[i][j]], q);
+			if (distance(p[vertices[i][j]], q) < k_distances[N-1]) {
+				k_candidates[N-1] = p[vertices[i][j]];
+				k_distances[N-1] = distance(p[vertices[i][j]], q);
 				for (int k = N-1; k > 0; k--) {
-					if (best_distances[k] < best_distances[k-1]) {
-						swap(best_distances[k], best_distances[k-1]);
-						swap(best_candidates[k], best_candidates[k-1]);
+					if (k_distances[k] < k_distances[k-1]) {
+						swap(k_distances[k], k_distances[k-1]);
+						swap(k_candidates[k], k_candidates[k-1]);
 					}
 				}
 			}
@@ -122,5 +119,22 @@ vector<vector<double>> query(vector<vector<double>> p, vector<double> q, int k, 
 			break;
 	}
 
-	return best_candidates;
+	vector<vector<double>> r_candidates;
+	num_points = 0;
+	num_vertices = 0;
+	for (int i = 0; i < (int) vertices.size(); i++) {
+		for (int j = 0; j < (int) vertices[i].size(); j++) {
+			if (num_points >= M)
+				break;
+			if (distance(p[vertices[i][j]], q) < R) {
+				r_candidates.push_back(p[vertices[i][j]]);
+			}
+			num_points++;
+		}
+		num_vertices++;
+		if (num_vertices >= probes)
+			break;
+	}
+
+	return make_tuple(k_candidates, r_candidates);
 }

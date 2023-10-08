@@ -4,5 +4,5 @@
 #include "metrics.hpp"
 
 // vector<double> query(vector<vector<double>> p, vector<double> q, int k, int M, int probes, double (*distance)(vector<double>, vector<double>) = euclidean_distance)
-std::vector<std::vector<double>> query(std::vector<std::vector<double>> p, std::vector<double> q, int k, int M, int probes, 
+std::tuple<std::vector<std::vector<double>>,std::vector<std::vector<double>>> query(std::vector<std::vector<double>> p, std::vector<double> q, int k, int M, int probes, 
 						  			   int N, double R, double (*distance)(std::vector<double>, std::vector<double> distance) = euclidean_distance);

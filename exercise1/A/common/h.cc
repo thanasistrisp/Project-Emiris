@@ -1,7 +1,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include "defines.h"
+#include "defines.hpp"
 
 using namespace std;
 
