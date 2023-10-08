@@ -3,6 +3,28 @@
 #include <vector>
 #include "metrics.hpp"
 
-// vector<double> query(vector<vector<double>> p, vector<double> q, int k, int M, int probes, double (*distance)(vector<double>, vector<double>) = euclidean_distance)
-std::tuple<std::vector<std::vector<double>>,std::vector<std::vector<double>>> query(std::vector<std::vector<double>> p, std::vector<double> q, int k, int M, int probes, 
-						  			   int N, double R, double (*distance)(std::vector<double>, std::vector<double> distance) = euclidean_distance);
+class hypercube
+{
+private:
+	std::vector<std::vector<double>> p;
+	std::vector<double> q;
+	int k;
+	int M;
+	int probes;
+	int N;
+	double R;
+	double (*distance)(std::vector<double>, std::vector<double> distance);
+	std::vector<int> q_proj;
+	std::vector<std::vector<int>> p_proj;
+	std::vector<std::vector<int>> vertices;
+public:
+	hypercube(std::vector<std::vector<double>> p, std::vector<double> q, int k, int M, int probes, 
+			  int N, double R, double (*distance)(std::vector<double>, std::vector<double> distance) = euclidean_distance);
+	std::vector<std::vector<double>> query_n_nearest_neighbors();
+	std::vector<std::vector<double>> query_range();
+};
+
+
+std::vector<std::vector<int>> pack(std::vector<std::vector<int>> p_proj, int n, std::vector<int> q_proj);
+std::vector<std::vector<int>> preprocess(std::vector<std::vector<double>> p, int k);
+int f(int x);

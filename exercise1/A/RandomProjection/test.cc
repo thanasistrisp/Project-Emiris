@@ -48,9 +48,10 @@ int main(void) {
 	double R = 520;
 	// define nearest neighbors
 	int N = 3;
+	// define hypercube
+	hypercube hypercube(p, q, k, M, probes, N, R);
 	// query
-	vector<vector<double>> k_candidates, r_candidates;
-	tie(k_candidates, r_candidates) = query(p, q, k, M, probes, N, R);
+	vector<vector<double>> k_candidates = hypercube.query_n_nearest_neighbors();
 	cout << "k_candidates: " << endl;
 	for (int i = 0; i < (int) k_candidates.size(); i++) {
 		cout << k_candidates[i][0] << " " << k_candidates[i][1] << " " << k_candidates[i][2] << endl;
@@ -59,6 +60,7 @@ int main(void) {
 	// brute force
 	brute_force(p, q, 3);
 	cout << "\nr_candidates: " << endl;
+	vector<vector<double>> r_candidates = hypercube.query_range();
 	for (int i = 0; i < (int) r_candidates.size(); i++) {
 		cout << r_candidates[i][0] << " " << r_candidates[i][1] << " " << r_candidates[i][2] << endl;
 	}

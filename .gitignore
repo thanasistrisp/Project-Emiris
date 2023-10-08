@@ -20,3 +20,6 @@
 !settings.json
 !set_program_args.pl
 !visualize*
+
+# MNIST directory
+*ubyte
