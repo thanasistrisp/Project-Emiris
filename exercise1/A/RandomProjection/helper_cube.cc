@@ -21,15 +21,13 @@ vector<vector<int>> hypercube::pack(vector<vector<int>> p_proj, int n, vector<in
 	vector<vector<int>> result;
 	vector<int> points;
 	for (int i = 0; i < n; i++) {
-		if (used[p_proj[i]] == false) {
-			int distance = hamming_distance(p_proj[i], q_proj);
-			// add to points all points with distance == hd
-			if (distance == hd) {
-				points.push_back(i);
-				used[p_proj[i]] = true;
-			}
+		int distance = hamming_distance(p_proj[i], q_proj);
+		// add to points all points with distance == hd
+		if (distance == hd) {
+			points.push_back(i);
 		}
 	}
+
 	// split points into vertices
 	for (int i = 0; i < (int) points.size(); i++) {
 		vector<int> vertex;
@@ -41,6 +39,7 @@ vector<vector<int>> hypercube::pack(vector<vector<int>> p_proj, int n, vector<in
 		}
 		result.push_back(vertex);
 	}
+
 	return result;
 }
 

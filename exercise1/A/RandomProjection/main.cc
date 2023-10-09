@@ -13,15 +13,20 @@ int main() {
   // read MNIST data
   vector<vector<double>> mnist_data = read_mnist_data("../../MNIST/train-images-idx3-ubyte");
 
+  // get the first 1000 mnist data
+  // mnist_data = vector<vector<double>>(mnist_data.begin(), mnist_data.begin() + 1000);
+
   vector<vector<double>> query_data = read_mnist_data("../../MNIST/t10k-images-idx3-ubyte");
 
-  vector<double> query = query_data[173];
+  vector<double> query = query_data[5];
 
   // create hypercube
-  hypercube cube(mnist_data, query, 14, 1000, 1000, 10, 10000);
+  hypercube cube(mnist_data, query, 14, 1000, 1000, 10, 1000);
 
   // query hypercube
   vector<vector<double>> k_candidates = cube.query_n_nearest_neighbors();
+
+  // vector<vector<double>> k_candidates = cube.query_range();
 
   // export results
   export_image(query, "../../output/query.ppm");
