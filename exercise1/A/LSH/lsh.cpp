@@ -7,6 +7,7 @@
 
 #include "lsh.h"
 #include "list.h"
+#include "hash_table.h"
 
 using std::vector;
 
