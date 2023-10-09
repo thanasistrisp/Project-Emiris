@@ -22,6 +22,8 @@ template <typename V> class HashBucket
         unsigned int get_id() const;
 
         void insert(const V*);
+
+        V* get_data(int) const;
 };
 
 template <typename K, typename V> class HashTable
@@ -38,6 +40,10 @@ template <typename K, typename V> class HashTable
         int primary_hash_function(const K&);
         unsigned int secondary_hash_function(const K&);
 
+        HashBucket<V> *recent_bucket;
+        int recent_bucket_list_index; // The index of the most recent bucket in the list of buckets.
+        int recent_element_index;
+
     public:
         HashTable(int, int, int, int);
         ~HashTable();
@@ -45,6 +51,8 @@ template <typename K, typename V> class HashTable
         int get_table_size() const;
 
         void insert(const K*, const V*);
+
+        V* get_data(const K&);
 };
 
 // ---------- Functions for class HashBucket ---------- //
@@ -70,10 +78,15 @@ template <typename V> void HashBucket<V>::insert(const V* element)
     elements.insert_first(element);
 }
 
+template <typename V> V* HashBucket<V>::get_data(int index) const
+{
+    return elements.get_data(index);
+}
+
 // ---------- Functions for class HashTable ---------- //
 
 template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int number_of_dimensions, int number_of_hash_functions, int window)
-: table_size(table_size), number_of_hash_functions(number_of_hash_functions)
+: table_size(table_size), number_of_hash_functions(number_of_hash_functions), recent_bucket(NULL), recent_bucket_list_index(-1), recent_element_index(-1)
 {
     // Initialize h_i functions, i = 1, ..., k.
     HashFunction *h;
@@ -177,6 +190,50 @@ template <typename K, typename V> void HashTable<K, V>::insert(const K *key, con
             break;
         }
     }
+}
+
+template <typename K, typename V> V* HashTable<K, V>::get_data(const K &key)
+{
+    // if recent bucket == null
+        // hash key
+        // find list of buckets
+        // get first bucket from list (if null, return)
+        // return first element from bucket
+    // go to next element
+    // if element == null
+        // get next bucket from list (if null, return)
+        // get first element from bucket
+        // return first element from bucket
+    // return element
+
+    int bucket_index;
+    List<HashBucket<V>> *list;
+    V* element;
+
+    if(recent_bucket == NULL){
+        bucket_index = primary_hash_function(key);
+        list = buckets[bucket_index];
+        recent_bucket_list_index = 0;
+        recent_bucket = list->get_data(recent_bucket_list_index);
+        if(recent_bucket == NULL){
+            return NULL;
+        }
+        recent_element_index = 0;
+        return recent_bucket->get_data(recent_element_index);
+    }
+
+    recent_element_index++;
+    element = recent_bucket->get_data(recent_element_index);
+    if(element == NULL){
+        recent_bucket_list_index++;
+        recent_bucket = list->get_data(recent_bucket_list_index);
+        if(recent_bucket == NULL){
+            return NULL;
+        }
+        recent_element_index = 0;
+        return recent_bucket->get_data(recent_bucket_list_index);
+    }
+    return element;
 }
 
 #endif /* T_HASH_TABLE_H */
