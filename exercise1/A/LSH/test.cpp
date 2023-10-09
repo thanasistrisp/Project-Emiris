@@ -44,6 +44,6 @@ int main(void) {
 
 	std::vector<int> v{1, 2, 3};
 
-	HashTable<std::vector<int>> hash_table(10, primary, secondary);
-	hash_table.insert(&v);
+	// HashTable<std::vector<int>> hash_table(10, primary, secondary);
+	// hash_table.insert(&v);
 }
