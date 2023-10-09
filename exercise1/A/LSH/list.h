@@ -15,7 +15,7 @@ template <typename T> class ListNode
         ListNode(const T*);
         ~ListNode();
 
-        const T* get_data() const;
+        T* get_data() const;
         ListNode* get_next_node() const;
 
         void set_next_node(ListNode *);
@@ -32,6 +32,9 @@ template <typename T> class List
         ListNode<T> *head;
         int count;
 
+        ListNode<T> *recent_node;
+        int recent_index;
+
     public:
         List();
         ~List();
@@ -40,8 +43,10 @@ template <typename T> class List
         void insert_first(const T*);
         void insert_last(const T*);
 
-        const T* remove_first();
-        const T* remove_last();
+        T* remove_first();
+        T* remove_last();
+
+        T* get_data(int);
 
         int get_count() const;
 
@@ -70,9 +75,9 @@ template <typename T> ListNode<T>::~ListNode()
     
 }
 
-template <typename T> const T* ListNode<T>::get_data() const
+template <typename T> T* ListNode<T>::get_data() const
 {
-    return data;
+    return (T*) data;
 }
 
 template <typename T> ListNode<T>* ListNode<T>::get_next_node() const
@@ -88,7 +93,7 @@ template <typename T> void ListNode<T>::set_next_node(ListNode<T> *node)
 // ---------- Functions for class List ---------- //
 
 template <class T> List<T>::List()
-: head(NULL), count(0)
+: head(NULL), count(0), recent_node(head), recent_index(-1)
 {
 
 }
@@ -126,7 +131,7 @@ template <typename T> void List<T>::insert_last(const T *data)
     count++;
 }
 
-template <typename T> const T* List<T>::remove_first()
+template <typename T> T* List<T>::remove_first()
 {
     if(count == 0){
         return NULL;
@@ -134,13 +139,13 @@ template <typename T> const T* List<T>::remove_first()
     ListNode<T> *to_be_removed = head;
     ListNode<T> *new_first_node = to_be_removed->get_next_node();
     head = new_first_node;
-    void *data = to_be_removed->get_data();
+    T *data = to_be_removed->get_data();
     delete to_be_removed;
     count--;
-    return data;
+    return (T*) data;
 }
 
-template <typename T> const T* List<T>::remove_last()
+template <typename T> T* List<T>::remove_last()
 {
     if(count == 0){
         return NULL;
@@ -160,7 +165,35 @@ template <typename T> const T* List<T>::remove_last()
     void *data = to_be_removed->get_data();
     delete to_be_removed;
     count--;
-    return data;
+    return (T*) data;
+}
+
+template <typename T> T* List<T>::get_data(int index)
+{
+    // if recent node = null, search from the start (index 0) until index
+    // if recent index is the right previous index, then go to next node and return
+    // if recent index < index, start from recent index and traverse until you find the index
+    // if index < recent index, start from the begining
+    if(index >= count){
+        return NULL;
+    }
+    if(recent_node == NULL || index < recent_index){
+        recent_node = head;
+        for(recent_index = 0; recent_node != NULL && recent_index < index; recent_index++){
+            recent_node = recent_node->get_next_node();
+            recent_index++;
+        }
+        if(recent_node != NULL){
+            return (T*) recent_node->get_data();
+        }
+        return NULL;
+    }
+    if(index == recent_index + 1){
+        recent_node = recent_node->get_next_node();
+        recent_index++;
+        return (T*) recent_node->get_data();
+    }
+    return NULL;
 }
 
 template <typename T> int List<T>::get_count() const
