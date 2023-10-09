@@ -17,37 +17,31 @@ static int hamming_distance(vector<int> vertex, vector<int> q);
 static bool same_vertex(vector<int> a, vector<int> b);
 
 // return points indices packed in vertices, and returns vector of tuples of points indices in same vertex and the Hamming distance of vertex to query q
-vector<vector<int>> pack(vector<vector<int>> p_proj, int n, vector<int> q_proj) {
-	vector<tuple<vector<int>, int>> result;
-	// add points that are in same vertex in same tuple (e.g. points 1,5,6 with distance 2)
-	// define used point (e.g. used[p] = true if point p is already in a tuple) (map)
-	map<vector<int>, bool> used;
-	for (int i = 0; i < (int) p_proj.size(); i++) { // it does not accept duplicate keys
-		used[p_proj[i]] = false;
-	}
+vector<vector<int>> hypercube::pack(vector<vector<int>> p_proj, int n, vector<int> q_proj, int hd) {
+	vector<vector<int>> result;
+	vector<int> points;
 	for (int i = 0; i < n; i++) {
 		if (used[p_proj[i]] == false) {
-			vector<int> vertex;
 			int distance = hamming_distance(p_proj[i], q_proj);
-			for (int j = 0; j < n; j++) {
-				if (same_vertex(p_proj[i], p_proj[j])) {
-					vertex.push_back(j);
-					used[p_proj[j]] = true;
-				}
+			// add to points all points with distance == hd
+			if (distance == hd) {
+				points.push_back(i);
+				used[p_proj[i]] = true;
 			}
-			result.push_back(make_tuple(vertex, distance));
 		}
 	}
-	// sort tuples by Hamming distance
-	sort(result.begin(), result.end(), [](tuple<vector<int>, int> a, tuple<vector<int>, int> b) {
-		return get<1>(a) < get<1>(b);
-	});
-	// return vector of vertices without Hamming distance
-	vector<vector<int>> vertices;
-	for (int i = 0; i < (int) result.size(); i++) {
-		vertices.push_back(get<0>(result[i]));
+	// split points into vertices
+	for (int i = 0; i < (int) points.size(); i++) {
+		vector<int> vertex;
+		vertex.push_back(points[i]);
+		for (int j = i + 1; j < (int) points.size(); j++) {
+			if (same_vertex(p_proj[points[i]], p_proj[points[j]])) {
+				vertex.push_back(points[j]);
+			}
+		}
+		result.push_back(vertex);
 	}
-	return vertices;	
+	return result;
 }
 
 // preprocess: store points p -> [f-i(h_i(p))] for i = 1, ..., d'=k

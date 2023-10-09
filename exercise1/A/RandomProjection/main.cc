@@ -15,10 +15,10 @@ int main() {
 
   vector<vector<double>> query_data = read_mnist_data("../../MNIST/t10k-images-idx3-ubyte");
 
-  vector<double> query = query_data[169];
+  vector<double> query = query_data[173];
 
   // create hypercube
-  hypercube cube(mnist_data, query, 14, 2000, 2000, 10, 10000);
+  hypercube cube(mnist_data, query, 14, 1000, 1000, 10, 10000);
 
   // query hypercube
   vector<vector<double>> k_candidates = cube.query_n_nearest_neighbors();
