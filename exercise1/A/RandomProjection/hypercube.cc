@@ -23,15 +23,13 @@ hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probe
 	p_proj = preprocess(p, k);
 }
 
-vector<vector<double>> hypercube::query_n_nearest_neighbors(vector<double> q) {
+vector<int> hypercube::query_n_nearest_neighbors(vector<double> q, vector<int> q_proj) {
 	cout << "Querying n nearest neighbors..." << endl;
-
-	vector<int> q_proj = calculate_q_proj(q);
 
 	int num_points = 0;
 	int num_vertices = 0;
 
-	vector<vector<double>> k_candidates(N, vector<double>(p[0].size()));
+	vector<int> k_candidates(N, -1);
 	vector<double> k_distances(N, numeric_limits<double>::max());
 
 	int hamming_distance = 0;
@@ -41,10 +39,10 @@ vector<vector<double>> hypercube::query_n_nearest_neighbors(vector<double> q) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
 				if (num_points >= M)
-					return k_candidates;
+					goto check;
 				if (distance(p[vertices[i][j]], q) < k_distances[N - 1])
 				{
-					k_candidates[N - 1] = p[vertices[i][j]];
+					k_candidates[N - 1] = vertices[i][j];
 					k_distances[N - 1] = distance(p[vertices[i][j]], q);
 					for (int k = N - 1; k > 0; k--)
 					{
@@ -59,23 +57,29 @@ vector<vector<double>> hypercube::query_n_nearest_neighbors(vector<double> q) {
 			}
 			num_vertices++;
 			if (num_vertices >= probes)
-				return k_candidates;
+				goto check;
 		}
 		hamming_distance++;
 	}
 
-	return k_candidates;
+	check:
+		for (int i = 0; i < N; i++) {
+			if (k_candidates[i] == -1) {
+				cout << "Not enough candidates for query. Choose larger M or probes." << endl;
+				exit(1);
+			}
+		}
+
+		return k_candidates;
 }
 
-vector<vector<double>> hypercube::query_range(vector<double> q) {
+vector<int> hypercube::query_range(vector<double> q, vector<int> q_proj) {
 	cout << "Querying range..." << endl;
-
-	vector<int> q_proj = calculate_q_proj(q);
 
 	int num_points = 0;
 	int num_vertices = 0;
 
-	map <double, vector<double>> candidates;
+	map<double, int> candidates;
 	int hamming_distance = 0;
 	while (true) {
 		vector<vector<int>> vertices = pack(p_proj, (int) p_proj.size(), q_proj, hamming_distance);
@@ -85,7 +89,7 @@ vector<vector<double>> hypercube::query_range(vector<double> q) {
 				double dist = distance(p[vertices[i][j]], q);
 				if (dist < R)
 				{
-					candidates[dist] = p[vertices[i][j]];
+					candidates[dist] = vertices[i][j];
 				}
 				num_points++;
 			}
@@ -98,12 +102,13 @@ vector<vector<double>> hypercube::query_range(vector<double> q) {
 		hamming_distance++;
 	}
 
-	vector<vector<double>> result;
+	vector<int> result;
 	for (auto it = candidates.begin(); it != candidates.end(); it++) {
 		result.push_back(it->second);
 	}
 
 	return result;
+
 }
 
 vector<int> hypercube::calculate_q_proj(vector<double> q) {

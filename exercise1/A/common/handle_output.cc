@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void handle_ouput(string input_file, string query_file, string output_file, int k, int M, int probes, int N, double R) {
+void handle_ouput(string input_file, string query_file, string output_file, int k, int M, int probes, int N, double R, double (*distance)(vector<double>, vector<double>)) {
 	vector<vector<double>> dataset = read_mnist_data(input_file);
 	// get the first 1000 images to dataset
 	dataset.resize(1000);
@@ -22,11 +22,17 @@ void handle_ouput(string input_file, string query_file, string output_file, int 
 	hypercube cube(dataset, k, M, probes, N, R);
 
 	for (int q = 0; q < (int) queries.size(); q++) {
+		vector<int> q_proj = cube.calculate_q_proj(queries[q]);
 		output << "Query: " << q << endl;
-		// get n nearest neighbors
-		vector<vector<double>> n_nearest_neighbors = cube.query_n_nearest_neighbors(queries[q]);
+		vector<int> n_nearest_neighbors = cube.query_n_nearest_neighbors(queries[q], q_proj);
 		for (int i = 0; i < N; i++) {
-			output << "Nearest neighbor-" << i << ": " << n_nearest_neighbors[i][0] << endl;
+			output << "Nearest neighbor-" << i+1 << ": " << n_nearest_neighbors[i] << endl;
+			output << "distanceHypercube: " << distance(dataset[n_nearest_neighbors[i]], queries[q]) << endl;
+		}
+		output << "R-near neighbors:" << endl;
+		vector<int> range_neighbors = cube.query_range(queries[q], q_proj);
+		for (int i = 0; i < (int) range_neighbors.size(); i++) {
+			output << range_neighbors[i] << endl;
 		}
 	}
 

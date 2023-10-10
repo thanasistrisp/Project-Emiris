@@ -28,11 +28,11 @@
 		"arg7": "-M",
 		"arg8": "10",
 		"arg9": "-probes",
-		"arg10": "2",
+		"arg10": "5",
 		"arg11": "-o",
 		"arg12": "../../output/output.txt",
 		"arg13": "-N",
-		"arg14": "1",
+		"arg14": "3",
 		"arg15": "-R",
 		"arg16": "10000"
 	},
