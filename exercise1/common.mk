@@ -42,7 +42,7 @@ INCLUDE := $(MY_PATH)include
 #
 # Το override επιτρέπει την προσθήκη επιπλέον παραμέτρων από τη γραμμή εντολών: make CFLAGS=...
 #
-override CXXFLAGS += -g -Wall -Wextra -Werror -MMD -I$(INCLUDE)
+override CXXFLAGS += -g -Wall -Wextra -Werror -MMD -I$(INCLUDE) -I.
 
 # Linker options
 #   -lm        Link με τη math library

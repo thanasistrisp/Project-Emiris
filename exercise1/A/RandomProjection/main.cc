@@ -63,23 +63,18 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (input_file.empty() || query_file.empty() || output_file.empty()) {
-		cout << "Mandatory arguments missing" << endl; // TODO
+		cout << "Mandatory arguments missing" << endl; // TODO for cin input
 		return 1;
 	}
 
-	// print all
-	cout << "input_file: " << input_file << endl;
-	cout << "query_file: " << query_file << endl;
-	cout << "output_file: " << output_file << endl;
-	cout << "k: " << k << endl;
-	cout << "M: " << M << endl;
-	cout << "probes: " << probes << endl;
-	cout << "N: " << N << endl;
-	cout << "R: " << R << endl;
+	clock_t start = clock();
 
 	handle_ouput(input_file, query_file, output_file, k, M, probes, N, R);
 
-	cout << "Done" << endl;
+	clock_t end = clock();
+	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
+
+	cout << "Done in " << elapsed_secs << " seconds" << endl;
 
 	return 0;
 }

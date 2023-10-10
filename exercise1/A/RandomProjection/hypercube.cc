@@ -19,13 +19,15 @@ hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probe
 	this->N = N;
 	this->R = R;
 	this->distance = distance;
+	clock_t start = clock();
 	cout << "Preprocessing..." << endl;
 	p_proj = preprocess(p, k);
+	clock_t end = clock();
+	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
+	cout << "Preprocessing time: " << elapsed_secs << endl;
 }
 
 vector<int> hypercube::query_n_nearest_neighbors(vector<double> q, vector<int> q_proj) {
-	cout << "Querying n nearest neighbors..." << endl;
-
 	int num_points = 0;
 	int num_vertices = 0;
 
@@ -74,8 +76,6 @@ vector<int> hypercube::query_n_nearest_neighbors(vector<double> q, vector<int> q
 }
 
 vector<int> hypercube::query_range(vector<double> q, vector<int> q_proj) {
-	cout << "Querying range..." << endl;
-
 	int num_points = 0;
 	int num_vertices = 0;
 
