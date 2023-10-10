@@ -8,14 +8,14 @@
 template <typename T> class ListNode
 {
     private:
-        const T* data;
+        T data;
         ListNode* next_node;
 
     public:
-        ListNode(const T*);
+        ListNode(T);
         ~ListNode();
 
-        T* get_data() const;
+        T get_data() const;
         ListNode* get_next_node() const;
 
         void set_next_node(ListNode *);
@@ -40,13 +40,13 @@ template <typename T> class List
         ~List();
         // Deletes list and nodes, but not their contents.
 
-        void insert_first(const T*);
-        void insert_last(const T*);
+        void insert_first(T);
+        void insert_last(T);
 
-        T* remove_first();
-        T* remove_last();
+        T remove_first();
+        T remove_last();
 
-        T* get_data(int);
+        T get_data(int);
 
         int get_count() const;
 
@@ -64,7 +64,7 @@ template <typename T> class List
 
 // ---------- Functions for class ListNode ---------- //
 
-template <typename T> ListNode<T>::ListNode(const T *data)
+template <typename T> ListNode<T>::ListNode(T data)
 : data(data), next_node(NULL)
 {
 
@@ -75,9 +75,9 @@ template <typename T> ListNode<T>::~ListNode()
     
 }
 
-template <typename T> T* ListNode<T>::get_data() const
+template <typename T> T ListNode<T>::get_data() const
 {
-    return (T*) data;
+    return data;
 }
 
 template <typename T> ListNode<T>* ListNode<T>::get_next_node() const
@@ -105,7 +105,7 @@ template <class T> List<T>::~List()
     }
 }
 
-template <typename T> void List<T>::insert_first(const T *data)
+template <typename T> void List<T>::insert_first(T data)
 {
     ListNode<T> *new_first_node = new ListNode<T>(data);
     ListNode<T> *old_first_node = head;
@@ -114,7 +114,7 @@ template <typename T> void List<T>::insert_first(const T *data)
     count++;
 }
 
-template <typename T> void List<T>::insert_last(const T *data)
+template <typename T> void List<T>::insert_last(T data)
 {
     if(count == 0){
         insert_first(data);
@@ -131,24 +131,24 @@ template <typename T> void List<T>::insert_last(const T *data)
     count++;
 }
 
-template <typename T> T* List<T>::remove_first()
+template <typename T> T List<T>::remove_first()
 {
     if(count == 0){
-        return NULL;
+        return T();
     }
     ListNode<T> *to_be_removed = head;
     ListNode<T> *new_first_node = to_be_removed->get_next_node();
     head = new_first_node;
-    T *data = to_be_removed->get_data();
+    T data = to_be_removed->get_data();
     delete to_be_removed;
     count--;
-    return (T*) data;
+    return data;
 }
 
-template <typename T> T* List<T>::remove_last()
+template <typename T> T List<T>::remove_last()
 {
     if(count == 0){
-        return NULL;
+        return T();
     }
     if(head->get_next_node() == NULL){
         return remove_first();
@@ -165,17 +165,17 @@ template <typename T> T* List<T>::remove_last()
     void *data = to_be_removed->get_data();
     delete to_be_removed;
     count--;
-    return (T*) data;
+    return data;
 }
 
-template <typename T> T* List<T>::get_data(int index)
+template <typename T> T List<T>::get_data(int index)
 {
     // if recent node = null, search from the start (index 0) until index
     // if recent index is the right previous index, then go to next node and return
     // if recent index < index, start from recent index and traverse until you find the index
     // if index < recent index, start from the begining
     if(index >= count){
-        return NULL;
+        return T();
     }
     if(recent_node == NULL || index < recent_index){
         recent_node = head;
@@ -184,16 +184,16 @@ template <typename T> T* List<T>::get_data(int index)
             recent_index++;
         }
         if(recent_node != NULL){
-            return (T*) recent_node->get_data();
+            return recent_node->get_data();
         }
-        return NULL;
+        return T();
     }
     if(index == recent_index + 1){
         recent_node = recent_node->get_next_node();
         recent_index++;
-        return (T*) recent_node->get_data();
+        return recent_node->get_data();
     }
-    return NULL;
+    return T();
 }
 
 template <typename T> int List<T>::get_count() const

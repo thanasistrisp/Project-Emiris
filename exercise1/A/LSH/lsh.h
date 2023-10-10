@@ -19,7 +19,7 @@ class LSH
         LSH(int, int, int, int, int);
         ~LSH();
 
-        void insert(std::vector<double>*, int*);
+        void insert(std::vector<double>, int);
 };
 
 #endif /* LSH_H */

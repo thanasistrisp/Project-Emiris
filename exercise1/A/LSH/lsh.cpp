@@ -33,7 +33,7 @@ LSH::~LSH()
     delete[] hash_tables;
 }
 
-void LSH::insert(vector<double>* p, int *index)
+void LSH::insert(vector<double> p, int index)
 {
     for(int i = 0; i < number_of_hash_tables; i++){
         hash_tables[i]->insert(p, index);

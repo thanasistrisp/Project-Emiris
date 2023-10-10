@@ -21,24 +21,24 @@ template <typename V> class HashBucket
 
         unsigned int get_id() const;
 
-        void insert(const V*);
+        void insert(V);
 
-        V* get_data(int) const;
+        V get_data(int) const;
 };
 
 template <typename K, typename V> class HashTable
 {
     private:
         const int table_size;
-        List<HashBucket<V>> **buckets;
+        List<HashBucket<V>*> **buckets;
 
         const int number_of_hash_functions;
         std::vector<HashFunction*> hash_functions;
         std::vector<int> primary_factors;
         std::vector<int> secondary_factors;
 
-        int primary_hash_function(const K&);
-        unsigned int secondary_hash_function(const K&);
+        int primary_hash_function(K);
+        unsigned int secondary_hash_function(K);
 
         HashBucket<V> *recent_bucket;
         int recent_bucket_list_index; // The index of the most recent bucket in the list of buckets.
@@ -50,9 +50,9 @@ template <typename K, typename V> class HashTable
 
         int get_table_size() const;
 
-        void insert(const K*, const V*);
+        void insert(K, V);
 
-        V* get_data(const K&);
+        V get_data(K);
 };
 
 // ---------- Functions for class HashBucket ---------- //
@@ -73,12 +73,12 @@ template <typename V> unsigned int HashBucket<V>::get_id() const
     return id;
 }
 
-template <typename V> void HashBucket<V>::insert(const V* element)
+template <typename V> void HashBucket<V>::insert(V element)
 {
     elements.insert_first(element);
 }
 
-template <typename V> V* HashBucket<V>::get_data(int index) const
+template <typename V> V HashBucket<V>::get_data(int index) const
 {
     return elements.get_data(index);
 }
@@ -107,7 +107,10 @@ template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int
         secondary_factors.push_back(rand());
     }
 
-    buckets = new List<HashBucket<V>>*[table_size];
+    buckets = new List<HashBucket<V>*>*[table_size];
+    for(int i = 0; i < table_size; i++){
+        buckets[i] = NULL;
+    }
 }
 
 template <typename K, typename V> HashTable<K, V>::~HashTable()
@@ -117,9 +120,13 @@ template <typename K, typename V> HashTable<K, V>::~HashTable()
         delete *iter;
     }
 
+    HashBucket<V> *bucket;
     if(buckets != NULL){
         for(int i = 0; i < table_size; i++){
             if(buckets[i] != NULL){
+                while((bucket = buckets[i]->remove_first()) != NULL){
+                    delete bucket;
+                }
                 delete buckets[i];
             }
         }
@@ -127,7 +134,7 @@ template <typename K, typename V> HashTable<K, V>::~HashTable()
     }
 }
 
-template <typename K, typename V> int HashTable<K, V>::primary_hash_function(const K& p)
+template <typename K, typename V> int HashTable<K, V>::primary_hash_function(K p)
 {
     // Use primary hash function
     // g(p) = ( \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M ) \mod table_size.
@@ -140,7 +147,7 @@ template <typename K, typename V> int HashTable<K, V>::primary_hash_function(con
     return (sum % M) % table_size;
 }
 
-template <typename K, typename V> unsigned int HashTable<K, V>::secondary_hash_function(const K& p)
+template <typename K, typename V> unsigned int HashTable<K, V>::secondary_hash_function(K p)
 {
     // Use secondary hash function
     // h(p) = \sum_{i = 1}^{k}(r'_i * h_i(p)) \mod M.
@@ -158,23 +165,24 @@ template <typename K, typename V> int HashTable<K, V>::get_table_size() const
     return table_size;
 }
 
-template <typename K, typename V> void HashTable<K, V>::insert(const K *key, const V *value)
+template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
 {
     // if bucket is already created, use secondary index to choose bucket in chain
     // else
         // traverse nodes to find the one with the id
         // if found, insert data there
         // else create new bucket
-    int bucket_index = primary_hash_function(*key);
-    unsigned int bucket_id = secondary_hash_function(*key);
+    int bucket_index = primary_hash_function(key);
+    unsigned int bucket_id = secondary_hash_function(key);
 
     HashBucket<V> *bucket;
-    List<HashBucket<V>> *list = buckets[bucket_index];
+    List<HashBucket<V>*> *list = buckets[bucket_index];
     if(list == NULL){
-        list = new List<HashBucket<V>>;
+        list = new List<HashBucket<V>*>;
         bucket = new HashBucket<V>(bucket_id);
         bucket->insert(value);
         list->insert_first(bucket);
+        buckets[bucket_index] = list;
         return;
     }
     for(int index = 0; ; index++){
@@ -192,7 +200,7 @@ template <typename K, typename V> void HashTable<K, V>::insert(const K *key, con
     }
 }
 
-template <typename K, typename V> V* HashTable<K, V>::get_data(const K &key)
+template <typename K, typename V> V HashTable<K, V>::get_data(K key)
 {
     // if recent bucket == null
         // hash key
