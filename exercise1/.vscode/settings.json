@@ -34,7 +34,7 @@
 		"arg13": "-N",
 		"arg14": "1",
 		"arg15": "-R",
-		"arg16": "10000",
+		"arg16": "10000"
 	},
 	"files.associations": {
 		"\"*.m\":\"matlab\"": "",
