@@ -9,26 +9,25 @@
 
 using namespace std;
 
-hypercube::hypercube(std::vector<std::vector<double>> p, std::vector<double> q, int k, int M, int probes, 
+hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probes, 
 					 int N, double R, double (*distance)(std::vector<double>, std::vector<double> distance))
 {
 	this->p = p;
-	this->q = q;
 	this->k = k;
 	this->M = M;
 	this->probes = probes;
 	this->N = N;
 	this->R = R;
 	this->distance = distance;
-	for (int i = 0; i < k; i++) {
-		q_proj.push_back(f(h(q)));
-	}
 	cout << "Preprocessing..." << endl;
 	p_proj = preprocess(p, k);
 }
 
-vector<vector<double>> hypercube::query_n_nearest_neighbors() {
+vector<vector<double>> hypercube::query_n_nearest_neighbors(vector<double> q) {
 	cout << "Querying n nearest neighbors..." << endl;
+
+	vector<int> q_proj = calculate_q_proj(q);
+
 	int num_points = 0;
 	int num_vertices = 0;
 
@@ -68,8 +67,11 @@ vector<vector<double>> hypercube::query_n_nearest_neighbors() {
 	return k_candidates;
 }
 
-vector<vector<double>> hypercube::query_range() {
+vector<vector<double>> hypercube::query_range(vector<double> q) {
 	cout << "Querying range..." << endl;
+
+	vector<int> q_proj = calculate_q_proj(q);
+
 	int num_points = 0;
 	int num_vertices = 0;
 
@@ -102,4 +104,12 @@ vector<vector<double>> hypercube::query_range() {
 	}
 
 	return result;
+}
+
+vector<int> hypercube::calculate_q_proj(vector<double> q) {
+	vector<int> q_proj;
+	for (int i = 0; i < k; i++) {
+		q_proj.push_back(f(h(q)));
+	}
+	return q_proj;
 }

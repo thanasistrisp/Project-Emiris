@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 			i++;
 		}
 		else if (strcmp(argv[i], "-help") == 0) {
-			cout << "Usage: ./lsh -d <input file> -q <query file> [-k <int>] [-M <int>] [-probes <int>] -o <output file> [-N <int>] [-R <double>]" << endl;
+			cout << "Usage: ./lsh -d <input file> -q <query file> -k <int> -M <int> -probes <int> -o <output file> -N <int> -R <double>" << endl;
 			return 0;
 		}
 		else {
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (input_file.empty() || query_file.empty() || output_file.empty()) {
-		cout << "Mandatory arguments missing" << endl;
+		cout << "Mandatory arguments missing" << endl; // TODO
 		return 1;
 	}
 
@@ -76,4 +76,10 @@ int main(int argc, char *argv[]) {
 	cout << "probes: " << probes << endl;
 	cout << "N: " << N << endl;
 	cout << "R: " << R << endl;
+
+	handle_ouput(input_file, query_file, output_file, k, M, probes, N, R);
+
+	cout << "Done" << endl;
+
+	return 0;
 }
