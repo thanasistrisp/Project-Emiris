@@ -29,6 +29,11 @@ LSH::LSH(int number_of_dimensions, int number_of_points, int number_of_hash_func
     for(int i = 0; i < number_of_hash_tables; i++){
         hash_tables[i] = new HashTable<vector<double>, int>(table_size, number_of_dimensions, number_of_hash_functions, window);
     }
+
+    // Insert data to all hash tables.
+    for(int i = 0; (unsigned int) i < dataset->size(); i++){
+        insert(dataset->at(i), i);
+    }
 }
 
 LSH::~LSH()

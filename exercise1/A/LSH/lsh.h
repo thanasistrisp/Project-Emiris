@@ -18,11 +18,11 @@ class LSH
 
         std::vector<std::vector<double>> *dataset;
     
+        void insert(std::vector<double>, int);
+
     public:
         LSH(int, int, int, int, int, std::vector<std::vector<double>>*);
         ~LSH();
-
-        void insert(std::vector<double>, int);
 
         std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,
                                                                 double (*distance)(const std::vector<double>&, const std::vector<double>&));
