@@ -30,7 +30,8 @@ void handle_ouput(string input_file, string query_file, string output_file, int 
 	vector<vector<double>> dataset = read_mnist_data(input_file);
 	// dataset.resize(1000);
 	vector<vector<double>> queries = read_mnist_data(query_file);
-	// queries.resize(2);
+	// take first 10 queries from test set
+	queries.resize(10);
 
 	ofstream output;
 	output.open(output_file);
