@@ -23,7 +23,7 @@ template <typename V> class HashBucket
 
         void insert(V);
 
-        V get_data(int) const;
+        V get_data(int);
 };
 
 template <typename K, typename V> class HashTable
@@ -78,7 +78,7 @@ template <typename V> void HashBucket<V>::insert(V element)
     elements.insert_first(element);
 }
 
-template <typename V> V HashBucket<V>::get_data(int index) const
+template <typename V> V HashBucket<V>::get_data(int index)
 {
     return elements.get_data(index);
 }
@@ -215,8 +215,8 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key)
     // return element
 
     int bucket_index;
-    List<HashBucket<V>> *list;
-    V* element;
+    List<HashBucket<V>*> *list = buckets[recent_bucket_list_index];
+    V element;
 
     if(recent_bucket == NULL){
         bucket_index = primary_hash_function(key);
@@ -224,7 +224,7 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key)
         recent_bucket_list_index = 0;
         recent_bucket = list->get_data(recent_bucket_list_index);
         if(recent_bucket == NULL){
-            return NULL;
+            return V();
         }
         recent_element_index = 0;
         return recent_bucket->get_data(recent_element_index);
@@ -232,11 +232,11 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key)
 
     recent_element_index++;
     element = recent_bucket->get_data(recent_element_index);
-    if(element == NULL){
+    if(element == V()){
         recent_bucket_list_index++;
         recent_bucket = list->get_data(recent_bucket_list_index);
         if(recent_bucket == NULL){
-            return NULL;
+            return V();
         }
         recent_element_index = 0;
         return recent_bucket->get_data(recent_bucket_list_index);
