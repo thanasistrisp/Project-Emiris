@@ -56,14 +56,26 @@ void LSH::insert(vector<double> p, int index)
 tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned int k,
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
-    auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) <= get<1>(t2); };
+    auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     set<tuple<int, double>, decltype(compare)> s(compare);
 
     double dist;
     int p_index;
+    bool valid = true;
+    unsigned int q_secondary_key;
+
     for(int i = 0; i < number_of_hash_tables; i++){
-        while((p_index = hash_tables[i]->get_data(q)) != 0){
+
+        q_secondary_key = hash_tables[i]->secondary_hash_function(q);
+
+        while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
             vector<double> p = dataset->at(p_index);
+
+            // Choose only the points that share the same ID inside the bucket.
+            if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
+                continue;
+            }
+
             dist = distance(p, q);
             if(s.size() == k){
                 if(dist < get<1>(*s.begin())){
@@ -92,8 +104,9 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
     int p_index;
     vector<int> indices;
     vector<double> distances;
+    bool valid = true;
     for(int i = 0; i < number_of_hash_tables; i++){
-        while((p_index = hash_tables[i]->get_data(q)) != 0){
+        while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
             vector<double> p = dataset->at(p_index);
             dist = distance(p, q);
             if(dist < r){

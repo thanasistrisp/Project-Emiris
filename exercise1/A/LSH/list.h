@@ -46,7 +46,7 @@ template <typename T> class List
         T remove_first();
         T remove_last();
 
-        T get_data(int);
+        T get_data(int, bool&);
 
         int get_count() const;
 
@@ -93,7 +93,7 @@ template <typename T> void ListNode<T>::set_next_node(ListNode<T> *node)
 // ---------- Functions for class List ---------- //
 
 template <class T> List<T>::List()
-: head(NULL), count(0), recent_node(head), recent_index(-1)
+: head(NULL), count(0), recent_node(head), recent_index(0)
 {
 
 }
@@ -168,22 +168,31 @@ template <typename T> T List<T>::remove_last()
     return data;
 }
 
-template <typename T> T List<T>::get_data(int index)
+// valid is true if the value is valid (i.e. legit instance of type T stored in the list)
+template <typename T> T List<T>::get_data(int index, bool &valid)
 {
     // if recent node = null, search from the start (index 0) until index
     // if recent index is the right previous index, then go to next node and return
     // if recent index < index, start from recent index and traverse until you find the index
     // if index < recent index, start from the begining
-    if(index >= count){
+    valid = false;
+    // Check if index is out of bounds.
+    if(index < 0 || index >= count){
         return T();
     }
-    if(recent_node == NULL || index < recent_index){
+    
+    if(recent_node == NULL){
+        recent_node = head;
+        recent_index = 0;
+    }
+    if(index < recent_index){
         recent_node = head;
         for(recent_index = 0; recent_node != NULL && recent_index < index; recent_index++){
             recent_node = recent_node->get_next_node();
             recent_index++;
         }
         if(recent_node != NULL){
+            valid = true;
             return recent_node->get_data();
         }
         return T();
@@ -191,9 +200,11 @@ template <typename T> T List<T>::get_data(int index)
     if(index == recent_index + 1){
         recent_node = recent_node->get_next_node();
         recent_index++;
+        valid = true;
         return recent_node->get_data();
     }
-    return T();
+    valid = true;
+    return recent_node->get_data();
 }
 
 template <typename T> int List<T>::get_count() const

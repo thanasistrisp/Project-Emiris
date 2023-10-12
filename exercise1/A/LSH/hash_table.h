@@ -23,7 +23,7 @@ template <typename V> class HashBucket
 
         void insert(V);
 
-        V get_data(int);
+        V get_data(int, bool&);
 };
 
 template <typename K, typename V> class HashTable
@@ -37,9 +37,6 @@ template <typename K, typename V> class HashTable
         std::vector<int> primary_factors;
         std::vector<int> secondary_factors;
 
-        int primary_hash_function(K);
-        unsigned int secondary_hash_function(K);
-
         HashBucket<V> *recent_bucket;
         int recent_bucket_list_index; // The index of the most recent bucket in the list of buckets.
         int recent_element_index;
@@ -50,9 +47,12 @@ template <typename K, typename V> class HashTable
 
         int get_table_size() const;
 
+        int primary_hash_function(K);
+        unsigned int secondary_hash_function(K);
+
         void insert(K, V);
 
-        V get_data(K);
+        V get_data(K, bool&);
 };
 
 // ---------- Functions for class HashBucket ---------- //
@@ -78,15 +78,15 @@ template <typename V> void HashBucket<V>::insert(V element)
     elements.insert_first(element);
 }
 
-template <typename V> V HashBucket<V>::get_data(int index)
+template <typename V> V HashBucket<V>::get_data(int index, bool &valid)
 {
-    return elements.get_data(index);
+    return elements.get_data(index, valid);
 }
 
 // ---------- Functions for class HashTable ---------- //
 
 template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int number_of_dimensions, int number_of_hash_functions, int window)
-: table_size(table_size), number_of_hash_functions(number_of_hash_functions), recent_bucket(NULL), recent_bucket_list_index(-1), recent_element_index(-1)
+: table_size(table_size), number_of_hash_functions(number_of_hash_functions), recent_bucket(NULL), recent_bucket_list_index(0), recent_element_index(0)
 {
     // Initialize h_i functions, i = 1, ..., k.
     HashFunction *h;
@@ -174,7 +174,7 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
         // else create new bucket
     int bucket_index = primary_hash_function(key);
     unsigned int bucket_id = secondary_hash_function(key);
-
+    bool valid, inserted = false;
     HashBucket<V> *bucket;
     List<HashBucket<V>*> *list = buckets[bucket_index];
     if(list == NULL){
@@ -185,22 +185,22 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
         buckets[bucket_index] = list;
         return;
     }
-    for(int index = 0; ; index++){
-        bucket = list->get_data(index);
-        if(bucket == NULL){
-            bucket = new HashBucket<V>(bucket_id);
-            list->insert_first(bucket);
-            bucket->insert(value);
-            break;
-        }
+    for(int index = 0; index < list->get_count(); index++){
+        bucket = list->get_data(index, valid);
         if(bucket->get_id() == bucket_id){
             bucket->insert(value);
+            inserted = true;
             break;
         }
     }
+    if(!inserted){
+        bucket = new HashBucket<V>(bucket_id);
+        bucket->insert(value);
+        list->insert_last(bucket);
+    }
 }
 
-template <typename K, typename V> V HashTable<K, V>::get_data(K key)
+template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid)
 {
     // if recent bucket == null
         // hash key
@@ -217,30 +217,41 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key)
     int bucket_index;
     List<HashBucket<V>*> *list = buckets[recent_bucket_list_index];
     V element;
+    bool fvalid = false; // To be used in this scope only.
+    valid = false;
 
+    if(list == NULL){
+        return V();
+    }
     if(recent_bucket == NULL){
         bucket_index = primary_hash_function(key);
         list = buckets[bucket_index];
+        if(list == NULL){
+            return V();
+        }
         recent_bucket_list_index = 0;
-        recent_bucket = list->get_data(recent_bucket_list_index);
+        recent_bucket = list->get_data(recent_bucket_list_index, fvalid);
         if(recent_bucket == NULL){
             return V();
-        }
+        }   
         recent_element_index = 0;
-        return recent_bucket->get_data(recent_element_index);
+        return recent_bucket->get_data(recent_element_index, valid);
     }
-
     recent_element_index++;
-    element = recent_bucket->get_data(recent_element_index);
-    if(element == V()){
+    element = recent_bucket->get_data(recent_element_index, valid);
+
+    if(element == V() && valid == false){
         recent_bucket_list_index++;
-        recent_bucket = list->get_data(recent_bucket_list_index);
+        recent_bucket = list->get_data(recent_bucket_list_index, fvalid);
         if(recent_bucket == NULL){
+            recent_bucket_list_index = 0;
+            recent_element_index = 0;
             return V();
         }
         recent_element_index = 0;
-        return recent_bucket->get_data(recent_bucket_list_index);
+        return recent_bucket->get_data(recent_bucket_list_index, valid);
     }
+    valid = true;
     return element;
 }
 

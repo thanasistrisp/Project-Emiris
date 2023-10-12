@@ -15,14 +15,15 @@ HashFunction::HashFunction(int number_of_dimensions, int window)
 : number_of_dimensions(number_of_dimensions), window(window)
 {
     // t ~ U[0, w)
-    std::default_random_engine generator;
+    std::random_device rd;
+    std::default_random_engine random_engine(rd());
     std::uniform_real_distribution<float> uniform(0.0, window);
-    t = uniform(generator);
+    t = uniform(random_engine);
 
     // v ~ N(0, 1)^{d}
     std::normal_distribution<double> normal(0.0, 1.0);
     for(int i = 0; i < number_of_dimensions; i++){
-        v.push_back(normal(generator));
+        v.push_back(normal(random_engine));
     }
 }
 

@@ -27,7 +27,7 @@ void brute_force(vector<vector<double>> p, vector<double> q, int K) {
 	}
 	sort(distances.begin(), distances.end());
 	for (int i = 0; i < K; i++) {
-		cout << p[distances[i].second][0] << " " << p[distances[i].second][1] << " " << p[distances[i].second][2] << endl;
+		cout << p[distances[i].second][0] << " " << p[distances[i].second][1] << " " << p[distances[i].second][2] << " distance = " << distances[i].first << endl;
 	}
 }
 
@@ -59,7 +59,7 @@ int main(void) {
 	int d = 3; // number of dimensions
 	int n = 1000; // number of points
 	int k = 3; // number of hash functions
-	int l = 1; // number of hash tables
+	int l = 5; // number of hash tables
 	int window = 4; // window
 
 	cout << "\nBrute force solution: " << endl;
@@ -69,8 +69,9 @@ int main(void) {
 	LSH lsh(d, n, k, l, window, &p);
 	tuple<vector<int>, vector<double>> knn = lsh.query(q, 10, euclidean_distance);
 	vector<int> indices = get<0>(knn);
+	vector<double> distances = get<1>(knn);
 	cout << indices.size() << endl;
 	for (int i = 0; i < (int) indices.size(); i++) {
-		cout << p.at(indices.at(i))[0] << " " << p.at(indices.at(i))[1] << " " << p.at(indices.at(i))[2] <<  endl;
+		cout << p.at(indices.at(i))[0] << " " << p.at(indices.at(i))[1] << " " << p.at(indices.at(i))[2] << " distance = " << distances.at(i) <<  endl;
 	}
 }
