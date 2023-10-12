@@ -74,3 +74,8 @@ void export_image(vector<double> image, string filename) {
 		file.write((char*)&temp, sizeof(unsigned char));
 	}
 }
+
+bool file_exists(string filename) {
+	ifstream file(filename);
+	return file.good();
+}

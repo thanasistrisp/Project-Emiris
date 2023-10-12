@@ -26,18 +26,7 @@ static vector<int> brute_force(vector<vector<double>> dataset, vector<double> qu
 	return nearest_neighbors;
 }
 
-void handle_ouput(string input_file, string query_file, string output_file, int k, int M, int probes, int N, double R, double (*distance)(vector<double>, vector<double>)) {
-	vector<vector<double>> dataset = read_mnist_data(input_file);
-	// dataset.resize(1000);
-	vector<vector<double>> queries = read_mnist_data(query_file);
-	// take first 10 queries from test set
-	queries.resize(10);
-
-	ofstream output;
-	output.open(output_file);
-
-	hypercube cube(dataset, k, M, probes, N, R);
-
+void handle_ouput(hypercube &cube, ofstream &output, const vector<vector<double>> &queries) {
 	for (int q = 0; q < (int) queries.size(); q++) {
 		vector<int> q_proj = cube.calculate_q_proj(queries[q]);
 		cout << "Query: " << q << endl;
@@ -48,14 +37,14 @@ void handle_ouput(string input_file, string query_file, string output_file, int 
 		double elapsed_secs_ANN = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
 		clock_t start_ENN = clock();
-		vector<int> real_nearest_neighbors = brute_force(dataset, queries[q], N, distance);
+		vector<int> real_nearest_neighbors = brute_force(cube.get_dataset(), queries[q], cube.get_N(), cube.distance);
 		clock_t end_ENN = clock();
 		double elapsed_secs_ENN = double(end_ENN - start_ENN) / CLOCKS_PER_SEC;
 		
-		for (int i = 0; i < N; i++) {
+		for (int i = 0; i < cube.get_N(); i++) {
 			output << "Nearest neighbor-" << i+1 << ": " << n_nearest_neighbors[i] << endl;
-			output << "distanceHypercube: " << distance(dataset[n_nearest_neighbors[i]], queries[q]) << endl;
-			output << "distanceTrue: " << distance(dataset[real_nearest_neighbors[i]], queries[q]) << endl;
+			output << "distanceHypercube: " << cube.distance(cube.get_dataset()[n_nearest_neighbors[i]], queries[q]) << endl;
+			output << "distanceTrue: " << cube.distance(cube.get_dataset()[real_nearest_neighbors[i]], queries[q]) << endl;
 		}
 		output << "tHypercube: " << elapsed_secs_ANN << endl;
 		output << "tTrue: " << elapsed_secs_ENN << endl;

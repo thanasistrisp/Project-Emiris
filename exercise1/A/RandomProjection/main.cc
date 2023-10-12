@@ -66,17 +66,61 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (input_file.empty() || query_file.empty() || output_file.empty()) {
-		cout << "Mandatory arguments missing" << endl; // TODO for cin input
-		return 1;
+	// ask from user
+	if (input_file.empty()) {
+		cout << "Enter input file: ";
+		cin >> input_file;
 	}
 
-	clock_t start = clock();
+	if (query_file.empty()) {
+		cout << "Enter query file: ";
+		cin >> query_file;
+	}
 
-	handle_ouput(input_file, query_file, output_file, k, M, probes, N, R);
+	if (output_file.empty()) {
+		cout << "Enter output file: ";
+		cin >> output_file;
+	}
 
-	clock_t end = clock();
-	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
+	if (!file_exists(input_file)) {
+		cout << "File " << input_file << " does not exist" << endl;
+		exit(1);
+	}
+	vector <vector<double>> dataset = read_mnist_data(input_file);
+	dataset.resize(1000);
+
+	hypercube cube(dataset, k, M, probes, N, R);
+
+	ofstream output(output_file);
+
+	double elapsed_secs = 0;
+
+	vector <vector<double>> queries;
+
+	clock_t start, end;
+
+	while (query_file != "exit" && !cin.eof()) {
+
+		start = clock();
+
+		if (!file_exists(query_file)) {
+			cout << "File " << query_file << " does not exist" << endl;
+			end = clock();
+			goto cont;
+		}
+		queries = read_mnist_data(query_file);
+		queries.resize(10);
+
+		handle_ouput(cube, output, queries);
+
+		end = clock();
+		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;
+
+		cont:
+			cout << "Enter query file: ";
+			cin >> query_file;
+
+	}
 
 	cout << "Done in " << elapsed_secs << " seconds" << endl;
 
