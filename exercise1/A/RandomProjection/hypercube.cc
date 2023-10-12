@@ -4,8 +4,8 @@
 #include <algorithm>
 
 #include "metrics.hpp"
-#include "h.hpp"
 #include "hypercube.hpp"
+#include "defines.hpp"
 
 using namespace std;
 
@@ -19,12 +19,32 @@ hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probe
 	this->N = N;
 	this->R = R;
 	this->distance = distance;
+	
 	clock_t start = clock();
 	cout << "Preprocessing..." << endl;
+	
+	// Initialize h_i functions, i = 1, ..., k.
+    HashFunction *h;
+    for(int i = 0; i < k; i++){
+        h = new HashFunction(p[0].size(), w);
+        hash_functions.push_back(h);
+    }
+
+	// Initialize f_map
+	f_map = new unordered_map<int, int>[k];
+
 	p_proj = preprocess(p, k);
+
 	clock_t end = clock();
 	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
 	cout << "Preprocessing time: " << elapsed_secs << endl;
+}
+
+hypercube::~hypercube() {
+	for (int i = 0; i < (int) hash_functions.size(); i++) {
+		delete hash_functions[i];
+	}	
+	delete[] f_map;
 }
 
 vector<int> hypercube::query_n_nearest_neighbors(vector<double> q, vector<int> q_proj) {
@@ -114,7 +134,19 @@ vector<int> hypercube::query_range(vector<double> q, vector<int> q_proj) {
 vector<int> hypercube::calculate_q_proj(vector<double> q) {
 	vector<int> q_proj;
 	for (int i = 0; i < k; i++) {
-		q_proj.push_back(f(h(q)));
+		q_proj.push_back(f(hash_functions[i]->hash(q), i));
 	}
 	return q_proj;
+}
+
+// preprocess: store points p -> [f-i(h_i(p))] for i = 1, ..., d'=k
+vector<vector<int>> hypercube::preprocess(vector<vector<double>> p, int k) {
+	vector<vector<int>> result(p.size(), vector<int>(k));
+	for (int i = 0; i < (int) p.size(); i++) {
+		for (int j = 0; j < k; j++) {
+			int h_j = hash_functions[j]->hash(p[i]);
+			result[i][j] = f(h_j, j);
+		}
+	}
+	return result;
 }

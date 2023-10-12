@@ -8,7 +8,6 @@
 #include <tuple>
 
 #include "metrics.hpp"
-#include "h.hpp"
 #include "hypercube.hpp"
 
 using namespace std;
@@ -43,18 +42,6 @@ vector<vector<int>> hypercube::pack(vector<vector<int>> p_proj, int n, vector<in
 	return result;
 }
 
-// preprocess: store points p -> [f-i(h_i(p))] for i = 1, ..., d'=k
-vector<vector<int>> preprocess(vector<vector<double>> p, int k) {
-	vector<vector<int>> result(p.size(), vector<int>(k));
-	for (int i = 0; i < (int) p.size(); i++) {
-		for (int j = 0; j < k; j++) {
-			result[i][j] = f(h(p[i]));
-		}
-	}
-	return result;
-}
-
-
 // compute hamming distance between a vertex and query q
 static int hamming_distance(vector<int> vertex, vector<int> q) {
 	int result = 0;
@@ -73,9 +60,10 @@ static bool same_vertex(vector<int> a, vector<int> b) {
 	return true;
 }
 
-int f(int x) { // uniform mapping to {0,1}
-	if (x % 2 == 0)
-		return 0;
-	else
-		return 1;
+int hypercube::f(int x, int i) {
+	// if x not in f_map, randomly generate 0 or 1, store in f_map and return, else return f_map[x]
+	if (f_map[i].find(x) == f_map[i].end()) {
+		f_map[i][x] = rand() % 2;
+	}
+	return f_map[i][x];
 }

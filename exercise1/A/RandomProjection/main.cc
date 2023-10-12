@@ -3,6 +3,8 @@
 #include <string>
 #include <cstring>
 #include <fstream>
+#include <random>
+#include <ctime>
 
 #include "hypercube.hpp"
 #include "helper.hpp"
@@ -10,6 +12,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+	srand(time(NULL));
+
 	string input_file;
 	string query_file;
 	string output_file;
