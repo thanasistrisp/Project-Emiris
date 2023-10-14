@@ -29,14 +29,19 @@ vector<vector<int>> hypercube::pack(vector<vector<int>> p_proj, int n, vector<in
 
 	// split points into vertices
 	for (int i = 0; i < (int) points.size(); i++) {
-		vector<int> vertex;
-		vertex.push_back(points[i]);
-		for (int j = i + 1; j < (int) points.size(); j++) {
-			if (same_vertex(p_proj[points[i]], p_proj[points[j]])) {
-				vertex.push_back(points[j]);
+		bool found = false;
+		for (int j = 0; j < (int) result.size(); j++) {
+			if (same_vertex(p_proj[points[i]], p_proj[result[j][0]])) {
+				result[j].push_back(points[i]);
+				found = true;
+				break;
 			}
 		}
-		result.push_back(vertex);
+		if (!found) {
+			vector<int> new_vertex;
+			new_vertex.push_back(points[i]);
+			result.push_back(new_vertex);
+		}
 	}
 
 	return result;

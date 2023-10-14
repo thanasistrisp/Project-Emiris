@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include <vector>
 #include <limits>
 #include <algorithm>
@@ -51,17 +52,17 @@ vector<int> hypercube::query_n_nearest_neighbors(vector<double> q, vector<int> q
 	int num_points = 0;
 	int num_vertices = 0;
 	
-	map<double, int> candidates;
+	multimap<double, int> candidates; // allows duplicate keys sorted by distance in ascending order
 	int hamming_distance = 0;
 	while (true) {
 		vector<vector<int>> vertices = pack(p_proj, (int) p_proj.size(), q_proj, hamming_distance);
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
-				if (num_points >= M)
-					goto check;
 				candidates.insert(pair<double, int>(distance(p[vertices[i][j]], q), vertices[i][j]));
 				num_points++;
+				if (num_points >= M)
+					goto check;
 			}
 			num_vertices++;
 			if (num_vertices >= probes)
@@ -87,20 +88,20 @@ vector<int> hypercube::query_range(vector<double> q, vector<int> q_proj) {
 	int num_points = 0;
 	int num_vertices = 0;
 
-	map<double, int> candidates;
+	multimap<double, int> candidates;
 	int hamming_distance = 0;
 	while (true) {
 		vector<vector<int>> vertices = pack(p_proj, (int) p_proj.size(), q_proj, hamming_distance);
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
-				if (num_points >= M)
-					goto check;
 				if (distance(p[vertices[i][j]], q) < R)
 				{
 					candidates.insert(pair<double, int>(distance(p[vertices[i][j]], q), vertices[i][j]));
 				}
 				num_points++;
+				if (num_points >= M)
+					goto check;
 			}
 			num_vertices++;
 			if (num_vertices >= probes)

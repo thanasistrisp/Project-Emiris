@@ -1,3 +1,3 @@
 #pragma once
 
-#define w 100
+#define w 1000
