@@ -50,8 +50,8 @@ void LSH::insert(vector<double> p, int index)
 {
     for(int i = 0; i < number_of_hash_tables; i++){
 
-        std::cout << "inserting element with index " << index; // debug
-	    std::cout << " to hash table with index " << i << std::endl; // debug
+        // std::cout << "inserting element with index " << index; // debug
+	    // std::cout << " to hash table with index " << i << std::endl; // debug
 
         hash_tables[i]->insert(p, index);
     }
@@ -66,20 +66,20 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
     double dist;
     int p_index;
     bool valid = true;
-    unsigned int q_secondary_key;
+    // unsigned int q_secondary_key;
 
     for(int i = 0; i < number_of_hash_tables; i++){
 
-        q_secondary_key = hash_tables[i]->secondary_hash_function(q);
+        // q_secondary_key = hash_tables[i]->secondary_hash_function(q);
 
         while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
             vector<double> p = dataset->at(p_index);
 
             // Choose only the points that share the same ID inside the bucket.
             // std::cout << "ID(p) = " << hash_tables[i]->secondary_hash_function(p) << ", ID(q) = " << q_secondary_key << std::endl;
-            if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
-                continue;
-            }
+            // if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
+            //     continue;
+            // }
 
             dist = distance(p, q);
             if(s.size() == k){
