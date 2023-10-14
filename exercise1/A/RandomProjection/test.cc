@@ -16,13 +16,22 @@ void brute_force(vector<vector<double>> p, vector<double> q, int K) {
 	}
 }
 
-// brute force radius search
-void brute_force(vector<vector<double>> p, vector<double> q, double R) {
+// brute force radius search sorted by distance
+void brute_force_R(vector<vector<double>> p, vector<double> q, double R) {
+	vector<pair<double, int>> distances(p.size());
 	for (int i = 0; i < (int) p.size(); i++) {
-		if (euclidean_distance(p[i], q) <= R) {
-			cout << p[i][0] << " " << p[i][1] << " " << p[i][2] << endl;
-		}
+		distances[i] = make_pair(euclidean_distance(p[i], q), i);
 	}
+	sort(distances.begin(), distances.end());
+	int counter = 0;
+	for (int i = 0; i < (int) distances.size(); i++) {
+		if (distances[i].first > R) {
+			break;
+		}
+		cout << p[distances[i].second][0] << " " << p[distances[i].second][1] << " " << p[distances[i].second][2] << endl;
+		counter++;
+	}
+	cout << "Number of points in range: " << counter << endl;
 }
 
 int main(void) {
@@ -35,36 +44,47 @@ int main(void) {
 	}
 	// define query point
 	vector<double> q(3);
-	q[0] = 500;
-	q[1] = 250;
-	q[2] = 970;
+	q[0] = 501;
+	q[1] = 500;
+	q[2] = 500;
 	// define k
 	int k = 3; // log(1000)
 	// define M
-	int M = 100; // there are more than 100 in one vertex
+	int M = 1000; // there are more than 100 in one vertex
 	// define probes
-	int probes = 2;
+	int probes = 1000;
 	// define Radius
 	double R = 520;
 	// define nearest neighbors
-	int N = 3;
+	int N = 4;
 	// define hypercube
-	hypercube hypercube(p, q, k, M, probes, N, R);
-	// query
-	vector<vector<double>> k_candidates = hypercube.query_n_nearest_neighbors();
-	cout << "k_candidates: " << endl;
-	for (int i = 0; i < (int) k_candidates.size(); i++) {
-		cout << k_candidates[i][0] << " " << k_candidates[i][1] << " " << k_candidates[i][2] << endl;
+	hypercube hc(p, k, M, probes, N, R);
+	// call query
+	vector<int> nearest_neighbors = hc.query_n_nearest_neighbors(q, hc.calculate_q_proj(q));
+	// print results
+	cout << "Nearest neighbors:" << endl;
+	for (int i = 0; i < (int) nearest_neighbors.size(); i++) {
+		cout << p[nearest_neighbors[i]][0] << " " << p[nearest_neighbors[i]][1] << " " << p[nearest_neighbors[i]][2] << endl;
 	}
-	cout << "\nBrute force: " << endl;
-	// brute force
-	brute_force(p, q, 3);
-	cout << "\nr_candidates: " << endl;
-	vector<vector<double>> r_candidates = hypercube.query_range();
-	for (int i = 0; i < (int) r_candidates.size(); i++) {
-		cout << r_candidates[i][0] << " " << r_candidates[i][1] << " " << r_candidates[i][2] << endl;
+	cout << endl;
+	// call query
+	vector<int> range = hc.query_range(q, hc.calculate_q_proj(q));
+	// print results
+	int counter = 0;
+	cout << "Range:" << endl;
+	for (int i = 0; i < (int) range.size(); i++) {
+		cout << p[range[i]][0] << " " << p[range[i]][1] << " " << p[range[i]][2] << endl;
+		counter++;
 	}
-	cout << "\nBrute force: " << endl;
-	brute_force(p, q, R);
-	return 0;
+	cout << "Number of points in range: " << counter << endl;
+	cout << endl;
+	// call brute force
+	cout << "Brute force nearest neighbors:" << endl;
+	brute_force(p, q, N);
+	cout << endl;
+	// call brute force
+	cout << "Brute force range:" << endl;
+	brute_force_R(p, q, R);
+	cout << endl;
+
 }
