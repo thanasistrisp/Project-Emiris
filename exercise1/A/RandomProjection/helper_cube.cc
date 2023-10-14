@@ -12,11 +12,11 @@
 
 using namespace std;
 
-static int hamming_distance(vector<int> vertex, vector<int> q);
-static bool same_vertex(vector<int> a, vector<int> b);
+static int hamming_distance(const vector<int> &vertex, const vector<int> &q);
+static bool same_vertex(const vector<int> &a, const vector<int> &b);
 
 // return points indices packed in vertices, and returns vector of tuples of points indices in same vertex and the Hamming distance of vertex to query q
-vector<vector<int>> hypercube::pack(vector<vector<int>> p_proj, int n, vector<int> q_proj, int hd) {
+vector<vector<int>> hypercube::pack(const vector<vector<int>> &p_proj, int n, const vector<int> &q_proj, int hd) {
 	vector<vector<int>> result;
 	vector<int> points;
 	for (int i = 0; i < n; i++) {
@@ -48,7 +48,7 @@ vector<vector<int>> hypercube::pack(vector<vector<int>> p_proj, int n, vector<in
 }
 
 // compute hamming distance between a vertex and query q
-static int hamming_distance(vector<int> vertex, vector<int> q) {
+static int hamming_distance(const vector<int> &vertex, const vector<int> &q) {
 	int result = 0;
 	for (int i = 0; i < (int) vertex.size(); i++) {
 		if (vertex[i] != q[i])
@@ -57,7 +57,7 @@ static int hamming_distance(vector<int> vertex, vector<int> q) {
 	return result;
 }
 
-static bool same_vertex(vector<int> a, vector<int> b) {
+static bool same_vertex(const vector<int> &a, const vector<int> &b) {
 	for (int i = 0; i < (int) a.size(); i++) {
 		if (a[i] != b[i])
 			return false;

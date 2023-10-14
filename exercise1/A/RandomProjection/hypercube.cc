@@ -11,7 +11,7 @@
 using namespace std;
 
 hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probes, 
-					 int N, double R, double (*distance)(std::vector<double>, std::vector<double> distance))
+					 int N, double R, double (*distance)(const std::vector<double> &, const std::vector<double> &))
 {
 	this->p = p;
 	this->k = k;
@@ -48,18 +48,19 @@ hypercube::~hypercube() {
 	delete[] f_map;
 }
 
-vector<int> hypercube::query_n_nearest_neighbors(vector<double> q, vector<int> q_proj) {
+tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj) {
 	int num_points = 0;
 	int num_vertices = 0;
 	
-	multimap<double, int> candidates; // allows duplicate keys sorted by distance in ascending order
+	multimap<double, int> candidates; // allows duplicate keys (distances) sorted by ascending order
 	int hamming_distance = 0;
 	while (true) {
 		vector<vector<int>> vertices = pack(p_proj, (int) p_proj.size(), q_proj, hamming_distance);
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
-				candidates.insert(pair<double, int>(distance(p[vertices[i][j]], q), vertices[i][j]));
+				double dist = distance(p[vertices[i][j]], q);
+				candidates.insert(pair<double, int>(dist, vertices[i][j]));
 				num_points++;
 				if (num_points >= M)
 					goto check;
@@ -72,19 +73,16 @@ vector<int> hypercube::query_n_nearest_neighbors(vector<double> q, vector<int> q
 	}
 
 	check:
-		vector<int> nearest_neighbors(N);
-		int i = 0;
+		vector<int> n_nearest_neighbors;
+		vector<double> dist;
 		for (auto it = candidates.begin(); it != candidates.end(); it++) {
-			if (i >= N) {
-				break;
-			}
-			nearest_neighbors[i] = it->second;
-			i++;
+			n_nearest_neighbors.push_back(it->second);
+			dist.push_back(it->first);
 		}
-		return nearest_neighbors;
+		return make_tuple(n_nearest_neighbors, dist);
 }
 
-vector<int> hypercube::query_range(vector<double> q, vector<int> q_proj) {
+vector<int> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj) {
 	int num_points = 0;
 	int num_vertices = 0;
 
@@ -118,7 +116,7 @@ vector<int> hypercube::query_range(vector<double> q, vector<int> q_proj) {
 		return range;
 }
 
-vector<int> hypercube::calculate_q_proj(vector<double> q) {
+vector<int> hypercube::calculate_q_proj(const vector<double> &q) {
 	vector<int> q_proj;
 	for (int i = 0; i < k; i++) {
 		q_proj.push_back(f(hash_functions[i]->hash(q), i));
@@ -127,7 +125,7 @@ vector<int> hypercube::calculate_q_proj(vector<double> q) {
 }
 
 // preprocess: store points p -> [f-i(h_i(p))] for i = 1, ..., d'=k
-vector<vector<int>> hypercube::preprocess(vector<vector<double>> p, int k) {
+vector<vector<int>> hypercube::preprocess(const vector<vector<double>> &p, int k) {
 	vector<vector<int>> result(p.size(), vector<int>(k));
 	for (int i = 0; i < (int) p.size(); i++) {
 		for (int j = 0; j < k; j++) {

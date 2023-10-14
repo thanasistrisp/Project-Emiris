@@ -7,7 +7,7 @@ using namespace std;
 
 static int reverse_int(int);
 
-vector<vector<double>> read_mnist_data(string filename) {
+vector<vector<double>> read_mnist_data(const string &filename) {
 	// read MNIST data from file
 	ifstream file(filename, ios::binary);
 
@@ -57,7 +57,7 @@ static int reverse_int(int i) {
 	return ((int)c1 << 24) + ((int)c2 << 16) + ((int)c3 << 8) + c4;
 }
 
-void export_image(vector<double> image, string filename) {
+void export_image(const vector<double> &image, string filename) {
 	// export image to file
 	ofstream file(filename, ios::binary);
 
@@ -75,7 +75,7 @@ void export_image(vector<double> image, string filename) {
 	}
 }
 
-bool file_exists(string filename) {
+bool file_exists(const string &filename) {
 	ifstream file(filename);
 	return file.good();
 }
