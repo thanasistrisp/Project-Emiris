@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	R++; // will fix this, leave it as it is for now
+	// R++; // will fix this, leave it as it is for now
 
 	// ask from user
 	if (input_file.empty()) {
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 		queries = read_mnist_data(query_file);
 		queries.resize(10);
 
-		handle_ouput(lsh, dataset, queries, N, output);
+		handle_ouput(lsh, dataset, queries, N, R, output);
 
 		end = clock();
 		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;

@@ -46,7 +46,7 @@ tuple<vector<int>, vector<double>> brute_force(vector<vector<double>> dataset, v
 	return make_tuple(indices, distances);
 }
 
-void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int n, ofstream &output) {
+void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int n, double r, ofstream &output) {
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
 		output << "Query: " << q << endl;
@@ -71,11 +71,14 @@ void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<
 		}
 		output << "tLSH: " << elapsed_secs_ANN << endl;
 		output << "tTrue: " << elapsed_secs_TNN << endl;
-		// output << "R-near neighbors:" << endl;
-		// vector<int> range_neighbors = cube.query_range(queries[q], q_proj);
-		// for (int i = 0; i < (int) range_neighbors.size(); i++) {
-		// 	output << range_neighbors[i] << endl;
-		// }
+
+		output << "R-near neighbors:" << endl;
+		tuple<vector<int>, vector<double>> rnn = lsh.query_range(queries[q], r, euclidean_distance);
+		vector<int> indices_rnn = get<0>(rnn);
+		vector<double> distances_rnn = get<1>(rnn);
+		for(int i = 0; (unsigned int) i < indices_rnn.size(); i++){
+			output << indices_rnn[i] << " " << distances_rnn[i] << endl;
+		}
 	}
 
 	output.close();
