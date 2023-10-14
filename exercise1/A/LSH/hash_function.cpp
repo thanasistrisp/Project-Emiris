@@ -3,7 +3,7 @@
 #include <random>
 // vector   is used for std::vector.
 // iterator is used for std::back_insert_iterator, std::advance().
-// random   is used for std::default_random_engine generator, std::normal_distribution, std::uniform_real_distribution and rand().
+// random   is used for std::random_device, std::default_random_engine generator, std::normal_distribution, std::uniform_real_distribution and rand().
 
 #include "hash_function.h"
 

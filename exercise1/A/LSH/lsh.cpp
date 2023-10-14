@@ -1,16 +1,12 @@
 #include <vector>
 #include <iterator>
-#include <random>
-// vector   is used for std::vector.
-// iterator is used for std::back_insert_iterator, std::advance().
-// random   is used for std::default_random_engine generator, std::normal_distribution, std::uniform_real_distribution and rand().
+#include <tuple>
+#include <set>
+// iterator is used for std::const_iterator, std::advance().
 
 #include "lsh.h"
 #include "list.h"
 #include "hash_table.h"
-
-#include <tuple>
-#include <set>
 
 using std::vector;
 using std::tuple;
@@ -49,10 +45,6 @@ LSH::~LSH()
 void LSH::insert(vector<double> p, int index)
 {
     for(int i = 0; i < number_of_hash_tables; i++){
-
-        std::cout << "inserting element with index " << index; // debug
-	    std::cout << " to hash table with index " << i << std::endl; // debug
-
         hash_tables[i]->insert(p, index);
     }
 }

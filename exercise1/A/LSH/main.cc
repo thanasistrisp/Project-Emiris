@@ -1,10 +1,13 @@
 #include <iostream>
-#include <vector>
+#include <fstream>
 #include <string>
 #include <cstring>
-#include <fstream>
-#include <random>
+#include <cstdlib>
 #include <ctime>
+#include <vector>
+// cstring is used for strcmp().
+// cstdlib is used for srand().
+// ctime is used for time().
 
 #include "lsh.h"
 #include "helper.hpp"
@@ -112,7 +115,7 @@ int main(int argc, char *argv[]) {
 			goto cont;
 		}
 		queries = read_mnist_data(query_file);
-		// queries.resize(10);
+		queries.resize(10);
 
 		handle_ouput(lsh, dataset, queries, N, output);
 

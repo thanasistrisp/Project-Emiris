@@ -1,15 +1,9 @@
 #include <vector>
-#include <algorithm>
 #include <iterator>
-#include <numeric>
 #include <string>
 #include <cmath>
-// vector    is used for std::vector.
-// algorithm is used for std::transform().
-// iterator  is used for std::back_insert_iterator, std::advance().
-// numeric   is used for std::accumulate().
+// iterator  is used for std::const_iterator, std::advance().
 // cmath     is used for abs(), pow().
-// string    is used for std::string.
 
 #include "lp_metric.h"
 
