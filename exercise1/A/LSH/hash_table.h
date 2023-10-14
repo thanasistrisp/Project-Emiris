@@ -23,7 +23,7 @@ template <typename V> class HashBucket
 
         void insert(V);
 
-        V get_data(int) const;
+        V get_data(int, bool&);
 };
 
 template <typename K, typename V> class HashTable
@@ -35,14 +35,11 @@ template <typename K, typename V> class HashTable
         const int number_of_hash_functions;
         std::vector<HashFunction*> hash_functions;
         std::vector<int> primary_factors;
-        std::vector<int> secondary_factors;
 
-        int primary_hash_function(K);
-        unsigned int secondary_hash_function(K);
-
-        HashBucket<V> *recent_bucket;
-        int recent_bucket_list_index; // The index of the most recent bucket in the list of buckets.
+        int recent_chain_index;
+        int recent_bucket_index;
         int recent_element_index;
+        bool finished_chain_search;
 
     public:
         HashTable(int, int, int, int);
@@ -50,9 +47,12 @@ template <typename K, typename V> class HashTable
 
         int get_table_size() const;
 
+        int primary_hash_function(K);
+        unsigned int secondary_hash_function(K);
+
         void insert(K, V);
 
-        V get_data(K);
+        V get_data(K, bool&);
 };
 
 // ---------- Functions for class HashBucket ---------- //
@@ -78,15 +78,16 @@ template <typename V> void HashBucket<V>::insert(V element)
     elements.insert_first(element);
 }
 
-template <typename V> V HashBucket<V>::get_data(int index) const
+template <typename V> V HashBucket<V>::get_data(int index, bool &valid)
 {
-    return elements.get_data(index);
+    return elements.get_data(index, valid);
 }
 
 // ---------- Functions for class HashTable ---------- //
 
 template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int number_of_dimensions, int number_of_hash_functions, int window)
-: table_size(table_size), number_of_hash_functions(number_of_hash_functions), recent_bucket(NULL), recent_bucket_list_index(-1), recent_element_index(-1)
+: table_size(table_size), number_of_hash_functions(number_of_hash_functions),
+  recent_chain_index(0), recent_bucket_index(0), recent_element_index(0), finished_chain_search(true)
 {
     // Initialize h_i functions, i = 1, ..., k.
     HashFunction *h;
@@ -99,12 +100,6 @@ template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int
     // g(p) = ( \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M ) \mod table_size.
     for(int i = 0; i < number_of_hash_functions; i++){
         primary_factors.push_back(rand());
-    }
-
-    // Initialize random factors for secondary hash function
-    // h(p) = \sum_{i = 1}^{k}(r'_i * h_i(p)) \mod M.
-    for(int i = 0; i < number_of_hash_functions; i++){
-        secondary_factors.push_back(rand());
     }
 
     buckets = new List<HashBucket<V>*>*[table_size];
@@ -137,27 +132,26 @@ template <typename K, typename V> HashTable<K, V>::~HashTable()
 template <typename K, typename V> int HashTable<K, V>::primary_hash_function(K p)
 {
     // Use primary hash function
-    // g(p) = ( \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M ) \mod table_size.
-    int r_i, h_i, sum = 0;
-    for(int i = 0; i < number_of_hash_functions; i++){
-        r_i = primary_factors.at(i);
-        h_i = hash_functions.at(i)->hash(p);
-        sum += r_i * h_i;
-    }
-    return (sum % M) % table_size;
+    // g(p) = ( \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M ) \mod table_size =
+    //      = h(p) \mod table_size.
+    return secondary_hash_function(p) % table_size;
 }
 
 template <typename K, typename V> unsigned int HashTable<K, V>::secondary_hash_function(K p)
 {
     // Use secondary hash function
-    // h(p) = \sum_{i = 1}^{k}(r'_i * h_i(p)) \mod M.
-    int r_i_prime, h_i, sum = 0;
+    // h(p) = \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M.
+    // Apply the following property
+    // (a + b) mod m = ((a mod m) + (b mod m)) mod m
+    // to avoid overflow.
+    int r_i, h_i;
+    unsigned int sum = 0;
     for(int i = 0; i < number_of_hash_functions; i++){
-        r_i_prime = secondary_factors.at(i);
+        r_i = primary_factors.at(i);
         h_i = hash_functions.at(i)->hash(p);
-        sum += r_i_prime * h_i;
+        sum = ((sum % M) + ((r_i * h_i) % M)) % M;
     }
-    return sum % M;
+    return sum;
 }
 
 template <typename K, typename V> int HashTable<K, V>::get_table_size() const
@@ -174,7 +168,7 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
         // else create new bucket
     int bucket_index = primary_hash_function(key);
     unsigned int bucket_id = secondary_hash_function(key);
-
+    bool valid, inserted = false;
     HashBucket<V> *bucket;
     List<HashBucket<V>*> *list = buckets[bucket_index];
     if(list == NULL){
@@ -185,62 +179,68 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
         buckets[bucket_index] = list;
         return;
     }
-    for(int index = 0; ; index++){
-        bucket = list->get_data(index);
-        if(bucket == NULL){
-            bucket = new HashBucket<V>(bucket_id);
-            list->insert_first(bucket);
-            bucket->insert(value);
-            break;
-        }
+    for(int index = 0; index < list->get_count(); index++){
+        bucket = list->get_data(index, valid);
         if(bucket->get_id() == bucket_id){
             bucket->insert(value);
+            inserted = true;
             break;
         }
+    }
+    if(!inserted){
+        bucket = new HashBucket<V>(bucket_id);
+        bucket->insert(value);
+        list->insert_last(bucket);
     }
 }
 
-template <typename K, typename V> V HashTable<K, V>::get_data(K key)
+template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid)
 {
-    // if recent bucket == null
-        // hash key
-        // find list of buckets
-        // get first bucket from list (if null, return)
-        // return first element from bucket
-    // go to next element
-    // if element == null
-        // get next bucket from list (if null, return)
-        // get first element from bucket
-        // return first element from bucket
-    // return element
+    List<HashBucket<V>*> *chain; //= buckets[recent_chain_index];
+    HashBucket<V> *bucket;
+    V element;
+    bool fvalid = false; // To be used in this scope only.
+    valid = false;
 
-    int bucket_index;
-    List<HashBucket<V>> *list;
-    V* element;
-
-    if(recent_bucket == NULL){
-        bucket_index = primary_hash_function(key);
-        list = buckets[bucket_index];
-        recent_bucket_list_index = 0;
-        recent_bucket = list->get_data(recent_bucket_list_index);
-        if(recent_bucket == NULL){
-            return NULL;
-        }
+    if(finished_chain_search){
+        recent_chain_index = primary_hash_function(key);
+        recent_bucket_index = 0;
         recent_element_index = 0;
-        return recent_bucket->get_data(recent_element_index);
+        finished_chain_search = false;
+    }
+    chain = buckets[recent_chain_index];
+
+    // Check again, in case recent_chain_index is obsolete.
+    if(chain == NULL){
+        finished_chain_search = true;
+        return V();
     }
 
+    // If the chain exists, check if we have seen through all buckets.
+    bucket = chain->get_data(recent_bucket_index, fvalid);
+    if(bucket == NULL){
+        finished_chain_search = true;
+        return V();
+    }
     recent_element_index++;
-    element = recent_bucket->get_data(recent_element_index);
-    if(element == NULL){
-        recent_bucket_list_index++;
-        recent_bucket = list->get_data(recent_bucket_list_index);
-        if(recent_bucket == NULL){
-            return NULL;
+    element = bucket->get_data(recent_element_index, valid);
+
+    // If reached the end of the bucket, look for the next bucket in the same chain.
+    if(element == V() && valid == false){
+        recent_bucket_index++;
+        bucket = chain->get_data(recent_bucket_index, fvalid);
+        if(bucket == NULL){
+            finished_chain_search = true;
+            return V();
         }
         recent_element_index = 0;
-        return recent_bucket->get_data(recent_bucket_list_index);
+        element = bucket->get_data(recent_element_index, valid);
+        if(element == V() && valid == false){
+            finished_chain_search = true;
+            return element;
+        }
     }
+    valid = true;
     return element;
 }
 
