@@ -120,7 +120,7 @@ template <typename T> void List<T>::insert_last(T data)
         insert_first(data);
         return;
     }
-    ListNode<T> *new_last_node = new ListNode(data);
+    ListNode<T> *new_last_node = new ListNode<T>(data);
     ListNode<T> *node = head;
     ListNode<T> *previous_node;
     while(node != NULL){

@@ -1,77 +1,130 @@
 #include <iostream>
-#include <algorithm>
-#include <tuple>
-#include <cmath>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <fstream>
+#include <random>
+#include <ctime>
 
 #include "lsh.h"
+#include "helper.hpp"
 
 using namespace std;
 
-double euclidean_distance(const std::vector<double>& v1, const std::vector<double>& v2){
-	if(v1.size() != v2.size()){
-        return -1;
-    }
+int main(int argc, char *argv[]) {
+	srand(time(NULL));
 
-    double sum = 0.0;
-    for(int i = 0; i < (int) v1.size(); i++){
-        sum += pow(abs(v1.at(i) - v2.at(i)), 2);
-    }
-    return sqrt(sum);
-}
+	string input_file;
+	string query_file;
+	string output_file;
+	int d = 784;
+	int k = 4;
+	int L = 5;
+	int N = 1;
+	int window = 4;
+	double R = 10000;
 
-// brute force nearest neighbor search
-void brute_force(vector<vector<double>> p, vector<double> q, int K) {
-	vector<pair<double, int>> distances(p.size());
-	for (int i = 0; i < (int) p.size(); i++) {
-		distances[i] = make_pair(euclidean_distance(p[i], q), i);
-	}
-	sort(distances.begin(), distances.end());
-	for (int i = 0; i < K; i++) {
-		cout << p[distances[i].second][0] << " " << p[distances[i].second][1] << " " << p[distances[i].second][2] << " distance = " << distances[i].first << endl;
-	}
-}
-
-// brute force radius search
-void brute_force(vector<vector<double>> p, vector<double> q, double R) {
-	for (int i = 0; i < (int) p.size(); i++) {
-		if (euclidean_distance(p[i], q) <= R) {
-			cout << p[i][0] << " " << p[i][1] << " " << p[i][2] << endl;
+	for (int i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-d") == 0) {
+			input_file = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-q") == 0) {
+			query_file = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-k") == 0) {
+			k = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-L") == 0) {
+			L = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-N") == 0) {
+			N = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-R") == 0) {
+			R = atof(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-o") == 0) {
+			output_file = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-help") == 0) {
+			cout << "Usage: ./lsh -d <input file> -q <query file> -k <int> -M <int> -probes <int> -o <output file> -N <int> -R <double>" << endl;
+			return 0;
+		}
+		else {
+			cout << "Invalid arguments" << endl;
+			return 1;
 		}
 	}
-}
 
-int main(void) {
-	cout << "LSH test" << endl;
+	R++; // will fix this, leave it as it is for now
 
-	// define 1000 points in 3D
-	vector<vector<double>> p(1000, vector<double>(3));
-	for (int i = 0; i < 1000; i++) {
-		p[i][0] = i+2;
-		p[i][1] = i+1;
-		p[i][2] = i+1;
+	// ask from user
+	if (input_file.empty()) {
+		cout << "Enter input file: ";
+		cin >> input_file;
 	}
-	// define query point
-	vector<double> q(3);
-	q[0] = 500;
-	q[1] = 250;
-	q[2] = 970;
 
-	int d = 3; // number of dimensions
-	int n = 1000; // number of points
-	int k = 3; // number of hash functions
-	int l = 5; // number of hash tables
-	int window = 4; // window
-
-	cout << "\nBrute force solution: " << endl;
-	brute_force(p, q, 10);
-
-	cout << "\nLSH solution: " << endl;
-	LSH lsh(d, n, k, l, window, &p);
-	tuple<vector<int>, vector<double>> knn = lsh.query(q, 10, euclidean_distance);
-	vector<int> indices = get<0>(knn);
-	vector<double> distances = get<1>(knn);
-	cout << indices.size() << endl;
-	for (int i = 0; i < (int) indices.size(); i++) {
-		cout << p.at(indices.at(i))[0] << " " << p.at(indices.at(i))[1] << " " << p.at(indices.at(i))[2] << " distance = " << distances.at(i) <<  endl;
+	if (query_file.empty()) {
+		cout << "Enter query file: ";
+		cin >> query_file;
 	}
+
+	if (output_file.empty()) {
+		cout << "Enter output file: ";
+		cin >> output_file;
+	}
+
+	if (!file_exists(input_file)) {
+		cout << "File " << input_file << " does not exist" << endl;
+		exit(1);
+	}
+	vector <vector<double>> dataset = read_mnist_data(input_file);
+	// dataset.resize(1000);
+
+	cout << "Read MNIST data" << endl;
+
+	LSH lsh(d, dataset.size(), k, L, window, &dataset);
+
+	cout << "Created LSH" << endl;
+
+	ofstream output(output_file);
+
+	double elapsed_secs = 0;
+
+	vector <vector<double>> queries;
+
+	clock_t start, end;
+
+	while (query_file != "exit" && !cin.eof()) {
+
+		start = clock();
+
+		if (!file_exists(query_file)) {
+			cout << "File " << query_file << " does not exist" << endl;
+			end = clock();
+			goto cont;
+		}
+		queries = read_mnist_data(query_file);
+		// queries.resize(10);
+
+		handle_ouput(lsh, dataset, queries, N, output);
+
+		end = clock();
+		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;
+
+		cont:
+			cout << "Enter query file: ";
+			cin >> query_file;
+	}
+
+	cout << "Done in " << elapsed_secs << " seconds" << endl;
+
+	return 0;
 }

@@ -35,11 +35,11 @@ template <typename K, typename V> class HashTable
         const int number_of_hash_functions;
         std::vector<HashFunction*> hash_functions;
         std::vector<int> primary_factors;
-        std::vector<int> secondary_factors;
 
-        HashBucket<V> *recent_bucket;
-        int recent_bucket_list_index; // The index of the most recent bucket in the list of buckets.
+        int recent_chain_index;
+        int recent_bucket_index;
         int recent_element_index;
+        bool finished_chain_search;
 
     public:
         HashTable(int, int, int, int);
@@ -86,7 +86,8 @@ template <typename V> V HashBucket<V>::get_data(int index, bool &valid)
 // ---------- Functions for class HashTable ---------- //
 
 template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int number_of_dimensions, int number_of_hash_functions, int window)
-: table_size(table_size), number_of_hash_functions(number_of_hash_functions), recent_bucket(NULL), recent_bucket_list_index(0), recent_element_index(0)
+: table_size(table_size), number_of_hash_functions(number_of_hash_functions),
+  recent_chain_index(0), recent_bucket_index(0), recent_element_index(0), finished_chain_search(true)
 {
     // Initialize h_i functions, i = 1, ..., k.
     HashFunction *h;
@@ -99,12 +100,6 @@ template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int
     // g(p) = ( \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M ) \mod table_size.
     for(int i = 0; i < number_of_hash_functions; i++){
         primary_factors.push_back(rand());
-    }
-
-    // Initialize random factors for secondary hash function
-    // h(p) = \sum_{i = 1}^{k}(r'_i * h_i(p)) \mod M.
-    for(int i = 0; i < number_of_hash_functions; i++){
-        secondary_factors.push_back(rand());
     }
 
     buckets = new List<HashBucket<V>*>*[table_size];
@@ -137,23 +132,18 @@ template <typename K, typename V> HashTable<K, V>::~HashTable()
 template <typename K, typename V> int HashTable<K, V>::primary_hash_function(K p)
 {
     // Use primary hash function
-    // g(p) = ( \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M ) \mod table_size.
-    int r_i, h_i, sum = 0;
-    for(int i = 0; i < number_of_hash_functions; i++){
-        r_i = primary_factors.at(i);
-        h_i = hash_functions.at(i)->hash(p);
-        sum += r_i * h_i;
-    }
-    return (sum % M) % table_size;
+    // g(p) = ( \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M ) \mod table_size =
+    //      = h(p) \mod table_size.
+    return secondary_hash_function(p) % table_size;
 }
 
 template <typename K, typename V> unsigned int HashTable<K, V>::secondary_hash_function(K p)
 {
     // Use secondary hash function
-    // h(p) = \sum_{i = 1}^{k}(r'_i * h_i(p)) \mod M.
+    // h(p) = \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M.
     int r_i_prime, h_i, sum = 0;
     for(int i = 0; i < number_of_hash_functions; i++){
-        r_i_prime = secondary_factors.at(i);
+        r_i_prime = primary_factors.at(i);
         h_i = hash_functions.at(i)->hash(p);
         sum += r_i_prime * h_i;
     }
@@ -202,54 +192,49 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
 
 template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid)
 {
-    // if recent bucket == null
-        // hash key
-        // find list of buckets
-        // get first bucket from list (if null, return)
-        // return first element from bucket
-    // go to next element
-    // if element == null
-        // get next bucket from list (if null, return)
-        // get first element from bucket
-        // return first element from bucket
-    // return element
-
-    int bucket_index;
-    List<HashBucket<V>*> *list = buckets[recent_bucket_list_index];
+    List<HashBucket<V>*> *chain; //= buckets[recent_chain_index];
+    HashBucket<V> *bucket;
     V element;
     bool fvalid = false; // To be used in this scope only.
     valid = false;
 
-    if(list == NULL){
+    if(finished_chain_search){
+        recent_chain_index = primary_hash_function(key);
+        recent_bucket_index = 0;
+        recent_element_index = 0;
+        finished_chain_search = false;
+    }
+    chain = buckets[recent_chain_index];
+
+    // Check again, in case recent_chain_index is obsolete.
+    if(chain == NULL){
+        finished_chain_search = true;
         return V();
     }
-    if(recent_bucket == NULL){
-        bucket_index = primary_hash_function(key);
-        list = buckets[bucket_index];
-        if(list == NULL){
-            return V();
-        }
-        recent_bucket_list_index = 0;
-        recent_bucket = list->get_data(recent_bucket_list_index, fvalid);
-        if(recent_bucket == NULL){
-            return V();
-        }   
-        recent_element_index = 0;
-        return recent_bucket->get_data(recent_element_index, valid);
+
+    // If the chain exists, check if we have seen through all buckets.
+    bucket = chain->get_data(recent_bucket_index, fvalid);
+    if(bucket == NULL){
+        finished_chain_search = true;
+        return V();
     }
     recent_element_index++;
-    element = recent_bucket->get_data(recent_element_index, valid);
+    element = bucket->get_data(recent_element_index, valid);
 
+    // If reached the end of the bucket, look for the next bucket in the same chain.
     if(element == V() && valid == false){
-        recent_bucket_list_index++;
-        recent_bucket = list->get_data(recent_bucket_list_index, fvalid);
-        if(recent_bucket == NULL){
-            recent_bucket_list_index = 0;
-            recent_element_index = 0;
+        recent_bucket_index++;
+        bucket = chain->get_data(recent_bucket_index, fvalid);
+        if(bucket == NULL){
+            finished_chain_search = true;
             return V();
         }
         recent_element_index = 0;
-        return recent_bucket->get_data(recent_bucket_list_index, valid);
+        element = bucket->get_data(recent_element_index, valid);
+        if(element == V() && valid == false){
+            finished_chain_search = true;
+            return element;
+        }
     }
     valid = true;
     return element;

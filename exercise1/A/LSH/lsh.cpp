@@ -49,6 +49,10 @@ LSH::~LSH()
 void LSH::insert(vector<double> p, int index)
 {
     for(int i = 0; i < number_of_hash_tables; i++){
+
+        std::cout << "inserting element with index " << index; // debug
+	    std::cout << " to hash table with index " << i << std::endl; // debug
+
         hash_tables[i]->insert(p, index);
     }
 }
@@ -72,16 +76,17 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
             vector<double> p = dataset->at(p_index);
 
             // Choose only the points that share the same ID inside the bucket.
+            // std::cout << "ID(p) = " << hash_tables[i]->secondary_hash_function(p) << ", ID(q) = " << q_secondary_key << std::endl;
             if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
                 continue;
             }
 
             dist = distance(p, q);
             if(s.size() == k){
-                if(dist < get<1>(*s.begin())){
-                    s.erase(s.begin());
+                if(dist >= get<1>(*s.begin())){
+                    continue;
                 }
-                continue;
+                s.erase(s.begin());
             }
             s.insert(make_tuple(p_index, dist));
         }
