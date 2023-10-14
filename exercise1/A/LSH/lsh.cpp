@@ -13,6 +13,7 @@ using std::tuple;
 using std::get;
 using std::make_tuple;
 using std::set;
+using std::prev;
 
 // ---------- Public functions for class LSH ----------
 
@@ -68,17 +69,16 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
             vector<double> p = dataset->at(p_index);
 
             // Choose only the points that share the same ID inside the bucket.
-            // std::cout << "ID(p) = " << hash_tables[i]->secondary_hash_function(p) << ", ID(q) = " << q_secondary_key << std::endl;
             if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
                 continue;
             }
 
             dist = distance(p, q);
             if(s.size() == k){
-                if(dist >= get<1>(*s.begin())){
+                if(dist >= get<1>(*s.rbegin())){
                     continue;
                 }
-                s.erase(s.begin());
+                s.erase(std::prev(s.end()));
             }
             s.insert(make_tuple(p_index, dist));
         }

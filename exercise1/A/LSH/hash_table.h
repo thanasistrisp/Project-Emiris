@@ -141,13 +141,17 @@ template <typename K, typename V> unsigned int HashTable<K, V>::secondary_hash_f
 {
     // Use secondary hash function
     // h(p) = \sum_{i = 1}^{k}(r_i * h_i(p)) \mod M.
-    int r_i_prime, h_i, sum = 0;
+    // Apply the following property
+    // (a + b) mod m = ((a mod m) + (b mod m)) mod m
+    // to avoid overflow.
+    int r_i, h_i;
+    unsigned int sum = 0;
     for(int i = 0; i < number_of_hash_functions; i++){
-        r_i_prime = primary_factors.at(i);
+        r_i = primary_factors.at(i);
         h_i = hash_functions.at(i)->hash(p);
-        sum += r_i_prime * h_i;
+        sum = ((sum % M) + ((r_i * h_i) % M)) % M;
     }
-    return sum % M;
+    return sum;
 }
 
 template <typename K, typename V> int HashTable<K, V>::get_table_size() const

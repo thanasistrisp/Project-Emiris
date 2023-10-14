@@ -28,10 +28,10 @@ tuple<vector<int>, vector<double>> brute_force(vector<vector<double>> dataset, v
 	for(int i = 0; (unsigned int) i < dataset.size(); i++){
 		dist = distance(dataset[i], query);
 		if(s.size() == N){
-			if(dist >= get<1>(*s.begin())){
+			if(dist >= get<1>(*s.rbegin())){
 				continue;
 			}
-			s.erase(s.begin());
+			s.erase(std::prev(s.end()));
 		}
 		s.insert(make_tuple(i, dist));
 	}

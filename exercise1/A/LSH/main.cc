@@ -15,6 +15,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
+	cout << time(NULL) << endl;
 	srand(time(NULL));
 
 	string input_file;
@@ -24,7 +25,7 @@ int main(int argc, char *argv[]) {
 	int k = 4;
 	int L = 5;
 	int N = 1;
-	int window = 4;
+	int window = 1000;
 	double R = 10000;
 
 	for (int i = 1; i < argc; i++) {
