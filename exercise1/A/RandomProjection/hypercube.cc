@@ -56,20 +56,6 @@ hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probe
 		}
 	}
 
-	// // check for points
-	// binary_string bs(vector<int>{1, 0, 1});
-	// auto it = hash_table->find(bs);
-	// if (it != hash_table->end()) {
-	// 	cout << "Points found: " << endl;
-	// 	for (int i = 0; i < (int) it->second.size(); i++) {
-	// 		cout << it->second[i] << endl;
-	// 	}
-	// }
-	// else {
-	// 	cout << "Points not found" << endl;
-	// }
-
-
 	clock_t end = clock();
 	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
 	cout << "Preprocessing time: " << elapsed_secs << endl;
@@ -87,16 +73,14 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	int num_points = 0;
 	int num_vertices = 0;
 	
-	multimap<double, int> candidates; // allows duplicate keys (distances) sorted by ascending order
-	int hamming_distance = 1;
+	map<double, int> candidates;
+	int hamming_distance = 0;
 	while (true) {
-		// create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
 		vector<vector<int>> vertices = pack(q_proj, hamming_distance);
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
-				double dist = distance(p[vertices[i][j]], q);
-				candidates.insert(pair<double, int>(dist, vertices[i][j]));
+				candidates.insert(pair<double, int>(distance(p[vertices[i][j]], q), vertices[i][j]));
 				num_points++;
 				if (num_points >= M)
 					goto check;
@@ -109,13 +93,18 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	}
 
 	check:
-		vector<int> n_nearest_neighbors;
-		vector<double> dist;
+		vector<int> nearest_neighbors(N);
+		vector<double> dist(N);
+		int i = 0;
 		for (auto it = candidates.begin(); it != candidates.end(); it++) {
-			n_nearest_neighbors.push_back(it->second);
-			dist.push_back(it->first);
+			if (i >= N) {
+				break;
+			}
+			nearest_neighbors[i] = it->second;
+			dist[i] = it->first;
+			i++;
 		}
-		return make_tuple(n_nearest_neighbors, dist);
+		return make_tuple(nearest_neighbors, dist);
 }
 
 vector<int> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj) {

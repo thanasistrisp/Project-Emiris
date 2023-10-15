@@ -17,11 +17,22 @@ static set<vector<int>> get_permutation(const vector<int> &q_proj, int hamming_d
 
 std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, int hamming_distance)
 {
+	if (hamming_distance == 0) {
+		binary_string bs(q_proj);
+		auto it = hash_table->find(bs);
+		if (it != hash_table->end()) {
+			return vector<vector<int>>(1, it->second);
+		}
+		else {
+			return vector<vector<int>>();
+		}
+	}
 	// get all permutations of q_proj with hamming distance
 	set<vector<int>> permutation = get_permutation(q_proj, hamming_distance);
 	// for each permutation, find the vertex in hash_table
 	vector<vector<int>> result;
-	for (int i = 0; i < (int) permutation.size(); i++) {
+	int sz = permutation.size();
+	for (int i = 0; i < sz; i++) {
 		vector<int> temp = *permutation.begin();
 		permutation.erase(permutation.begin());
 		binary_string bs(temp);

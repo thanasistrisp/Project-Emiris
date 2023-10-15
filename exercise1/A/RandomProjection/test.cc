@@ -37,28 +37,28 @@ void brute_force_R(vector<vector<double>> p, vector<double> q, double R) {
 int main(void) {
 	// srand(time(NULL));
 	// define 1000 points in 3D
-	vector<vector<double>> p(10, vector<double>(3));
-	for (int i = 0; i < 10; i++) {
+	vector<vector<double>> p(1000, vector<double>(3));
+	for (int i = 0; i < 1000; i++) {
 		// generate points from 1 to 1000
-		p[i][0] = rand() % 10 + 1;
-		p[i][1] = rand() % 10 + 1;
-		p[i][2] = rand() % 10 + 1;
+		p[i][0] = rand() % 1000 + 1;
+		p[i][1] = rand() % 1000 + 1;
+		p[i][2] = rand() % 1000 + 1;
 	}
 	// define query point
 	vector<double> q(3);
-	q[0] = 6;
-	q[1] = 5;
-	q[2] = 5;
+	q[0] = 2;
+	q[1] = 1;
+	q[2] = 1;
 	// define k
 	int k = 3; // log(1000)
 	// define M
-	int M = 5; // there are more than 100 in one vertex
+	int M = 1000; // there are more than 100 in one vertex
 	// define probes
-	int probes = 5;
+	int probes = 1000;
 	// define Radius
 	double R = 520;
 	// define nearest neighbors
-	int N = 2;
+	int N = 20;
 	// define hypercube
 	hypercube hc(p, k, M, probes, N, R);
 	cout << "Hello world!" << endl;
