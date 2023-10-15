@@ -60,7 +60,9 @@ int main(void) {
 	// define hypercube
 	hypercube hc(p, k, M, probes, N, R);
 	// call query
-	vector<int> nearest_neighbors = hc.query_n_nearest_neighbors(q, hc.calculate_q_proj(q));
+	tuple<vector<int>, vector<double>> result = hc.query_n_nearest_neighbors(q, hc.calculate_q_proj(q));
+	vector<int> nearest_neighbors = get<0>(result);
+	vector<double> dist = get<1>(result);
 	// print results
 	cout << "Nearest neighbors:" << endl;
 	for (int i = 0; i < (int) nearest_neighbors.size(); i++) {
