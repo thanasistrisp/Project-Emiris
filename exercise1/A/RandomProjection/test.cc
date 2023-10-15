@@ -38,15 +38,16 @@ int main(void) {
 	// define 1000 points in 3D
 	vector<vector<double>> p(1000, vector<double>(3));
 	for (int i = 0; i < 1000; i++) {
-		p[i][0] = i+2;
-		p[i][1] = i+1;
-		p[i][2] = i+1;
+		// generate points from 1 to 1000
+		p[i][0] = rand() % 1000 + 1;
+		p[i][1] = rand() % 1000 + 1;
+		p[i][2] = rand() % 1000 + 1;
 	}
 	// define query point
 	vector<double> q(3);
 	q[0] = 501;
-	q[1] = 500;
-	q[2] = 500;
+	q[1] = 300;
+	q[2] = 200;
 	// define k
 	int k = 3; // log(1000)
 	// define M
@@ -59,32 +60,33 @@ int main(void) {
 	int N = 4;
 	// define hypercube
 	hypercube hc(p, k, M, probes, N, R);
+	cout << "Hello world!" << endl;
 	// call query
-	vector<int> nearest_neighbors = hc.query_n_nearest_neighbors(q, hc.calculate_q_proj(q));
+	// vector<int> nearest_neighbors = hc.query_n_nearest_neighbors(q, hc.calculate_q_proj(q));
 	// print results
-	cout << "Nearest neighbors:" << endl;
-	for (int i = 0; i < (int) nearest_neighbors.size(); i++) {
-		cout << p[nearest_neighbors[i]][0] << " " << p[nearest_neighbors[i]][1] << " " << p[nearest_neighbors[i]][2] << endl;
-	}
-	cout << endl;
-	// call query
-	vector<int> range = hc.query_range(q, hc.calculate_q_proj(q));
-	// print results
-	int counter = 0;
-	cout << "Range:" << endl;
-	for (int i = 0; i < (int) range.size(); i++) {
-		cout << p[range[i]][0] << " " << p[range[i]][1] << " " << p[range[i]][2] << endl;
-		counter++;
-	}
-	cout << "Number of points in range: " << counter << endl;
-	cout << endl;
-	// call brute force
-	cout << "Brute force nearest neighbors:" << endl;
-	brute_force(p, q, N);
-	cout << endl;
-	// call brute force
-	cout << "Brute force range:" << endl;
-	brute_force_R(p, q, R);
-	cout << endl;
+	// cout << "Nearest neighbors:" << endl;
+	// for (int i = 0; i < (int) nearest_neighbors.size(); i++) {
+	// 	cout << p[nearest_neighbors[i]][0] << " " << p[nearest_neighbors[i]][1] << " " << p[nearest_neighbors[i]][2] << endl;
+	// }
+	// cout << endl;
+	// // call query
+	// // vector<int> range = hc.query_range(q, hc.calculate_q_proj(q));
+	// // print results
+	// int counter = 0;
+	// cout << "Range:" << endl;
+	// for (int i = 0; i < (int) range.size(); i++) {
+	// 	cout << p[range[i]][0] << " " << p[range[i]][1] << " " << p[range[i]][2] << endl;
+	// 	counter++;
+	// }
+	// cout << "Number of points in range: " << counter << endl;
+	// cout << endl;
+	// // call brute force
+	// cout << "Brute force nearest neighbors:" << endl;
+	// brute_force(p, q, N);
+	// cout << endl;
+	// // call brute force
+	// cout << "Brute force range:" << endl;
+	// brute_force_R(p, q, R);
+	// cout << endl;
 
 }
