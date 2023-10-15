@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 		queries = read_mnist_data(query_file);
 		queries.resize(10);
 
-		// handle_ouput(cube, output, queries);
+		handle_ouput(cube, output, queries);
 
 		end = clock();
 		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;

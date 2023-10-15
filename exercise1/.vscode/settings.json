@@ -1,7 +1,7 @@
 {
 	"c_project": {
 		// Όνομα του εκτελέσιμου προγράμματος (μόνο για μεταγλώττιση πολλών αρχείων & make)
-		"program": "testcube",
+		"program": "cube",
 
 		// Directory στο οποίο βρίσκεται το πρόγραμμα (μόνο για μεταγλώτισση με make)
 		"dir": "A/RandomProjection",
@@ -30,7 +30,7 @@
 		"arg9": "-probes",
 		"arg10": "50",
 		"arg11": "-o",
-		"arg12": "../../output/output.txt",
+		"arg12": "../../output/output.dat",
 		"arg13": "-N",
 		"arg14": "5",
 		"arg15": "-R",
