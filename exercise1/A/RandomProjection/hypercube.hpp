@@ -2,7 +2,9 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include "metrics.hpp"
 #include "hash_function.h"
 #include "binary_string.hpp"
@@ -19,6 +21,8 @@ private:
 
 	std::unordered_map<int, int> *f_map;
 
+	std::unordered_set<binary_string, binary_string::hash> *used_vertices;
+
 	// define HashTable
 	typedef std::unordered_map<binary_string, std::vector<int>, binary_string::hash> HashTable;
 	HashTable *hash_table;
@@ -26,6 +30,7 @@ private:
 	std::vector<HashFunction*> hash_functions;
 	int f(int x, int i);
 	std::vector<std::vector<int>> pack(const std::vector<int> &q_proj, int hamming_distance);
+	std::set<std::vector<int>> get_permutation(const std::vector<int> &q_proj, int hamming_distance);
 public:
 	hypercube(std::vector<std::vector<double>> p, int k, int M, int probes, 
 			  int N, double R, double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);

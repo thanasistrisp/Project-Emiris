@@ -56,6 +56,9 @@ hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probe
 		}
 	}
 
+	// initialize used_vertices
+	used_vertices = new unordered_set<binary_string, binary_string::hash>();
+
 	clock_t end = clock();
 	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
 	cout << "Preprocessing time: " << elapsed_secs << endl;
@@ -67,13 +70,14 @@ hypercube::~hypercube() {
 	}	
 	delete[] f_map;
 	delete hash_table;
+	delete used_vertices;
 }
 
 tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj) {
 	int num_points = 0;
 	int num_vertices = 0;
 	
-	map<double, int> candidates;
+	multimap<double, int> candidates;
 	int hamming_distance = 0;
 	while (true) {
 		vector<vector<int>> vertices = pack(q_proj, hamming_distance);

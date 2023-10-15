@@ -13,14 +13,13 @@
 
 using namespace std;
 
-static set<vector<int>> get_permutation(const vector<int> &q_proj, int hamming_distance);
-
 std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, int hamming_distance)
 {
 	if (hamming_distance == 0) {
 		binary_string bs(q_proj);
 		auto it = hash_table->find(bs);
 		if (it != hash_table->end()) {
+			used_vertices->insert(bs);
 			return vector<vector<int>>(1, it->second);
 		}
 		else {
@@ -52,12 +51,18 @@ int hypercube::f(int x, int i) {
 }
 
 // get all permutations of q_proj based on hamming distance
-static set<vector<int>> get_permutation(const vector<int> &q_proj, int hamming_distance) {
+set<vector<int>> hypercube::get_permutation(const vector<int> &q_proj, int hamming_distance) {
 	set<vector<int>> result;
 	for (int i = 0; i < (int) q_proj.size(); i++) {
 		vector<int> permutation = q_proj;
 		permutation[i] = 1 - permutation[i];
-		result.insert(permutation);
+		// if not in used_vertices, insert
+		if (hamming_distance != 1)
+			result.insert(permutation);
+		else if (used_vertices->find(permutation) == used_vertices->end()) {
+			result.insert(permutation);
+			used_vertices->insert(permutation);
+		}
 	}
 	if (hamming_distance == 1)
 		return result;
