@@ -77,14 +77,32 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	int num_points = 0;
 	int num_vertices = 0;
 	
-	multimap<double, int> candidates;
+	// initialize k best candidates and distances
+	vector<int> best_candidates(N);
+	vector<double> best_distances(N, numeric_limits<double>::max());
+
 	int hamming_distance = 0;
 	while (true) {
+		// create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
 		vector<vector<int>> vertices = pack(q_proj, hamming_distance);
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
-				candidates.insert(pair<double, int>(distance(p[vertices[i][j]], q), vertices[i][j]));
+				double dist = distance(p[vertices[i][j]], q);
+				if (dist < best_distances[N - 1]) {
+					best_distances[N - 1] = dist;
+					best_candidates[N - 1] = vertices[i][j];
+					// sort best_distances and best_candidates
+					for (int k = N - 1; k > 0; k--) {
+						if (best_distances[k] < best_distances[k - 1]) {
+							swap(best_distances[k], best_distances[k - 1]);
+							swap(best_candidates[k], best_candidates[k - 1]);
+						}
+						else {
+							break;
+						}
+					}
+				}
 				num_points++;
 				if (num_points >= M)
 					goto check;
@@ -97,16 +115,11 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	}
 
 	check:
-		vector<int> nearest_neighbors(N);
-		vector<double> dist(N);
-		int i = 0;
-		for (auto it = candidates.begin(); it != candidates.end(); it++) {
-			if (i >= N) {
-				break;
-			}
-			nearest_neighbors[i] = it->second;
-			dist[i] = it->first;
-			i++;
+		vector<int> nearest_neighbors;
+		vector<double> dist;
+		for (int i = 0; i < N; i++) {
+			nearest_neighbors.push_back(best_candidates[i]);
+			dist.push_back(best_distances[i]);
 		}
 		// reset used_vertices
 		used_vertices->clear();
@@ -148,7 +161,7 @@ vector<int> hypercube::query_range(const vector<double> &q, const vector<int> &q
 		}
 		// reset used_vertices
 		used_vertices->clear();
-		
+
 		return range;
 }
 

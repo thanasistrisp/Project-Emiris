@@ -12,19 +12,31 @@
 using namespace std;
 
 // brute force search for nearest neighbors
-static tuple<vector<int>, vector<double>> brute_force(const vector<vector<double>> &dataset, const vector<double> &query, int N, double (*distance)(const vector<double> &, const vector<double> &)) {
-	vector<int> nearest_neighbors;
-	vector<double> distances, dist;
-	for (int i = 0; i < (int) dataset.size(); i++) {
-		distances.push_back(distance(dataset[i], query));
+tuple<vector<int>, vector<double>> brute_force(vector<vector<double>> dataset, vector<double> query, unsigned int N, double (*distance)(const vector<double>&, const vector<double>&))
+{
+	auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
+	set<tuple<int, double>, decltype(compare)> s(compare);
+
+	double dist;
+	for(int i = 0; (unsigned int) i < dataset.size(); i++){
+		dist = distance(dataset[i], query);
+		if(s.size() == N){
+			if(dist >= get<1>(*s.rbegin())){
+				continue;
+			}
+			s.erase(std::prev(s.end()));
+		}
+		s.insert(make_tuple(i, dist));
 	}
-	for (int i = 0; i < N; i++) {
-		int min_index = min_element(distances.begin(), distances.end()) - distances.begin();
-		nearest_neighbors.push_back(min_index);
-		dist.push_back(distances[min_index]);
-		distances[min_index] = numeric_limits<double>::max();
+
+	vector<int> indices;
+	vector<double> distances;
+	set<tuple<int, double>>::const_iterator iter;
+	for(iter = s.begin(); iter != s.end(); std::advance(iter, 1)){
+		indices.push_back(get<0>(*iter));
+		distances.push_back(get<1>(*iter));
 	}
-	return make_tuple(nearest_neighbors, dist);
+	return make_tuple(indices, distances);
 }
 
 void handle_ouput(hypercube &cube, ofstream &output, const vector<vector<double>> &queries) {
