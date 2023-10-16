@@ -7,7 +7,7 @@
 #include "list.h"
 #include "hash_function.h"
 
-#define M ((1ULL << 32) - 5) // Large prime number for fast hashing.
+// #define M ((1ULL << 32) - 5) // Large prime number for fast hashing.
 
 template <typename V> class HashBucket
 {
@@ -40,6 +40,8 @@ template <typename K, typename V> class HashTable
         int recent_bucket_index;
         int recent_element_index;
         bool finished_chain_search;
+
+        const static unsigned int M = ((1ULL << 32) - 5); // Large prime number for fast hashing.
 
     public:
         HashTable(int, int, int, int);
