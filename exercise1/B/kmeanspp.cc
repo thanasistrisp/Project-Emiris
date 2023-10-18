@@ -8,9 +8,9 @@
 using namespace std;
 
 static vector<double> calculate_D(const vector<vector<double>> &p, const vector<vector<double>> &c);
-vector<double> calculate_P(const vector<double> &D);
-void normalize_vector(vector<double> &v);
-int binary_search(const vector<double> &p, double x);
+static vector<double> calculate_P(const vector<double> &D);
+static void normalize_vector(vector<double> &v);
+static int binary_search(const vector<double> &p, double x);
 
 
 vector<vector<double>> kmeanspp(vector<vector<double>> p, int k) {
@@ -42,7 +42,7 @@ vector<vector<double>> kmeanspp(vector<vector<double>> p, int k) {
 
 // Helper functions
 
-vector<double> calculate_D(const vector<vector<double>> &p, const vector<vector<double>> &c) {
+static vector<double> calculate_D(const vector<vector<double>> &p, const vector<vector<double>> &c) {
 	vector<double> D(p.size());
 	for (int i = 0; i < (int) p.size(); i++) {
 		double min = dist(p[i], c[0]);
@@ -57,7 +57,7 @@ vector<double> calculate_D(const vector<vector<double>> &p, const vector<vector<
 	return D;
 }
 
-vector<double> calculate_P(const vector<double> &D) {
+static vector<double> calculate_P(const vector<double> &D) {
 	vector<double> P(D.size());
 	double sum = 0;
 	int r = D.size();
@@ -68,7 +68,7 @@ vector<double> calculate_P(const vector<double> &D) {
 	return P;
 }
 
-void normalize_vector(vector<double> &v) {
+static void normalize_vector(vector<double> &v) {
 	double max = v[0];
 	for (int i = 1; i < (int) v.size(); i++) {
 		if (v[i] > max) {
@@ -81,7 +81,7 @@ void normalize_vector(vector<double> &v) {
 }
 
 // find and return k such that p[k-1] < x <= p[k]
-int binary_search(const vector<double> &p, double x) {
+static int binary_search(const vector<double> &p, double x) {
 	int l = 0;
 	int r = p.size() - 1;
 	while (l < r) {
