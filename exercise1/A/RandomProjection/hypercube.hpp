@@ -12,7 +12,7 @@
 class hypercube
 {
 private:
-	std::vector<std::vector<double>> p;
+	const std::vector<std::vector<double>> &p;
 	int k;
 	int M;
 	int probes;
@@ -32,7 +32,7 @@ private:
 	std::vector<std::vector<int>> pack(const std::vector<int> &q_proj, int hamming_distance);
 	std::set<std::vector<int>> get_permutation(const std::vector<int> &q_proj, int hamming_distance);
 public:
-	hypercube(std::vector<std::vector<double>> p, int k, int M, int probes, 
+	hypercube(const std::vector<std::vector<double>> &p, int k, int M, int probes, 
 			  int N, double R, double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);
 	~hypercube();
 	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<double> &q, const std::vector<int> &q_proj);
