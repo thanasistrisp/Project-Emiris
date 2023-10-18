@@ -2,7 +2,7 @@
 
 #include "kmeans.h"
 
-KMeans::KMeans(std::vector<std::vector<double>> *dataset)
+KMeans::KMeans(std::vector<std::vector<double>> &dataset)
 : dataset(dataset)
 {
     

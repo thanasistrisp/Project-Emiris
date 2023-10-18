@@ -11,7 +11,7 @@ class KMeans
         std::vector<double> centroids;
         std::vector<std::vector<int>> clusters;
 
-        std::vector<std::vector<double>> *dataset;
+        std::vector<std::vector<double>> &dataset;
 
         void kmeanspp();
 
@@ -20,7 +20,7 @@ class KMeans
         void update();
 
     public:
-        KMeans(std::vector<std::vector<double>>*);
+        KMeans(std::vector<std::vector<double>>&);
         ~KMeans();
 
         void compute_clusters(int, update_method, std::vector<int>,
