@@ -10,10 +10,9 @@
 
 using namespace std;
 
-hypercube::hypercube(std::vector<std::vector<double>> p, int k, int M, int probes, 
-					 int N, double R, double (*distance)(const std::vector<double> &, const std::vector<double> &))
+hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, 
+					 int N, double R, double (*distance)(const std::vector<double> &, const std::vector<double> &)) : p(p)
 {
-	this->p = p;
 	this->k = k;
 	this->M = M;
 	this->probes = probes;
