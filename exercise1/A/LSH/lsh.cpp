@@ -18,7 +18,7 @@ using std::prev;
 // ---------- Public functions for class LSH ----------
 
 LSH::LSH(int number_of_dimensions, int number_of_points, int number_of_hash_functions,
-         int number_of_hash_tables, int window, vector<vector<double>> *dataset)
+         int number_of_hash_tables, int window, const vector<vector<double>> &dataset)
 : number_of_dimensions(number_of_dimensions), number_of_hash_functions(number_of_hash_functions),
   table_size(number_of_points / 4), number_of_hash_tables(number_of_hash_tables), dataset(dataset)
 {
@@ -28,8 +28,8 @@ LSH::LSH(int number_of_dimensions, int number_of_points, int number_of_hash_func
     }
 
     // Insert data to all hash tables.
-    for(int i = 0; (unsigned int) i < dataset->size(); i++){
-        insert(dataset->at(i), i);
+    for(int i = 0; (unsigned int) i < dataset.size(); i++){
+        insert(dataset.at(i), i);
     }
 }
 
@@ -66,7 +66,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
         q_secondary_key = hash_tables[i]->secondary_hash_function(q);
 
         while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
-            vector<double> p = dataset->at(p_index);
+            vector<double> p = dataset.at(p_index);
 
             // Choose only the points that share the same ID inside the bucket.
             if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
@@ -105,7 +105,7 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
     bool valid = true;
     for(int i = 0; i < number_of_hash_tables; i++){
         while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
-            vector<double> p = dataset->at(p_index);
+            vector<double> p = dataset.at(p_index);
             dist = distance(p, q);
             if(dist < r){
                 s.insert(make_tuple(p_index, dist));

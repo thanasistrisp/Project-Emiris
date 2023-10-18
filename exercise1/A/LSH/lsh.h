@@ -16,12 +16,12 @@ class LSH
         const int number_of_hash_tables; // Number of hash tables L.
         HashTable<std::vector<double>, int> **hash_tables; // Hash tables.
 
-        std::vector<std::vector<double>> *dataset;
+        const std::vector<std::vector<double>> &dataset;
     
         void insert(std::vector<double>, int);
 
     public:
-        LSH(int, int, int, int, int, std::vector<std::vector<double>>*);
+        LSH(int, int, int, int, int, const std::vector<std::vector<double>>&);
         ~LSH();
 
         std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,

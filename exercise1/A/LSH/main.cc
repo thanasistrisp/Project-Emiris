@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Read MNIST data" << endl;
 
-	LSH lsh(d, dataset.size(), k, L, window, &dataset);
+	LSH lsh(d, dataset.size(), k, L, window, dataset);
 
 	cout << "Created LSH" << endl;
 
