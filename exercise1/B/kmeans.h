@@ -23,6 +23,7 @@ class KMeans
         void assign_hypercube(int);
 
         void update();
+        void update(int, int);
 
     public:
         KMeans(std::vector<std::vector<double>>& dataset, int k);

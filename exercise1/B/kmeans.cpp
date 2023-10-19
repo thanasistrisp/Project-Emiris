@@ -1,4 +1,7 @@
 #include <vector>
+#include <set>
+
+using namespace std;
 
 #include "kmeans.h"
 
@@ -27,8 +30,40 @@ void KMeans::assign_hypercube(int index)
 
 }
 
-void KMeans::update()
+void KMeans::update() // MacQueen's update rule
 {
+    for(int i = 0; i < k; i++){ // For each cluster
+        for(int j = 0; j < (int) centroids[i].size(); j++){
+            centroids[i][j] = 0; // Reset centroid
+        }
+        for(int j = 0; j < (int) clusters[i].size(); j++){ // For each point in cluster
+            for(int l = 0; l < (int) dataset[clusters[i][j]].size(); l++){
+                centroids[i][l] += dataset[clusters[i][j]][l]; // Add point's coordinates to centroid
+            }
+        }
+        for(int j = 0; j < (int) centroids[i].size(); j++){
+            centroids[i][j] /= clusters[i].size(); // Divide by number of points in cluster (mean)
+        }
+    }
+}
+
+void KMeans::update(int k1, int k2) { // recalculate centroids only for the two affected clusters
+    set<int> s;
+    s.insert(k1);
+    s.insert(k2);
+    for (int i : s) {
+        for (int j = 0; j < (int) centroids[i].size(); j++) {
+            centroids[i][j] = 0;
+        }
+        for (int j = 0; j < (int) clusters[i].size(); j++) {
+            for (int l = 0; l < (int) dataset[clusters[i][j]].size(); l++) {
+                centroids[i][l] += dataset[clusters[i][j]][l];
+            }
+        }
+        for (int j = 0; j < (int) centroids[i].size(); j++) {
+            centroids[i][j] /= clusters[i].size();
+        }
+    }
 
 }
 
