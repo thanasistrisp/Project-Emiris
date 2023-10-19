@@ -67,7 +67,7 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
 
 /* todo: add check for unchanged cluster centroids => end of algorithm */
 
-std::vector<double> KMeans::get_centroids() const
+std::vector<std::vector<double>> KMeans::get_centroids() const
 {
     return centroids;
 }
