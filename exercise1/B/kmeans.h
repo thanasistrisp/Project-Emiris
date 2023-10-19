@@ -18,7 +18,9 @@ class KMeans
 
         void kmeanspp();
 
-        void assign();
+        void assign_lloyds(int);
+        void assign_lsh(int);
+        void assign_hypercube(int);
 
         void update();
 
