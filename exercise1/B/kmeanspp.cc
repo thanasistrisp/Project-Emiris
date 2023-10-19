@@ -3,7 +3,7 @@
 #include <random>
 #include <algorithm>
 
-#include "kmeanspp.h"
+#include "kmeans.h"
 
 using namespace std;
 
@@ -13,18 +13,19 @@ static void normalize_vector(vector<double> &v);
 static int binary_search(const vector<double> &p, double x);
 
 
-vector<vector<double>> kmeanspp(vector<vector<double>> p, int k) {
-	vector<vector<double>> c;
+void KMeans::kmeanspp() {
+	// deep copy of the dataset
+	vector<vector<double>> p(dataset);
 	random_device rd;
 	default_random_engine random_engine(rd());
 	uniform_int_distribution<int> distribution(0, p.size() - 1);
 	int i = distribution(random_engine);
-	c.push_back(p[i]);
+	centroids.push_back(p[i]);
 	// delete the centroid from the list of points
 	p.erase(p.begin() + i);
 	// calculate the distance from each point to the centroid
 	for (int t = 1; t < k; t++) {
-		vector<double> D = calculate_D(p, c);
+		vector<double> D = calculate_D(p, centroids);
 		normalize_vector(D);
 		vector<double> P = calculate_P(D);
 		sort(P.begin(), P.end());
@@ -33,10 +34,9 @@ vector<vector<double>> kmeanspp(vector<vector<double>> p, int k) {
 		uniform_real_distribution<double> distribution(0, P[P.size() - 1]);
 		double x = distribution(random_engine);
 		int r = binary_search(P, x);
-		c.push_back(p[r]);
+		centroids.push_back(p[r]);
 		p.erase(p.begin() + r);
 	}
-	return c;
 }
 
 
@@ -45,9 +45,9 @@ vector<vector<double>> kmeanspp(vector<vector<double>> p, int k) {
 static vector<double> calculate_D(const vector<vector<double>> &p, const vector<vector<double>> &c) {
 	vector<double> D(p.size());
 	for (int i = 0; i < (int) p.size(); i++) {
-		double min = dist(p[i], c[0]);
+		double min = KMeans::distance(p[i], c[0]);
 		for (int j = 1; j < (int) c.size(); j++) {
-			double d = dist(p[i], c[j]);
+			double d = KMeans::distance(p[i], c[j]);
 			if (d < min) {
 				min = d;
 			}

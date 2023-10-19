@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "kmeanspp.h"
+#include "kmeans.h"
 
 using namespace std;
 
@@ -16,14 +16,14 @@ int main(void) {
 
 	int k = 3; // number of clusters
 	
-	vector<vector<double>> c = kmeanspp(p, k);
+	KMeans kmeans(p, k);
 
-	// print the centroids
-	for (int i = 0; i < (int) c.size(); i++) {
-		cout << "c[" << i << "] = (";
-		for (int j = 0; j < (int) c[i].size(); j++) {
-			cout << c[i][j] << ", ";
-		}
-		cout << ")" << endl;
-	}
+	// // print the centroids
+	// for (int i = 0; i < (int) c.size(); i++) {
+	// 	cout << "c[" << i << "] = (";
+	// 	for (int j = 0; j < (int) c[i].size(); j++) {
+	// 		cout << c[i][j] << ", ";
+	// 	}
+	// 	cout << ")" << endl;
+	// }
 }
