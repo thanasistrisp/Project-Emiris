@@ -17,16 +17,15 @@ class KMeans
         std::vector<int> point_to_cluster;
 
         std::vector<std::vector<double>> &dataset;
-        int k;
 
-        void kmeanspp();
+        void kmeanspp(int k);
 
-        std::tuple<int,int> assign_lloyds(int);
-        std::tuple<int,int> assign_lsh(int);
-        std::tuple<int,int> assign_hypercube(int);
+        std::tuple<int,int> assign_lloyds(int, int);
+        std::tuple<int,int> assign_lsh(int, int);
+        std::tuple<int,int> assign_hypercube(int, int);
 
-        void update();
-        void update(int, int);
+        void update(int);
+        void update(int, int, int);
 
     public:
         KMeans(std::vector<std::vector<double>>& dataset);

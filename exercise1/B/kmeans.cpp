@@ -8,7 +8,7 @@ using namespace std;
 
 KMeans::KMeans(std::vector<std::vector<double>> &dataset) : dataset(dataset)
 {
-    
+    point_to_cluster.resize(dataset.size());
 }
 
 KMeans::~KMeans()
@@ -16,7 +16,7 @@ KMeans::~KMeans()
 
 }
 
-tuple<int,int> KMeans::assign_lloyds(int index)
+tuple<int,int> KMeans::assign_lloyds(int index, int k)
 {
     int old_cluster = point_to_cluster[index];
     int new_cluster = 0;
@@ -34,17 +34,17 @@ tuple<int,int> KMeans::assign_lloyds(int index)
     return make_tuple(old_cluster, new_cluster);
 }
 
-tuple<int,int> KMeans::assign_lsh(int index)
+tuple<int,int> KMeans::assign_lsh(int index, int k)
 {
     return make_tuple(-1,-1);
 }
 
-tuple<int,int> KMeans::assign_hypercube(int index)
+tuple<int,int> KMeans::assign_hypercube(int index, int k)
 {
     return make_tuple(-1,-1);
 }
 
-void KMeans::update() // MacQueen's update rule
+void KMeans::update(int k) // MacQueen's update rule
 {
     for(int i = 0; i < k; i++){ // For each cluster
         for(int j = 0; j < (int) centroids[i].size(); j++){
@@ -61,7 +61,7 @@ void KMeans::update() // MacQueen's update rule
     }
 }
 
-void KMeans::update(int k1, int k2) { // recalculate centroids only for the two affected clusters
+void KMeans::update(int k1, int k2, int k) { // recalculate centroids only for the two affected clusters
     set<int> s;
     s.insert(k1);
     s.insert(k2);
@@ -83,8 +83,7 @@ void KMeans::update(int k1, int k2) { // recalculate centroids only for the two 
 
 void KMeans::compute_clusters(int k, update_method method, std::vector<int> method_args, const std::vector<double>&)
 {
-    this->k = k;
-    tuple<int,int> (KMeans::*assign)(int);
+    tuple<int,int> (KMeans::*assign)(int, int);
     if(method == CLASSIC){
         assign = &KMeans::assign_lloyds;
     }
@@ -96,17 +95,17 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
     }
 
     // Initialize centroids using KMeans++ algorithm.
-    kmeanspp();
+    kmeanspp(k);
     while(true){
         for(int i = 0; i < (int) dataset.size(); i++){
             // Assign point to cluster and apply MacQueen's update rule.
             int old_cluster, new_cluster;
-            tie(old_cluster, new_cluster) = (this->*assign)(i);
+            tie(old_cluster, new_cluster) = (this->*assign)(i, k);
             if(old_cluster != new_cluster){
-                update(old_cluster, new_cluster);
+                update(old_cluster, new_cluster, k);
             }
         }
-        update();
+        update(k);
     }
 }
 
