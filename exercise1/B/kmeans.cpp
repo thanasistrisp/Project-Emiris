@@ -44,8 +44,9 @@ tuple<int,int> KMeans::assign_hypercube(int index, int k)
     return make_tuple(-1,-1);
 }
 
-void KMeans::update(int k) // MacQueen's update rule
+bool KMeans::update(int k) // MacQueen's update rule
 {
+    vector<vector<double>> old_centroids = centroids;
     for(int i = 0; i < k; i++){ // For each cluster
         for(int j = 0; j < (int) centroids[i].size(); j++){
             centroids[i][j] = 0; // Reset centroid
@@ -59,9 +60,11 @@ void KMeans::update(int k) // MacQueen's update rule
             centroids[i][j] /= clusters[i].size(); // Divide by number of points in cluster (mean)
         }
     }
+    return !(old_centroids == centroids);
 }
 
-void KMeans::update(int k1, int k2, int k) { // recalculate centroids only for the two affected clusters
+bool KMeans::update(int k1, int k2, int k) { // recalculate centroids only for the two affected clusters
+    vector<vector<double>> old_centroids = centroids;
     set<int> s;
     s.insert(k1);
     s.insert(k2);
@@ -78,7 +81,7 @@ void KMeans::update(int k1, int k2, int k) { // recalculate centroids only for t
             centroids[i][j] /= clusters[i].size();
         }
     }
-
+    return !(old_centroids == centroids);
 }
 
 void KMeans::compute_clusters(int k, update_method method, std::vector<int> method_args, const std::vector<double>&)
@@ -94,6 +97,8 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
         assign = &KMeans::assign_hypercube;
     }
 
+    bool changed_centroids;
+
     // Initialize centroids using KMeans++ algorithm.
     kmeanspp(k);
     while(true){
@@ -105,7 +110,10 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
                 update(old_cluster, new_cluster, k);
             }
         }
-        update(k);
+        changed_centroids = update(k);
+        if(changed_centroids){
+            break;
+        }
     }
 }
 

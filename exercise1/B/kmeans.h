@@ -24,8 +24,8 @@ class KMeans
         std::tuple<int,int> assign_lsh(int, int);
         std::tuple<int,int> assign_hypercube(int, int);
 
-        void update(int);
-        void update(int, int, int);
+        bool update(int);
+        bool update(int, int, int);
 
     public:
         KMeans(std::vector<std::vector<double>>& dataset);
