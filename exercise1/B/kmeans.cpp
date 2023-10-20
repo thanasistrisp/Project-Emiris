@@ -117,8 +117,6 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
     }
 }
 
-/* todo: add check for unchanged cluster centroids => end of algorithm */
-
 std::vector<std::vector<double>> KMeans::get_centroids() const
 {
     return centroids;
@@ -127,4 +125,28 @@ std::vector<std::vector<double>> KMeans::get_centroids() const
 std::vector<std::vector<int>> KMeans::get_clusters() const
 {
     return clusters;
+}
+
+int KMeans::silhouette(int i)
+{
+    int cluster = point_to_cluster[i];
+    double a = 0;
+    for(int j = 0; j < (int) clusters[cluster].size(); j++){ // For each point in cluster
+        a += distance(dataset[i], dataset[clusters[cluster][j]]); // Add distance from point to all other points in cluster
+    }
+    a /= clusters[cluster].size();
+    double b = 0;
+    for(int j = 0; j < (int) clusters.size(); j++){ // For each cluster
+        if(j != cluster){ // If not the same cluster
+            double sum = 0;
+            for(int l = 0; l < (int) clusters[j].size(); l++){ // For each point in cluster
+                sum += distance(dataset[i], dataset[clusters[j][l]]);
+            }
+            sum /= clusters[j].size();
+            if(b == 0 || sum < b){ // If first iteration or sum is smaller than previous minimum
+                b = sum;
+            }
+        }
+    }
+    return (b - a) / max(a, b);
 }

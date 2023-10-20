@@ -20,6 +20,7 @@ class KMeans
 
         void kmeanspp(int k);
 
+
         std::tuple<int,int> assign_lloyds(int, int);
         std::tuple<int,int> assign_lsh(int, int);
         std::tuple<int,int> assign_hypercube(int, int);
@@ -38,6 +39,8 @@ class KMeans
         std::vector<std::vector<int>> get_clusters() const;
 
         static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;
+        
+        int silhouette(int i);
 };
 
 #endif /* KMEANS_H */

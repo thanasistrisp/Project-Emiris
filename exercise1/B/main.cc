@@ -14,16 +14,26 @@ int main(void) {
 		p[i][2] = i + 1;
 	}
 
-	// int k = 3; // number of clusters
+	int k = 3; // number of clusters
 	
 	KMeans kmeans(p);
 
-	// // print the centroids
-	// for (int i = 0; i < (int) c.size(); i++) {
-	// 	cout << "c[" << i << "] = (";
-	// 	for (int j = 0; j < (int) c[i].size(); j++) {
-	// 		cout << c[i][j] << ", ";
-	// 	}
-	// 	cout << ")" << endl;
-	// }
+	kmeans.compute_clusters(k, CLASSIC, vector<int>(), vector<double>());
+
+	vector<vector<double>> centroids = kmeans.get_centroids();
+	vector<vector<int>> clusters = kmeans.get_clusters();
+
+	for (int i = 0; i < k; i++) {
+		cout << "Cluster " << i << endl;
+		cout << "Centroid: ";
+		for (int j = 0; j < (int) centroids[i].size(); j++) {
+			cout << centroids[i][j] << " ";
+		}
+		cout << endl;
+		cout << "Points: ";
+		for (int j = 0; j < (int) clusters[i].size(); j++) {
+			cout << clusters[i][j] << " ";
+		}
+		cout << endl;
+	}
 }
