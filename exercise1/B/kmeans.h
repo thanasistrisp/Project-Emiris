@@ -2,6 +2,7 @@
 #define KMEANS_H
 
 #include <vector>
+#include <tuple>
 
 #include "metrics.hpp"
 
@@ -13,19 +14,21 @@ class KMeans
         std::vector<std::vector<double>> centroids;
         std::vector<std::vector<int>> clusters;
 
+        std::vector<int> point_to_cluster;
+
         std::vector<std::vector<double>> &dataset;
-        int k;
 
-        void kmeanspp();
+        void kmeanspp(int k);
 
-        void assign_lloyds(int);
-        void assign_lsh(int);
-        void assign_hypercube(int);
+        std::tuple<int,int> assign_lloyds(int, int);
+        std::tuple<int,int> assign_lsh(int, int);
+        std::tuple<int,int> assign_hypercube(int, int);
 
-        void update();
+        void update(int);
+        void update(int, int, int);
 
     public:
-        KMeans(std::vector<std::vector<double>>& dataset, int k);
+        KMeans(std::vector<std::vector<double>>& dataset);
         ~KMeans();
 
         void compute_clusters(int, update_method, std::vector<int>, const std::vector<double>&);

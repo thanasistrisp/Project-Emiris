@@ -14,9 +14,9 @@ int main(void) {
 		p[i][2] = i + 1;
 	}
 
-	int k = 3; // number of clusters
+	// int k = 3; // number of clusters
 	
-	KMeans kmeans(p, k);
+	KMeans kmeans(p);
 
 	// // print the centroids
 	// for (int i = 0; i < (int) c.size(); i++) {

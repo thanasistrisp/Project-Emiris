@@ -13,7 +13,7 @@ static void normalize_vector(vector<double> &v);
 static int binary_search(const vector<double> &p, double x);
 
 
-void KMeans::kmeanspp() {
+void KMeans::kmeanspp(int k) {
 	// deep copy of the dataset
 	vector<vector<double>> p(dataset);
 	random_device rd;
