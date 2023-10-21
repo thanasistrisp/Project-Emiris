@@ -57,7 +57,17 @@ static int reverse_int(int i) {
 	return ((int)c1 << 24) + ((int)c2 << 16) + ((int)c3 << 8) + c4;
 }
 
+bool file_exists(const string &filename) {
+	ifstream file(filename);
+	return file.good();
+}
+
 void export_image(const vector<double> &image, string filename) {
+	// check if path exists else create folders
+	string path = filename.substr(0, filename.find_last_of("/"));
+	if (!file_exists(path)) {
+		system(("mkdir -p " + path).c_str());
+	}
 	// export image to file
 	ofstream file(filename, ios::binary);
 
@@ -73,9 +83,6 @@ void export_image(const vector<double> &image, string filename) {
 		file.write((char*)&temp, sizeof(unsigned char));
 		file.write((char*)&temp, sizeof(unsigned char));
 	}
-}
 
-bool file_exists(const string &filename) {
-	ifstream file(filename);
-	return file.good();
+	file.close();
 }

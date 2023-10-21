@@ -44,4 +44,9 @@ int main(void) {
 			cout << endl;
 		}
 	}
+
+	// check if the points are correctly assigned with the silhouette method
+	for (int i = 0; i < (int) p.size(); i++) {
+		cout << "s[" << i << "] = " << kmeans.silhouette(i) << endl;
+	}
 }
