@@ -7,7 +7,7 @@ using namespace std;
 
 int main() {
 	vector<vector<double>> dataset = read_mnist_data("../MNIST/train-images-idx3-ubyte");
-	// dataset.resize(1000);
+	dataset.resize(1000);
 	KMeans kmeans(dataset);
 	// start time
 	clock_t begin = clock();
@@ -25,4 +25,21 @@ int main() {
 		}
 	}
 	cout << "Done!" << endl;
+	// si = average of points in cluster i (silhouette)
+	vector<double> si(clusters.size(), 0);
+	double stotal = 0;
+	for (int i = 0; i < (int) clusters.size(); i++) {
+		for (int j = 0; j < (int) clusters[i].size(); j++) {
+			si[i] += kmeans.silhouette(clusters[i][j]);
+		}
+		si[i] /= clusters[i].size();
+		stotal += si[i];
+	}
+	stotal /= dataset.size();
+	// print results
+	cout << "Silhouette for each cluster:" << endl;
+	for (int i = 0; i < (int) si.size(); i++) {
+		cout << "Cluster " << i << ": " << si[i] << endl;
+	}
+	cout << "Total silhouette: " << stotal << endl;
 }

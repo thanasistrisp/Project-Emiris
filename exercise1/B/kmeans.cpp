@@ -128,13 +128,15 @@ void KMeans::compute_clusters(int k, update_method method)
 
     // Initialize centroids using KMeans++ algorithm.
     kmeanspp();
+    bool first = true; // flag to avoid updating centroids on first iteration
     while(true){
         for(int i = 0; i < (int) dataset.size(); i++){
             // Assign point to cluster and apply MacQueen's update rule.
             int old_cluster, new_cluster;
             tie(old_cluster, new_cluster) = (this->*assign)(i);
-            if(old_cluster != new_cluster){
+            if(old_cluster != new_cluster && !first){
                 update(old_cluster, new_cluster);
+                first = false;
             }
         }
         changed_centroids = update();
