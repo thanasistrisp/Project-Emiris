@@ -35,5 +35,13 @@ int main(void) {
 			cout << clusters[i][j] << " ";
 		}
 		cout << endl;
+		// print also the points
+		for (int j = 0; j < (int) clusters[i].size(); j++) {
+			cout << "Point " << clusters[i][j] << ": ";
+			for (int l = 0; l < (int) p[clusters[i][j]].size(); l++) {
+				cout << p[clusters[i][j]][l] << ", ";
+			}
+			cout << endl;
+		}
 	}
 }

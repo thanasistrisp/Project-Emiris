@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <tuple>
+#include <unordered_set>
 
 #include "metrics.hpp"
 
@@ -12,7 +13,7 @@ class KMeans
 {
     private:
         std::vector<std::vector<double>> centroids;
-        std::vector<std::vector<int>> clusters;
+        std::vector<std::unordered_set<int>> clusters;
 
         std::vector<int> point_to_cluster;
 

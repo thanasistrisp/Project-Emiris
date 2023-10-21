@@ -32,8 +32,8 @@ tuple<int,int> KMeans::assign_lloyds(int index, int k)
     }
     if (changed) {
         point_to_cluster[index] = new_cluster; // update point's cluster
-        clusters[old_cluster].erase(clusters[old_cluster].begin() + index); // remove point from old cluster
-        clusters[new_cluster].push_back(index); // add point to new cluster
+        clusters[old_cluster].erase(index); // remove point from old cluster
+        clusters[new_cluster].insert(index); // add point to new cluster
     }
     return make_tuple(old_cluster, new_cluster);
 }
@@ -50,42 +50,55 @@ tuple<int,int> KMeans::assign_hypercube(int index, int k)
 
 bool KMeans::update(int k) // MacQueen's update rule
 {
-    vector<vector<double>> old_centroids = centroids;
-    for(int i = 0; i < k; i++){ // For each cluster
-        for(int j = 0; j < (int) centroids[i].size(); j++){
-            centroids[i][j] = 0; // Reset centroid
-        }
-        for(int j = 0; j < (int) clusters[i].size(); j++){ // For each point in cluster
-            for(int l = 0; l < (int) dataset[clusters[i][j]].size(); l++){
-                centroids[i][l] += dataset[clusters[i][j]][l]; // Add point's coordinates to centroid
+    bool changed_centroids = false;
+    for(int i = 0; i < k; i++){ // for each cluster
+        vector<double> new_centroid(dataset[0].size(), 0);
+        for(int j : clusters[i]){ // for each point in cluster
+            for(int l = 0; l < (int) dataset[j].size(); l++){
+                new_centroid[l] += dataset[j][l]; // add point's coordinates
             }
         }
-        for(int j = 0; j < (int) centroids[i].size(); j++){
-            centroids[i][j] /= clusters[i].size(); // Divide by number of points in cluster (mean)
+        for(int l = 0; l < (int) new_centroid.size(); l++){
+            new_centroid[l] /= clusters[i].size(); // divide by number of points
+        }
+        if(new_centroid != centroids[i]){
+            centroids[i] = new_centroid;
+            changed_centroids = true;
         }
     }
-    return !(old_centroids == centroids);
+    return changed_centroids;
 }
 
-bool KMeans::update(int k1, int k2, int k) { // recalculate centroids only for the two affected clusters
-    vector<vector<double>> old_centroids = centroids;
-    set<int> s;
-    s.insert(k1);
-    s.insert(k2);
-    for (int i : s) {
-        for (int j = 0; j < (int) centroids[i].size(); j++) {
-            centroids[i][j] = 0;
-        }
-        for (int j = 0; j < (int) clusters[i].size(); j++) {
-            for (int l = 0; l < (int) dataset[clusters[i][j]].size(); l++) {
-                centroids[i][l] += dataset[clusters[i][j]][l];
-            }
-        }
-        for (int j = 0; j < (int) centroids[i].size(); j++) {
-            centroids[i][j] /= clusters[i].size();
+bool KMeans::update(int old_cluster, int new_cluster, int k)
+{
+    bool changed_centroids = false;
+    vector<double> new_centroid(dataset[0].size(), 0);
+    for(int j : clusters[old_cluster]){
+        for(int l = 0; l < (int) dataset[j].size(); l++){
+            new_centroid[l] += dataset[j][l];
         }
     }
-    return !(old_centroids == centroids);
+    for(int l = 0; l < (int) new_centroid.size(); l++){
+        new_centroid[l] /= clusters[old_cluster].size();
+    }
+    if(new_centroid != centroids[old_cluster]){
+        centroids[old_cluster] = new_centroid;
+        changed_centroids = true;
+    }
+    new_centroid = vector<double>(dataset[0].size(), 0);
+    for(int j : clusters[new_cluster]){
+        for(int l = 0; l < (int) dataset[j].size(); l++){
+            new_centroid[l] += dataset[j][l];
+        }
+    }
+    for(int l = 0; l < (int) new_centroid.size(); l++){
+        new_centroid[l] /= clusters[new_cluster].size();
+    }
+    if(new_centroid != centroids[new_cluster]){
+        centroids[new_cluster] = new_centroid;
+        changed_centroids = true;
+    }
+    return changed_centroids;
 }
 
 void KMeans::compute_clusters(int k, update_method method, std::vector<int> method_args, const std::vector<double>&)
@@ -93,7 +106,7 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
     clusters.resize(k);
     // add all points to cluster 0
     for(int i = 0; i < (int) dataset.size(); i++){
-        clusters[0].push_back(i);
+        clusters[0].insert(i);
         point_to_cluster[i] = 0;
     }
     
@@ -122,7 +135,7 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
             }
         }
         changed_centroids = update(k);
-        if(changed_centroids){
+        if(!changed_centroids){
             break;
         }
     }
@@ -135,27 +148,37 @@ std::vector<std::vector<double>> KMeans::get_centroids() const
 
 std::vector<std::vector<int>> KMeans::get_clusters() const
 {
-    return clusters;
+    vector<vector<int>> clusters_vector;
+    for(int i = 0; i < (int) clusters.size(); i++){
+        vector<int> cluster;
+        for(int j : clusters[i]){
+            cluster.push_back(j);
+        }
+        clusters_vector.push_back(cluster);
+    }
+    return clusters_vector;
 }
 
 int KMeans::silhouette(int i)
 {
     int cluster = point_to_cluster[i];
     double a = 0;
-    for(int j = 0; j < (int) clusters[cluster].size(); j++){ // For each point in cluster
-        a += distance(dataset[i], dataset[clusters[cluster][j]]); // Add distance from point to all other points in cluster
+    for(int j : clusters[cluster]){
+        if(j != i){
+            a += distance(dataset[i], dataset[j]);
+        }
     }
-    a /= clusters[cluster].size();
+    a /= clusters[cluster].size() - 1;
     double b = 0;
-    for(int j = 0; j < (int) clusters.size(); j++){ // For each cluster
-        if(j != cluster){ // If not the same cluster
-            double sum = 0;
-            for(int l = 0; l < (int) clusters[j].size(); l++){ // For each point in cluster
-                sum += distance(dataset[i], dataset[clusters[j][l]]);
+    for(int k = 0; k < (int) clusters.size(); k++){
+        if(k != cluster){
+            double b_k = 0;
+            for(int j : clusters[k]){
+                b_k += distance(dataset[i], dataset[j]);
             }
-            sum /= clusters[j].size();
-            if(b == 0 || sum < b){ // If first iteration or sum is smaller than previous minimum
-                b = sum;
+            b_k /= clusters[k].size();
+            if(b == 0 || b_k < b){
+                b = b_k;
             }
         }
     }
