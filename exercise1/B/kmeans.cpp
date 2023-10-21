@@ -20,17 +20,21 @@ tuple<int,int> KMeans::assign_lloyds(int index, int k)
 {
     int old_cluster = point_to_cluster[index];
     int new_cluster = 0;
+    bool changed = false;
     double min_dist = distance(dataset[index], centroids[0]);
     for(int i = 1; i < k; i++){
         double dist = distance(dataset[index], centroids[i]);
         if(dist < min_dist){
             min_dist = dist;
             new_cluster = i;
+            changed = true;
         }
     }
-    point_to_cluster[index] = new_cluster; // update point's cluster
-    clusters[old_cluster].erase(clusters[old_cluster].begin() + index); // remove point from old cluster
-    clusters[new_cluster].push_back(index); // add point to new cluster
+    if (changed) {
+        point_to_cluster[index] = new_cluster; // update point's cluster
+        clusters[old_cluster].erase(clusters[old_cluster].begin() + index); // remove point from old cluster
+        clusters[new_cluster].push_back(index); // add point to new cluster
+    }
     return make_tuple(old_cluster, new_cluster);
 }
 
@@ -86,6 +90,13 @@ bool KMeans::update(int k1, int k2, int k) { // recalculate centroids only for t
 
 void KMeans::compute_clusters(int k, update_method method, std::vector<int> method_args, const std::vector<double>&)
 {
+    clusters.resize(k);
+    // add all points to cluster 0
+    for(int i = 0; i < (int) dataset.size(); i++){
+        clusters[0].push_back(i);
+        point_to_cluster[i] = 0;
+    }
+    
     tuple<int,int> (KMeans::*assign)(int, int);
     if(method == CLASSIC){
         assign = &KMeans::assign_lloyds;
