@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <set>
 #include <tuple>
@@ -16,13 +17,13 @@ KMeans::~KMeans()
 
 }
 
-tuple<int,int> KMeans::assign_lloyds(int index, int k)
+tuple<int,int> KMeans::assign_lloyds(int index)
 {
     int old_cluster = point_to_cluster[index];
     int new_cluster = 0;
     bool changed = false;
     double min_dist = distance(dataset[index], centroids[0]);
-    for(int i = 1; i < k; i++){
+    for(int i = 1; i < (int) centroids.size(); i++){
         double dist = distance(dataset[index], centroids[i]);
         if(dist < min_dist){
             min_dist = dist;
@@ -38,20 +39,22 @@ tuple<int,int> KMeans::assign_lloyds(int index, int k)
     return make_tuple(old_cluster, new_cluster);
 }
 
-tuple<int,int> KMeans::assign_lsh(int index, int k)
+tuple<int,int> KMeans::assign_lsh(int index)
 {
+    cout << index << endl;
     return make_tuple(-1,-1);
 }
 
-tuple<int,int> KMeans::assign_hypercube(int index, int k)
+tuple<int,int> KMeans::assign_hypercube(int index)
 {
+    cout << index << endl;
     return make_tuple(-1,-1);
 }
 
-bool KMeans::update(int k) // MacQueen's update rule
+bool KMeans::update() // MacQueen's update rule
 {
     bool changed_centroids = false;
-    for(int i = 0; i < k; i++){ // for each cluster
+    for(int i = 0; i < (int) centroids.size(); i++){ // for each cluster
         vector<double> new_centroid(dataset[0].size(), 0);
         for(int j : clusters[i]){ // for each point in cluster
             for(int l = 0; l < (int) dataset[j].size(); l++){
@@ -69,7 +72,7 @@ bool KMeans::update(int k) // MacQueen's update rule
     return changed_centroids;
 }
 
-bool KMeans::update(int old_cluster, int new_cluster, int k)
+bool KMeans::update(int old_cluster, int new_cluster)
 {
     bool changed_centroids = false;
     vector<double> new_centroid(dataset[0].size(), 0);
@@ -101,7 +104,7 @@ bool KMeans::update(int old_cluster, int new_cluster, int k)
     return changed_centroids;
 }
 
-void KMeans::compute_clusters(int k, update_method method, std::vector<int> method_args, const std::vector<double>&)
+void KMeans::compute_clusters(int k, update_method method)
 {
     clusters.resize(k);
     // add all points to cluster 0
@@ -110,7 +113,7 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
         point_to_cluster[i] = 0;
     }
     
-    tuple<int,int> (KMeans::*assign)(int, int);
+    tuple<int,int> (KMeans::*assign)(int);
     if(method == CLASSIC){
         assign = &KMeans::assign_lloyds;
     }
@@ -124,17 +127,17 @@ void KMeans::compute_clusters(int k, update_method method, std::vector<int> meth
     bool changed_centroids;
 
     // Initialize centroids using KMeans++ algorithm.
-    kmeanspp(k);
+    kmeanspp();
     while(true){
         for(int i = 0; i < (int) dataset.size(); i++){
             // Assign point to cluster and apply MacQueen's update rule.
             int old_cluster, new_cluster;
-            tie(old_cluster, new_cluster) = (this->*assign)(i, k);
+            tie(old_cluster, new_cluster) = (this->*assign)(i);
             if(old_cluster != new_cluster){
-                update(old_cluster, new_cluster, k);
+                update(old_cluster, new_cluster);
             }
         }
-        changed_centroids = update(k);
+        changed_centroids = update();
         if(!changed_centroids){
             break;
         }

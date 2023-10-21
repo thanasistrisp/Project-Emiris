@@ -3,5 +3,7 @@
 
 cluster_OBJS = main.o kmeanspp.o ../A/common/metrics.o kmeans.o
 
+test_OBJS = test.o kmeanspp.o ../A/common/metrics.o kmeans.o
+
 # Ο βασικός κορμός του Makefile
 include ../common.mk

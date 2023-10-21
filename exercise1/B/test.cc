@@ -18,7 +18,7 @@ int main(void) {
 	
 	KMeans kmeans(p);
 
-	kmeans.compute_clusters(k, CLASSIC, vector<int>(), vector<double>());
+	kmeans.compute_clusters(k, CLASSIC);
 
 	vector<vector<double>> centroids = kmeans.get_centroids();
 	vector<vector<int>> clusters = kmeans.get_clusters();

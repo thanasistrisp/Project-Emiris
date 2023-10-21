@@ -19,21 +19,21 @@ class KMeans
 
         std::vector<std::vector<double>> &dataset;
 
-        void kmeanspp(int k);
+        void kmeanspp();
 
 
-        std::tuple<int,int> assign_lloyds(int, int);
-        std::tuple<int,int> assign_lsh(int, int);
-        std::tuple<int,int> assign_hypercube(int, int);
+        std::tuple<int,int> assign_lloyds(int);
+        std::tuple<int,int> assign_lsh(int);
+        std::tuple<int,int> assign_hypercube(int);
 
-        bool update(int);
-        bool update(int, int, int);
+        bool update();
+        bool update(int, int);
 
     public:
         KMeans(std::vector<std::vector<double>>& dataset);
         ~KMeans();
 
-        void compute_clusters(int, update_method, std::vector<int>, const std::vector<double>&);
+        void compute_clusters(int, update_method);
 
         std::vector<std::vector<double>> get_centroids() const;
     
