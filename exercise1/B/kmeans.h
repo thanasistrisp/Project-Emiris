@@ -41,7 +41,7 @@ class KMeans
 
         static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;
         
-        int silhouette(int i);
+        double silhouette(int i);
 };
 
 #endif /* KMEANS_H */

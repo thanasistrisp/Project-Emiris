@@ -162,28 +162,28 @@ std::vector<std::vector<int>> KMeans::get_clusters() const
     return clusters_vector;
 }
 
-int KMeans::silhouette(int i)
+double KMeans::silhouette(int i)
 {
     int cluster = point_to_cluster[i];
-    double a = 0;
+    double a = 0, b = 0;
     for(int j : clusters[cluster]){
-        if(j != i){
-            a += distance(dataset[i], dataset[j]);
-        }
+        a += distance(dataset[i], dataset[j]);
     }
-    a /= clusters[cluster].size() - 1;
-    double b = 0;
-    for(int k = 0; k < (int) clusters.size(); k++){
-        if(k != cluster){
-            double b_k = 0;
-            for(int j : clusters[k]){
-                b_k += distance(dataset[i], dataset[j]);
-            }
-            b_k /= clusters[k].size();
-            if(b == 0 || b_k < b){
-                b = b_k;
+    a /= clusters[cluster].size();
+
+    int c1 = cluster, c2 = -1;
+    for(int j = 0; j < (int) centroids.size(); j++){
+        if(j != c1){
+            double dist = distance(dataset[i], centroids[j]);
+            if(c2 == -1 || dist < distance(dataset[i], centroids[c2])){
+                c2 = j;
             }
         }
     }
+    for(int j : clusters[c2]){
+        b += distance(dataset[i], dataset[j]);
+    }
+    b /= clusters[c2].size();
+    
     return (b - a) / max(a, b);
 }
