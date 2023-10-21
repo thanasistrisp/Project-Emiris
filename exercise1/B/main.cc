@@ -32,8 +32,8 @@ int main() {
 		for (int j = 0; j < (int) clusters[i].size(); j++) {
 			si[i] += kmeans.silhouette(clusters[i][j]);
 		}
-		si[i] /= clusters[i].size();
 		stotal += si[i];
+		si[i] /= clusters[i].size();
 	}
 	stotal /= dataset.size();
 	// print results
