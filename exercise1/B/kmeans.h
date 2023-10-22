@@ -21,7 +21,6 @@ class KMeans
 
         void kmeanspp();
 
-
         std::tuple<int,int> assign_lloyds(int);
         std::tuple<int,int> assign_lsh(int);
         std::tuple<int,int> assign_hypercube(int);
@@ -29,7 +28,7 @@ class KMeans
         bool update();
         bool update(int, int);
 
-        int L, k_of_LSH, M, k_of_hypercube, probes;
+        int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes;
 
     public:
         KMeans(const std::vector<std::vector<double>>& dataset);

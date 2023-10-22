@@ -45,14 +45,14 @@ tuple<int,int> KMeans::assign_lloyds(int index)
 
 tuple<int,int> KMeans::assign_lsh(int index)
 {
-    static LSH lsh(dataset.size(), k_of_LSH, L, w, dataset);
+    static LSH lsh(k_lsh, number_of_hash_tables, w, dataset);
     cout << index << endl;
-    return make_tuple(-1,-1);
+    // return make_tuple(-1,-1);
 }
 
 tuple<int,int> KMeans::assign_hypercube(int index)
 {
-    static hypercube hypercube(dataset, k_of_hypercube, M, probes);
+    static hypercube hypercube(dataset, k_hypercube, max_points_checked, probes);
     cout << index << endl;
     return make_tuple(-1,-1);
 }
@@ -111,7 +111,7 @@ bool KMeans::update(int old_cluster, int new_cluster)
 }
 
 void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
-    tie(L, k_of_LSH, M, k_of_hypercube, probes) = config;
+    tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
     clusters.resize(k);
     // add all points to cluster 0
     for(int i = 0; i < (int) dataset.size(); i++){
