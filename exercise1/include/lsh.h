@@ -21,7 +21,7 @@ class LSH
         void insert(std::vector<double>, int);
 
     public:
-        LSH(int, int, int, int, int, const std::vector<std::vector<double>>&);
+        LSH(int, int, int, int, const std::vector<std::vector<double>>&);
         ~LSH();
 
         std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,

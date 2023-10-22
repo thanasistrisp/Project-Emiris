@@ -11,13 +11,11 @@
 using namespace std;
 
 hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, 
-					 int N, double R, double (*distance)(const std::vector<double> &, const std::vector<double> &)) : p(p)
+					 double (*distance)(const std::vector<double> &, const std::vector<double> &)) : p(p)
 {
 	this->k = k;
 	this->M = M;
 	this->probes = probes;
-	this->N = N;
-	this->R = R;
 	this->distance = distance;
 	
 	clock_t start = clock();
@@ -72,7 +70,7 @@ hypercube::~hypercube() {
 	delete used_vertices;
 }
 
-tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj) {
+tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj, int N) {
 	int num_points = 0;
 	int num_vertices = 0;
 	
@@ -126,7 +124,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 		return make_tuple(nearest_neighbors, dist);
 }
 
-vector<int> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj) {
+vector<int> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj, double R) {
 	int num_points = 0;
 	int num_vertices = 0;
 

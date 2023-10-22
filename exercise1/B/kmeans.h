@@ -7,7 +7,7 @@
 
 #include "metrics.hpp"
 
-typedef enum {CLASSIC, LSH, HYPERCUBE} update_method;
+typedef enum {CLASSIC, REVERSE_LSH, REVERSE_HYPERCUBE} update_method;
 
 class KMeans
 {
@@ -17,7 +17,7 @@ class KMeans
 
         std::vector<int> point_to_cluster;
 
-        std::vector<std::vector<double>> &dataset;
+        const std::vector<std::vector<double>> &dataset;
 
         void kmeanspp();
 
@@ -29,8 +29,10 @@ class KMeans
         bool update();
         bool update(int, int);
 
+        int L, k_of_LSH, M, k_of_hypercube, probes;
+
     public:
-        KMeans(std::vector<std::vector<double>>& dataset);
+        KMeans(const std::vector<std::vector<double>>& dataset, const std::tuple<int,int,int,int,int> &config);
         ~KMeans();
 
         void compute_clusters(int, update_method);

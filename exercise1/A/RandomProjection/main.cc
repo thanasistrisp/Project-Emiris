@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 	vector <vector<double>> dataset = read_mnist_data(input_file);
 	// dataset.resize(1000);
 
-	hypercube cube(dataset, k, M, probes, N, R);
+	hypercube cube(dataset, k, M, probes);
 
 	ofstream output(output_file);
 
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 		queries = read_mnist_data(query_file);
 		queries.resize(10);
 
-		handle_ouput(cube, output, queries);
+		handle_ouput(cube, output, queries, R, N);
 
 		end = clock();
 		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;

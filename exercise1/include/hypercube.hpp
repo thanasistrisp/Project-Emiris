@@ -16,8 +16,6 @@ private:
 	int k;
 	int M;
 	int probes;
-	int N;
-	double R;
 
 	std::unordered_map<int, int> *f_map;
 
@@ -33,12 +31,11 @@ private:
 	std::set<std::vector<int>> get_permutation(const std::vector<int> &q_proj, int hamming_distance);
 public:
 	hypercube(const std::vector<std::vector<double>> &p, int k, int M, int probes, 
-			  int N, double R, double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);
+			  double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);
 	~hypercube();
-	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<double> &q, const std::vector<int> &q_proj);
-	std::vector<int> query_range(const std::vector<double> &q, const std::vector<int> &q_proj);
+	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<double> &q, const std::vector<int> &q_proj, int N);
+	std::vector<int> query_range(const std::vector<double> &q, const std::vector<int> &q_proj, double R);
 	std::vector<int> calculate_q_proj(const std::vector<double> &q);
 	std::vector<std::vector<double>> get_dataset() { return p; }
-	int get_N() { return N; }
 	double (*distance)(const std::vector<double> &, const std::vector<double> &);
 };
