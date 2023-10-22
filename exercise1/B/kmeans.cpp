@@ -45,9 +45,62 @@ tuple<int,int> KMeans::assign_lloyds(int index)
 
 tuple<int,int> KMeans::assign_lsh(int index)
 {
+    index++; // 
+
     static LSH lsh(k_lsh, number_of_hash_tables, w, dataset);
-    cout << index << endl;
-    // return make_tuple(-1,-1);
+    for(int i = 0; i < (int) dataset.size(); i++){
+        point_to_cluster[i] = -1;
+    }
+
+    double dist, radius = distance(centroids[0], centroids[1]);
+    for(int i = 0; i < (int) centroids.size(); i++){
+        for(int j = i + 1; j < (int) centroids.size(); j++){
+            dist = distance(centroids[i], centroids[j]);
+            if(dist < radius){
+                radius = dist;
+            }
+        }
+    }
+    radius /= 2;
+    int iterations = 0, max_iterations = 10;
+    int balls_new_point = centroids.size();
+    tuple<vector<int>, vector<double>> centroid_ann;
+    vector<int> ball;
+    int p_index;
+    bool ball_counted = false;
+    while(balls_new_point > (int) centroids.size() / 10 && iterations < max_iterations){
+        balls_new_point = 0;
+        for(int i = 0; i < (int) centroids.size(); i++){ // For each centroid
+            centroid_ann = lsh.query_range(centroids[i], radius, distance, dataset.size() >> 3); // Get all points inside a ball with the given radius.
+            ball = get<0>(centroid_ann);
+            ball_counted = false;
+            for(int j = 0; j < (int) ball.size(); j++){ // For each point inside the ball.
+                p_index = ball[j];
+                if(point_to_cluster[p_index] == -1){ // If the point hasn't been assigned to any cluster.
+                    point_to_cluster[p_index] = i;
+                }
+                // If the point belongs to two balls, assign it to the cluster with the closest centroid.
+                else if(distance(centroids[point_to_cluster[p_index]], dataset[p_index]) < 
+                        distance(centroids[i], dataset[p_index])){
+                    point_to_cluster[p_index] = i;
+                    if(ball_counted){
+                        balls_new_point++;
+                    }
+                    update(point_to_cluster[p_index], i);
+                }
+            }
+        }
+        iterations++;
+        radius *= 2;
+    }
+    for(int i = 0; i < (int) dataset.size(); i++){
+        if(point_to_cluster[i] == -1){
+            clusters[0].insert(i);
+            point_to_cluster[i] = 0;
+            assign_lloyds(i);
+        }
+    }
+    return make_tuple(-1,-1);
 }
 
 tuple<int,int> KMeans::assign_hypercube(int index)
@@ -136,15 +189,20 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
     kmeanspp();
     bool first = true; // flag to avoid updating centroids on first iteration
     while(true){
-        for(int i = 0; i < (int) dataset.size(); i++){
-            // Assign point to cluster and apply MacQueen's update rule.
-            int old_cluster, new_cluster;
-            tie(old_cluster, new_cluster) = (this->*assign)(i);
-            if(old_cluster != new_cluster && !first){
-                update(old_cluster, new_cluster);
+        if(method == CLASSIC){
+            for(int i = 0; i < (int) dataset.size(); i++){
+                // Assign point to cluster and apply MacQueen's update rule.
+                int old_cluster, new_cluster;
+                tie(old_cluster, new_cluster) = (this->*assign)(i);
+                if(method == CLASSIC && old_cluster != new_cluster && !first){
+                    update(old_cluster, new_cluster);
+                }
             }
+            first = false;
         }
-        first = false;
+        else{
+            (this->*assign)(0);
+        }
         changed_centroids = update();
         if(!changed_centroids){
             break;
