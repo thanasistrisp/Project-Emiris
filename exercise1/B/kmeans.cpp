@@ -142,9 +142,9 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
             tie(old_cluster, new_cluster) = (this->*assign)(i);
             if(old_cluster != new_cluster && !first){
                 update(old_cluster, new_cluster);
-                first = false;
             }
         }
+        first = false;
         changed_centroids = update();
         if(!changed_centroids){
             break;
