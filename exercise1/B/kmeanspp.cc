@@ -13,7 +13,7 @@ static void normalize_vector(vector<double> &v);
 static int binary_search(const vector<double> &p, double x);
 
 
-void KMeans::kmeanspp(int k) {
+void KMeans::kmeanspp() {
 	// deep copy of the dataset
 	vector<vector<double>> p(dataset);
 	random_device rd;
@@ -24,7 +24,7 @@ void KMeans::kmeanspp(int k) {
 	// delete the centroid from the list of points
 	p.erase(p.begin() + i);
 	// calculate the distance from each point to the centroid
-	for (int t = 1; t < k; t++) {
+	for (int t = 1; t < (int) clusters.size(); t++) {
 		vector<double> D = calculate_D(p, centroids);
 		normalize_vector(D);
 		vector<double> P = calculate_P(D);

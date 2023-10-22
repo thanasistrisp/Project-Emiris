@@ -19,22 +19,22 @@
 		// ΠΡΟΣΟΧΗ: Ολα τα arg1 - arg8 πρέπει να δηλώνονται, αν τα βάλουμε σε σχόλια θα
 		//          πάρουμε μήνυμα λάθους. Αν θέλουμε λιγότερα απλά τερματίζουμε με "#".
 		//
-		"arg1": "-d",
-		"arg2": "../../MNIST/input.dat",
-		"arg3": "-q",
-		"arg4": "../../MNIST/query.dat",
-		"arg5": "-k",
-		"arg6": "14",
-		"arg7": "-M",
-		"arg8": "200",
-		"arg9": "-probes",
-		"arg10": "50",
-		"arg11": "-o",
-		"arg12": "../../output/output.dat",
-		"arg13": "-N",
-		"arg14": "5",
-		"arg15": "-R",
-		"arg16": "10000"
+		"arg1": "-i",
+		"arg2": "../MNIST/input.dat",
+		"arg3": "-c",
+		"arg4": "cluster.conf",
+		"arg5": "-o",
+		"arg6": "../output/cluster.txt",
+		"arg7": "-complete",
+		"arg8": "-m",
+		"arg9": "Classic",
+		"arg10": "#",
+		"arg11": "#",
+		"arg12": "#",
+		"arg13": "#",
+		"arg14": "#",
+		"arg15": "#",
+		"arg16": "#"
 	},
 	"files.associations": {
 		"\"*.m\":\"matlab\"": "",
