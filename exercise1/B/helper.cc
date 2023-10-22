@@ -64,6 +64,7 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 		output << "Algorithm: Range Search Hypercube" << endl;
 		break;
 	}
+	cout << "Running clustering algorithm..." << endl;
 	// set timer
 	clock_t start = clock();
 	tuple<int, int, int, int, int> kmean_args = make_tuple(get<1>(config), get<2>(config), get<3>(config), get<4>(config), get<5>(config));
@@ -72,4 +73,67 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 	clock_t end = clock();
 	// compute time
 	double time = (double)(end - start) / CLOCKS_PER_SEC;
+	cout << "Clustering time: " << time << endl;
+
+	// get clusters
+	vector<vector<int>> clusters = kmeans.get_clusters();
+	vector<vector<double>> centroids = kmeans.get_centroids();
+
+	for (int i = 0; i < k; i++) {
+		output << "CLUSTER-" << i + 1 << " {size: " << clusters[i].size() << ", centroid: [";
+		for (int j = 0; j < (int)centroids[i].size(); j++) {
+			output << centroids[i][j];
+			if (j != (int)centroids[i].size() - 1) {
+				output << ", ";
+			}
+		}
+		output << "]}" << endl;
+	}
+	output << "clustering_time: " << time << endl;
+
+	clock_t start_silhouette = clock();
+	cout << "Computing silhouette..." << endl;
+	output << "Silhouette: [";
+	vector<double> si(clusters.size(), 0);
+	double stotal = 0;
+	for (int i = 0; i < (int) clusters.size(); i++) {
+		for (int j = 0; j < (int) clusters[i].size(); j++) {
+			si[i] += kmeans.silhouette(clusters[i][j]);
+		}
+		stotal += si[i];
+		si[i] /= clusters[i].size();
+	}
+	stotal /= kmeans.get_dataset_size();
+	for (int i = 0; i < (int) si.size(); i++) {
+		output << si[i];
+		output << ", ";
+	}
+	output << stotal << "]" << endl;
+	clock_t end_silhouette = clock();
+	double silhouette_time = (double)(end_silhouette - start_silhouette) / CLOCKS_PER_SEC;
+	cout << "Silhouette time: " << silhouette_time << endl;
+
+
+	if (complete) {
+		for (int i = 0; i < (int) clusters.size(); i++) {
+			output << "CLUSTER-" << i + 1 << " {";
+			output << "[";
+			for (int j = 0; j < (int) centroids[i].size(); j++) {
+				output << centroids[i][j];
+				if (j != (int) centroids[i].size() - 1) {
+					output << ", ";
+				}
+			}
+			output << "], ";
+			output << "{";
+			for (int j = 0; j < (int) clusters[i].size(); j++) {
+				output << clusters[i][j];
+				if (j != (int) clusters[i].size() - 1) {
+					output << ", ";
+				}
+			}
+			output << "}}" << endl;
+		}
+		
+	}
 }

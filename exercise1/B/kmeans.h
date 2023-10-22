@@ -5,7 +5,7 @@
 #include <tuple>
 #include <unordered_set>
 
-#include "metrics.hpp"
+#include "lp_metric.h"
 
 typedef enum {CLASSIC, REVERSE_LSH, REVERSE_HYPERCUBE} update_method;
 
@@ -44,6 +44,8 @@ class KMeans
         static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;
         
         double silhouette(int i);
+
+        int get_dataset_size() const { return dataset.size(); }
 };
 
 #endif /* KMEANS_H */

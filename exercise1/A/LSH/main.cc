@@ -10,6 +10,7 @@
 // ctime is used for time().
 
 #include "lsh.h"
+#include "helper_LSH.hpp"
 #include "helper.hpp"
 
 using namespace std;

@@ -7,6 +7,7 @@
 #include <random>
 
 #include "kmeans.h"
+#include "helper_kmeans.hpp"
 #include "helper.hpp"
 
 using namespace std;
@@ -80,9 +81,9 @@ int main(int argc, char *argv[]) {
 
 	// read input file
 	vector<vector<double>> dataset = read_mnist_data(input_file);
+	dataset.resize(1000);
 	
 	// read config file
-	int K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes;
 	tuple<int, int, int, int, int, int> config = read_config_file(config_file);
 
 	// run kmeans

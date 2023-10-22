@@ -17,6 +17,7 @@
 !launch.json
 !tasks.json
 !settings.json
+!cluster.conf
 !set_program_args.pl
 !visualize*
 
