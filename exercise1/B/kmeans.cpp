@@ -142,9 +142,9 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
             tie(old_cluster, new_cluster) = (this->*assign)(i);
             if(old_cluster != new_cluster && !first){
                 update(old_cluster, new_cluster);
-                first = false;
             }
         }
+        first = false;
         changed_centroids = update();
         if(!changed_centroids){
             break;
@@ -175,9 +175,11 @@ double KMeans::silhouette(int i)
     int cluster = point_to_cluster[i];
     double a = 0, b = 0;
     for(int j : clusters[cluster]){
-        a += distance(dataset[i], dataset[j]);
+        if (j != i) {
+            a += distance(dataset[i], dataset[j]);
+        }
     }
-    a /= clusters[cluster].size();
+    a /= clusters[cluster].size() - 1;
 
     int c1 = cluster, c2 = -1;
     for(int j = 0; j < (int) centroids.size(); j++){

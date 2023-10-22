@@ -11,7 +11,8 @@ int main() {
 	KMeans kmeans(dataset);
 	// start time
 	clock_t begin = clock();
-	kmeans.compute_clusters(10, CLASSIC);
+	auto params = make_tuple(0, 0, 0, 0, 0);
+	kmeans.compute_clusters(10, CLASSIC, params);
 	// end time
 	clock_t end = clock();
 	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
