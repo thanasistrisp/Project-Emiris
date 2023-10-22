@@ -8,7 +8,7 @@
 #include <tuple>
 #include <set>
 
-#include "metrics.hpp"
+#include "lp_metric.h"
 #include "hypercube.hpp"
 
 using namespace std;

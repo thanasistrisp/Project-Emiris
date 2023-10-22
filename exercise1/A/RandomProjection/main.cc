@@ -7,6 +7,7 @@
 #include <ctime>
 
 #include "hypercube.hpp"
+#include "helper_RP.hpp"
 #include "helper.hpp"
 
 using namespace std;

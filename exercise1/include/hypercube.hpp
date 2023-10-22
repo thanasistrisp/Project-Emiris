@@ -5,7 +5,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include "metrics.hpp"
+#include "lp_metric.h"
 #include "hash_function.h"
 #include "binary_string.hpp"
 
