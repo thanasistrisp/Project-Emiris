@@ -35,7 +35,7 @@ class KMeans
         KMeans(const std::vector<std::vector<double>>& dataset);
         ~KMeans();
 
-        void compute_clusters(int, update_method, const std::tuple<int,int,int,int> &config);
+        void compute_clusters(int, update_method, const std::tuple<int,int,int,int,int> &config);
 
         std::vector<std::vector<double>> get_centroids() const;
     

@@ -110,8 +110,8 @@ bool KMeans::update(int old_cluster, int new_cluster)
     return changed_centroids;
 }
 
-void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int> &config) {
-    tie(k_of_LSH, M, k_of_hypercube, probes) = config;
+void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
+    tie(L, k_of_LSH, M, k_of_hypercube, probes) = config;
     clusters.resize(k);
     // add all points to cluster 0
     for(int i = 0; i < (int) dataset.size(); i++){

@@ -1,5 +1,10 @@
 #include <tuple>
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <ctime>
+
+#include "kmeans.h"
 
 using namespace std;
 
@@ -43,4 +48,28 @@ tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 		}
 	}
 	return make_tuple(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes);
+}
+
+void handle_cluster_output(KMeans &kmeans, const string &output_file, bool complete, update_method method, const tuple<int, int, int, int, int, int> &config)
+{
+	ofstream output(output_file);
+	switch (method) {
+	case CLASSIC:
+		output << "Algorithm: Lloyds" << endl;
+		break;
+	case REVERSE_LSH:
+		output << "Algorithm: Range Search LSH" << endl;
+		break;
+	case REVERSE_HYPERCUBE:
+		output << "Algorithm: Range Search Hypercube" << endl;
+		break;
+	}
+	// set timer
+	clock_t start = clock();
+	tuple<int, int, int, int, int> kmean_args = make_tuple(get<1>(config), get<2>(config), get<3>(config), get<4>(config), get<5>(config));
+	int k = get<0>(config);
+	kmeans.compute_clusters(k, method, kmean_args);
+	clock_t end = clock();
+	// compute time
+	double time = (double)(end - start) / CLOCKS_PER_SEC;
 }
