@@ -32,10 +32,10 @@ class KMeans
         int L, k_of_LSH, M, k_of_hypercube, probes;
 
     public:
-        KMeans(const std::vector<std::vector<double>>& dataset, const std::tuple<int,int,int,int,int> &config);
+        KMeans(const std::vector<std::vector<double>>& dataset);
         ~KMeans();
 
-        void compute_clusters(int, update_method);
+        void compute_clusters(int, update_method, const std::tuple<int,int,int,int> &config);
 
         std::vector<std::vector<double>> get_centroids() const;
     
