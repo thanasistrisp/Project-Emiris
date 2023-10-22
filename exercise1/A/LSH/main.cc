@@ -67,8 +67,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// R++; // will fix this, leave it as it is for now
-
 	// ask from user
 	if (input_file.empty()) {
 		cout << "Enter input file: ";
@@ -94,7 +92,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Read MNIST data" << endl;
 
-	LSH lsh(dataset.size(), k, L, window, dataset);
+	LSH lsh(k, L, window, dataset);
 
 	cout << "Created LSH" << endl;
 
