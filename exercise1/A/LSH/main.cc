@@ -21,7 +21,6 @@ int main(int argc, char *argv[]) {
 	string input_file;
 	string query_file;
 	string output_file;
-	int d = 784;
 	int k = 4;
 	int L = 5;
 	int N = 1;
@@ -94,7 +93,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Read MNIST data" << endl;
 
-	LSH lsh(d, dataset.size(), k, L, window, dataset);
+	LSH lsh(dataset.size(), k, L, window, dataset);
 
 	cout << "Created LSH" << endl;
 

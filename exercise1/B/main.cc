@@ -68,10 +68,10 @@ int main(int argc, char *argv[]) {
 		method = CLASSIC;
 	}
 	else if (method_str == "lsh") {
-		method = LSH;
+		method = REVERSE_LSH;
 	}
 	else if (method_str == "hypercube") {
-		method = HYPERCUBE;
+		method = REVERSE_HYPERCUBE;
 	}
 	else {
 		cout << "Invalid method" << endl;
@@ -83,7 +83,10 @@ int main(int argc, char *argv[]) {
 	
 	// read config file
 	int K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes;
-	tie(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes) = read_config_file(config_file);
+	tuple<int, int, int, int, int, int> config = read_config_file(config_file);
+	tie(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes) = config;
+
+	tuple<int, int, int, int> k_args = make_tuple(k_of_LSH, M, k_of_hypercube, probes);
 
 	// print them
 	cout << "K of K-means: " << K_of_Kmeans << endl;

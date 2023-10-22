@@ -6,10 +6,15 @@
 using namespace std;
 
 #include "kmeans.h"
+#include "defines.hpp"
 
-KMeans::KMeans(std::vector<std::vector<double>> &dataset) : dataset(dataset)
+#include "lsh.h"
+#include "hypercube.hpp"
+
+KMeans::KMeans(const vector<std::vector<double>> &dataset, const tuple<int,int,int,int,int> &config) : dataset(dataset)
 {
     point_to_cluster.resize(dataset.size());
+    tie(L, k_of_LSH, M, k_of_hypercube, probes) = config;
 }
 
 KMeans::~KMeans()
@@ -41,12 +46,14 @@ tuple<int,int> KMeans::assign_lloyds(int index)
 
 tuple<int,int> KMeans::assign_lsh(int index)
 {
+    static LSH lsh(dataset.size(), k_of_LSH, L, w, dataset);
     cout << index << endl;
     return make_tuple(-1,-1);
 }
 
 tuple<int,int> KMeans::assign_hypercube(int index)
 {
+    static hypercube hypercube(dataset, k_of_hypercube, M, probes);
     cout << index << endl;
     return make_tuple(-1,-1);
 }
@@ -117,10 +124,10 @@ void KMeans::compute_clusters(int k, update_method method)
     if(method == CLASSIC){
         assign = &KMeans::assign_lloyds;
     }
-    else if(method == LSH){
+    else if(method == REVERSE_LSH){
         assign = &KMeans::assign_lsh;
     }
-    else {
+    else if(method == REVERSE_HYPERCUBE){
         assign = &KMeans::assign_hypercube;
     }
 

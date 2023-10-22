@@ -17,10 +17,10 @@ using std::prev;
 
 // ---------- Public functions for class LSH ----------
 
-LSH::LSH(int number_of_dimensions, int number_of_points, int number_of_hash_functions,
-         int number_of_hash_tables, int window, const vector<vector<double>> &dataset)
-: number_of_dimensions(number_of_dimensions), number_of_hash_functions(number_of_hash_functions),
-  table_size(number_of_points / 4), number_of_hash_tables(number_of_hash_tables), dataset(dataset)
+LSH::LSH(int number_of_points, int number_of_hash_functions,
+         int number_of_hash_tables, int window, const vector<vector<double>> &dataset) : 
+        number_of_dimensions(dataset.at(0).size()), number_of_hash_functions(number_of_hash_functions),
+        table_size(number_of_points / 4), number_of_hash_tables(number_of_hash_tables), dataset(dataset)
 {
     hash_tables = new HashTable<vector<double>, int>*[number_of_hash_tables];
     for(int i = 0; i < number_of_hash_tables; i++){
@@ -31,6 +31,7 @@ LSH::LSH(int number_of_dimensions, int number_of_points, int number_of_hash_func
     for(int i = 0; (unsigned int) i < dataset.size(); i++){
         insert(dataset.at(i), i);
     }
+    
 }
 
 LSH::~LSH()
