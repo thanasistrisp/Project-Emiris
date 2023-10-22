@@ -7,8 +7,6 @@
 #include "list.h"
 #include "hash_function.h"
 
-// #define M ((1ULL << 32) - 5) // Large prime number for fast hashing.
-
 template <typename V> class HashBucket
 {
     private:
@@ -24,6 +22,8 @@ template <typename V> class HashBucket
         void insert(V);
 
         V get_data(int, bool&);
+
+        int get_count() const;
 };
 
 template <typename K, typename V> class HashTable
@@ -54,7 +54,7 @@ template <typename K, typename V> class HashTable
 
         void insert(K, V);
 
-        V get_data(K, bool&);
+        V get_data(K, bool&, int = -1);
 };
 
 // ---------- Functions for class HashBucket ---------- //
@@ -83,6 +83,11 @@ template <typename V> void HashBucket<V>::insert(V element)
 template <typename V> V HashBucket<V>::get_data(int index, bool &valid)
 {
     return elements.get_data(index, valid);
+}
+
+template <typename V> int HashBucket<V>::get_count() const
+{
+    return elements.get_count();
 }
 
 // ---------- Functions for class HashTable ---------- //
@@ -196,9 +201,9 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
     }
 }
 
-template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid)
+template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid, int min_bucket_elements)
 {
-    List<HashBucket<V>*> *chain; //= buckets[recent_chain_index];
+    List<HashBucket<V>*> *chain;
     HashBucket<V> *bucket;
     V element;
     bool fvalid = false; // To be used in this scope only.
@@ -224,6 +229,10 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid
         finished_chain_search = true;
         return V();
     }
+    // Avoid buckets with very few items if min_bucket_elements != -1.
+    if(bucket->get_count() < min_bucket_elements){
+        return V();
+    }
     recent_element_index++;
     element = bucket->get_data(recent_element_index, valid);
 
@@ -233,6 +242,10 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid
         bucket = chain->get_data(recent_bucket_index, fvalid);
         if(bucket == NULL){
             finished_chain_search = true;
+            return V();
+        }
+        // Avoid buckets with very few items if min_bucket_elements != -1.
+        if(bucket->get_count() < min_bucket_elements){
             return V();
         }
         recent_element_index = 0;

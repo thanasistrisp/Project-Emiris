@@ -30,7 +30,6 @@ LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int window, co
     for(int i = 0; (unsigned int) i < dataset.size(); i++){
         insert(dataset.at(i), i);
     }
-    
 }
 
 LSH::~LSH()
@@ -95,7 +94,8 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
 }
 
 tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, double r,
-                                               double (*distance)(const vector<double>&, const vector<double>&))
+                                                    double (*distance)(const vector<double>&, const vector<double>&),
+                                                    int min_bucket_elements)
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     set<tuple<int, double>, decltype(compare)> s(compare);
@@ -104,7 +104,7 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
     int p_index;
     bool valid = true;
     for(int i = 0; i < number_of_hash_tables; i++){
-        while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
+        while((p_index = hash_tables[i]->get_data(q, valid, min_bucket_elements)) != 0 || valid){
             vector<double> p = dataset.at(p_index);
             dist = distance(p, q);
             if(dist < r){

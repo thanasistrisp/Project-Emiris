@@ -28,7 +28,8 @@ class LSH
                                                                 double (*distance)(const std::vector<double>&, const std::vector<double>&));
 
         std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double>&, double r,
-                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&));
+                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&),
+                                                                int min_bucket_elements = -1);
 };
 
 #endif /* LSH_H */
