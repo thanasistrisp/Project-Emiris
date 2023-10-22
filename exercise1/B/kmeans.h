@@ -7,7 +7,7 @@
 
 #include "metrics.hpp"
 
-enum update_method {CLASSIC = 0, LSH = 1, HYPERCUBE = 2}; 
+typedef enum {CLASSIC, LSH, HYPERCUBE} update_method;
 
 class KMeans
 {

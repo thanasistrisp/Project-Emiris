@@ -1,45 +1,97 @@
 #include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <tuple>
+#include <random>
 
 #include "kmeans.h"
 #include "helper.hpp"
 
 using namespace std;
 
-int main() {
-	vector<vector<double>> dataset = read_mnist_data("../MNIST/train-images-idx3-ubyte");
-	dataset.resize(1000);
-	KMeans kmeans(dataset);
-	// start time
-	clock_t begin = clock();
-	kmeans.compute_clusters(10, CLASSIC);
-	// end time
-	clock_t end = clock();
-	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-	cout << "Time elapsed: " << elapsed_secs << endl;
-	vector<vector<double>> centroids = kmeans.get_centroids();
-	vector<vector<int>> clusters = kmeans.get_clusters();
-	// print images to output folder in folder for each cluster
-	for (int i = 0; i < (int) clusters.size(); i++) {
-		for (int j = 0; j < (int) clusters[i].size(); j++) {
-			export_image(dataset[clusters[i][j]], "../output/clustering/cluster_" + to_string(i) + "/image_" + to_string(j) + ".png");
+int main(int argc, char *argv[]) {
+	srand(time(NULL));
+
+	string input_file;
+	string config_file;
+	string output_file;
+	bool complete = false;
+	string method_str = "";
+
+	for (int i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-i") == 0) {
+			input_file = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-c") == 0) {
+			config_file = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-o") == 0) {
+			output_file = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-complete") == 0) {
+			complete = true;
+		}
+		else if (strcmp(argv[i], "-m") == 0) {
+			method_str = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-help") == 0) {
+			cout << "Usage: ./cluster -i <input file> -c <configuration file> -o <output file> -complete <optional> -m <method: Classic OR LSH or Hypercube>" << endl;
+			return 0;
+		}
+		else {
+			cout << "Invalid arguments" << endl;
+			return 1;
 		}
 	}
-	cout << "Done!" << endl;
-	// si = average of points in cluster i (silhouette)
-	vector<double> si(clusters.size(), 0);
-	double stotal = 0;
-	for (int i = 0; i < (int) clusters.size(); i++) {
-		for (int j = 0; j < (int) clusters[i].size(); j++) {
-			si[i] += kmeans.silhouette(clusters[i][j]);
-		}
-		stotal += si[i];
-		si[i] /= clusters[i].size();
+
+	
+	// check if files exist
+	if (!file_exists(input_file)) {
+		cout << "Input file does not exist" << endl;
+		return 1;
 	}
-	stotal /= dataset.size();
-	// print results
-	cout << "Silhouette for each cluster:" << endl;
-	for (int i = 0; i < (int) si.size(); i++) {
-		cout << "Cluster " << i << ": " << si[i] << endl;
+	if (!file_exists(config_file)) {
+		cout << "Query file does not exist" << endl;
+		return 1;
 	}
-	cout << "Total silhouette: " << stotal << endl;
+
+	// convert method string to enum
+	transform(method_str.begin(), method_str.end(), method_str.begin(), ::tolower); // convert to lowercase
+	update_method method;
+	if (method_str == "classic") {
+		method = CLASSIC;
+	}
+	else if (method_str == "lsh") {
+		method = LSH;
+	}
+	else if (method_str == "hypercube") {
+		method = HYPERCUBE;
+	}
+	else {
+		cout << "Invalid method" << endl;
+		return 1;
+	}
+
+	// read input file
+	vector<vector<double>> dataset = read_mnist_data(input_file);
+	
+	// read config file
+	int K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes;
+	tie(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes) = read_config_file(config_file);
+
+	// print them
+	cout << "K of K-means: " << K_of_Kmeans << endl;
+	cout << "L of LSH: " << L << endl;
+	cout << "k of LSH: " << k_of_LSH << endl;
+	cout << "M of Hypercube: " << M << endl;
+	cout << "k of Hypercube: " << k_of_hypercube << endl;
+	cout << "probes of Hypercube: " << probes << endl;
+
+	return 0;
 }
