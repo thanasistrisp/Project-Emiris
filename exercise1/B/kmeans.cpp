@@ -47,13 +47,8 @@ tuple<int,int> KMeans::assign_lsh(int index)
 {
     index++; // 
 
+    // Index n points into L hashtables: once for the entire algorithm.
     static LSH lsh(k_lsh, number_of_hash_tables, w, dataset);
-    for(int i = 0; i < (int) dataset.size(); i++){
-        if(point_to_cluster[i] != -1){
-            clusters[point_to_cluster[i]].erase(i);
-        }
-        point_to_cluster[i] = -1;
-    }
 
     double dist, radius = distance(centroids[0], centroids[1]);
     for(int i = 0; i < (int) centroids.size(); i++){
@@ -64,47 +59,48 @@ tuple<int,int> KMeans::assign_lsh(int index)
             }
         }
     }
+
+    // Start with radius = min(dist between centroids) / 2.
     radius /= 2;
-    int iterations = 0, max_iterations = 10;
-    int balls_new_point = centroids.size();
-    tuple<vector<int>, vector<double>> centroid_ann;
+    bool changed_assignment = true;
     vector<int> ball;
+    vector<double> distances;
     int p_index;
-    bool ball_counted = false;
-    while(balls_new_point > (int) centroids.size() / 10 && iterations < max_iterations){
-        balls_new_point = 0;
-        for(int i = 0; i < (int) centroids.size(); i++){ // For each centroid
-            centroid_ann = lsh.query_range(centroids[i], radius, distance, dataset.size() >> 3); // Get all points inside a ball with the given radius.
-            ball = get<0>(centroid_ann);
-            ball_counted = false;
-            for(int j = 0; j < (int) ball.size(); j++){ // For each point inside the ball.
+    while(changed_assignment){
+        changed_assignment = false;
+        for(int i = 0; i < (int) centroids.size(); i++){
+            // At each iteration, for each centroid c, range/ball queries centered at c.
+            // Avoid buckets with very few items.
+            tie(ball, distances) = lsh.query_range(centroids[i], radius, distance, dataset.size() >> 3);
+            for(int j = 0; j < (int) ball.size(); j++){
                 p_index = ball[j];
-                if(point_to_cluster[p_index] == -1){ // If the point hasn't been assigned to any cluster.
+                if(point_to_cluster[p_index] == -1){
                     point_to_cluster[p_index] = i;
                     clusters[i].insert(p_index);
+                    changed_assignment = true;
                 }
-                // If the point belongs to two balls, assign it to the cluster with the closest centroid.
-                else if(distance(centroids[point_to_cluster[p_index]], dataset[p_index]) < 
-                        distance(centroids[i], dataset[p_index])){
-                    point_to_cluster[p_index] = i;
+                // If the point lies in >= 2 balls, assign it to the cluster with the closest centroid.
+                else if(distances[j] < distance(centroids[point_to_cluster[p_index]], dataset[p_index])){
                     clusters[point_to_cluster[p_index]].erase(p_index);
+                    point_to_cluster[p_index] = i;
                     clusters[i].insert(p_index);
-                    if(ball_counted){
-                        balls_new_point++;
-                    }
-                    update(point_to_cluster[p_index], i);
+                    changed_assignment = true;
                 }
             }
         }
-        iterations++;
-        radius *= 2;
+        radius *= 2; // Multiply radius by 2.
     }
+
+    // For every unassigned point, compare its distances to all centers
+    // i.e. apply Lloyd's method for assignment.
+    int old_cluster, new_cluster;
     for(int i = 0; i < (int) dataset.size(); i++){
         if(point_to_cluster[i] == -1){
             clusters[0].insert(i);
             point_to_cluster[i] = 0;
         }
-        assign_lloyds(i);
+        tie(old_cluster, new_cluster) = assign_lloyds(i);
+        point_to_cluster[i] = new_cluster;
     }
     return make_tuple(-1,-1);
 }
