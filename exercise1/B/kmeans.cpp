@@ -49,6 +49,9 @@ tuple<int,int> KMeans::assign_lsh(int index)
 
     static LSH lsh(k_lsh, number_of_hash_tables, w, dataset);
     for(int i = 0; i < (int) dataset.size(); i++){
+        if(point_to_cluster[i] != -1){
+            clusters[point_to_cluster[i]].erase(i);
+        }
         point_to_cluster[i] = -1;
     }
 
@@ -78,11 +81,14 @@ tuple<int,int> KMeans::assign_lsh(int index)
                 p_index = ball[j];
                 if(point_to_cluster[p_index] == -1){ // If the point hasn't been assigned to any cluster.
                     point_to_cluster[p_index] = i;
+                    clusters[i].insert(p_index);
                 }
                 // If the point belongs to two balls, assign it to the cluster with the closest centroid.
                 else if(distance(centroids[point_to_cluster[p_index]], dataset[p_index]) < 
                         distance(centroids[i], dataset[p_index])){
                     point_to_cluster[p_index] = i;
+                    clusters[point_to_cluster[p_index]].erase(p_index);
+                    clusters[i].insert(p_index);
                     if(ball_counted){
                         balls_new_point++;
                     }
@@ -97,8 +103,8 @@ tuple<int,int> KMeans::assign_lsh(int index)
         if(point_to_cluster[i] == -1){
             clusters[0].insert(i);
             point_to_cluster[i] = 0;
-            assign_lloyds(i);
         }
+        assign_lloyds(i);
     }
     return make_tuple(-1,-1);
 }
@@ -166,18 +172,21 @@ bool KMeans::update(int old_cluster, int new_cluster)
 void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
     tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
     clusters.resize(k);
-    // add all points to cluster 0
-    for(int i = 0; i < (int) dataset.size(); i++){
-        clusters[0].insert(i);
-        point_to_cluster[i] = 0;
-    }
     
     tuple<int,int> (KMeans::*assign)(int);
     if(method == CLASSIC){
         assign = &KMeans::assign_lloyds;
+        // add all points to cluster 0
+        for(int i = 0; i < (int) dataset.size(); i++){
+            clusters[0].insert(i);
+            point_to_cluster[i] = 0;
+        }
     }
     else if(method == REVERSE_LSH){
         assign = &KMeans::assign_lsh;
+        for(int i = 0; i < (int) dataset.size(); i++){
+            point_to_cluster[i] = -1;
+        }
     }
     else if(method == REVERSE_HYPERCUBE){
         assign = &KMeans::assign_hypercube;
