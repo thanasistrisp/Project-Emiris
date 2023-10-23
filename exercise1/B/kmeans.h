@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "lp_metric.h"
 
@@ -16,6 +17,8 @@ class KMeans
         std::vector<std::unordered_set<int>> clusters;
 
         std::vector<int> point_to_cluster;
+
+        std::unordered_map<int, int> point_2_cluster;
 
         const std::vector<std::vector<double>> &dataset;
 
