@@ -30,6 +30,7 @@ class KMeans
 
         bool update();
         bool update(int, int);
+        bool update(int, int, int);
 
         int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes;
 
