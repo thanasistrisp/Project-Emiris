@@ -78,6 +78,7 @@ tuple<int,int> KMeans::assign_lsh(int index)
                 iter = point_2_cluster.find(p_index);
                 if(iter == point_2_cluster.end()){
                     point_2_cluster[p_index] = i;
+                    point_to_cluster[p_index] = i;
                     clusters[i].insert(p_index);
                     changed_assignment = true;
                 }
@@ -85,6 +86,7 @@ tuple<int,int> KMeans::assign_lsh(int index)
                 else if(distances[j] < distance(centroids[iter->second], dataset[p_index])){
                     clusters[iter->second].erase(p_index);
                     point_2_cluster[p_index] = i;
+                    point_to_cluster[p_index] = i;
                     clusters[i].insert(p_index);
                     changed_assignment = true;
                 }
@@ -97,14 +99,13 @@ tuple<int,int> KMeans::assign_lsh(int index)
     // i.e. apply Lloyd's method for assignment.
     int old_cluster, new_cluster;
     for(int i = 0; i < (int) dataset.size(); i++){
-        iter = point_2_cluster.find(i);
-        if(iter == point_2_cluster.end()){
-            clusters[0].insert(i);
-            point_to_cluster[i] = 0;
-            point_2_cluster[i] = 0;
+        if(point_to_cluster[i] != -1){
+            continue;
         }
+        // Prepare for Lloyd's.
+        clusters[0].insert(i);
+        point_to_cluster[i] = 0;
         tie(old_cluster, new_cluster) = assign_lloyds(i);
-        point_to_cluster[i] = new_cluster;
         point_2_cluster[p_index] = new_cluster;
     }
     return make_tuple(-1,-1);
@@ -185,6 +186,10 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
     }
     else if(method == REVERSE_LSH){
         assign = &KMeans::assign_lsh;
+        for(int i = 0; i < (int) dataset.size(); i++){
+            // clusters[0].insert(i);
+            point_to_cluster[i] = -1;
+        }
     }
     else if(method == REVERSE_HYPERCUBE){
         assign = &KMeans::assign_hypercube;
