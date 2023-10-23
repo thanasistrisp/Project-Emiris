@@ -16,7 +16,6 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	cout << time(NULL) << endl;
 	srand(time(NULL));
 
 	string input_file;
@@ -92,7 +91,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Read MNIST data" << endl;
 
-	LSH lsh(k, L, window, dataset);
+	LSH lsh(k, L, dataset.size() / 4, window, dataset);
 
 	cout << "Created LSH" << endl;
 

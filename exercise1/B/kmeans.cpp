@@ -49,8 +49,7 @@ tuple<int,int> KMeans::assign_lsh(int index)
     index++; // 
 
     // Index n points into L hashtables: once for the entire algorithm.
-    static LSH lsh(k_lsh, number_of_hash_tables, w, dataset);
-
+    static LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, w, dataset);
     double dist, radius = distance(centroids[0], centroids[1]);
     for(int i = 0; i < (int) centroids.size(); i++){
         for(int j = i + 1; j < (int) centroids.size(); j++){
@@ -73,7 +72,7 @@ tuple<int,int> KMeans::assign_lsh(int index)
         for(int i = 0; i < (int) centroids.size(); i++){
             // At each iteration, for each centroid c, range/ball queries centered at c.
             // Avoid buckets with very few items.
-            tie(ball, distances) = lsh.query_range(centroids[i], radius, distance, dataset.size() >> 3);
+            tie(ball, distances) = lsh.query_range(centroids[i], radius, distance);
             for(int j = 0; j < (int) ball.size(); j++){
                 p_index = ball[j];
                 iter = point_2_cluster.find(p_index);

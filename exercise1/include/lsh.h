@@ -21,15 +21,15 @@ class LSH
         void insert(std::vector<double>, int);
 
     public:
-        LSH(int, int, int, const std::vector<std::vector<double>>&);
+        // number of hash functions, number of hash tables, tablesize, window, dataset
+        LSH(int, int, int, int, const std::vector<std::vector<double>>&);
         ~LSH();
 
         std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,
                                                                 double (*distance)(const std::vector<double>&, const std::vector<double>&));
 
         std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double>&, double r,
-                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&),
-                                                                int min_bucket_elements = -1);
+                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&));
 };
 
 #endif /* LSH_H */
