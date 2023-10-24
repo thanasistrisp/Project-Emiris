@@ -103,7 +103,7 @@ tuple<int,int> KMeans::assign_lsh(int index)
         clusters[0].insert(i);
         point_to_cluster[i] = 0;
         tie(old_cluster, new_cluster) = assign_lloyds(i);
-        point_2_cluster[p_index] = new_cluster;
+        point_2_cluster[i] = new_cluster;
     }
     return make_tuple(-1,-1);
 }
@@ -169,7 +169,7 @@ tuple<int,int> KMeans::assign_hypercube(int index)
         clusters[0].insert(i);
         point_to_cluster[i] = 0;
         tie(old_cluster, new_cluster) = assign_lloyds(i);
-        point_2_cluster[p_index] = new_cluster;
+        point_2_cluster[i] = new_cluster;
     }
     return make_tuple(-1,-1);
 }
@@ -230,8 +230,6 @@ bool KMeans::update(int old_cluster, int new_cluster)
 bool KMeans::update(int old_cluster, int new_cluster, int index)
 {
     bool changed_centroids = false;
-
-    // std::cout << old_cluster << " " << new_cluster << std::endl;
 
     // For the old cluster:
     // new_centroid = (old_centroid * old_len - new_point) / new_len.
