@@ -181,9 +181,9 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
     // For the old cluster:
     // new_centroid = (old_centroid * old_len - new_point) / new_len.
     vector<double> old_centroid = centroids[old_cluster];
-    vector<double> new_centroid = vector_scalar_mult(old_centroid, clusters[old_cluster].size());
+    vector<double> new_centroid = vector_scalar_mult(old_centroid, clusters[old_cluster].size() + 1);
     new_centroid = vector_subtraction(new_centroid, dataset[index]);
-    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[new_cluster].size()));
+    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[old_cluster].size() - 1));
     if(new_centroid != old_centroid){
         centroids[old_cluster] = new_centroid;
         changed_centroids = true;
@@ -192,9 +192,9 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
     // For the new cluster:
     // new_centroid = (old_centroid * old_len + new_point) / new_len.
     old_centroid = centroids[new_cluster];
-    new_centroid = vector_scalar_mult(old_centroid, clusters[old_cluster].size());
+    new_centroid = vector_scalar_mult(old_centroid, clusters[new_cluster].size() - 1);
     new_centroid = vector_addition(new_centroid, dataset[index]);
-    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[old_cluster].size()));
+    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[new_cluster].size() + 1));
     if(new_centroid != old_centroid){
         centroids[new_cluster] = new_centroid;
         changed_centroids = true;
