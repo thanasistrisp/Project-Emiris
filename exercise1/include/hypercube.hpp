@@ -34,7 +34,7 @@ public:
 			  double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);
 	~hypercube();
 	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<double> &q, const std::vector<int> &q_proj, int N);
-	std::vector<int> query_range(const std::vector<double> &q, const std::vector<int> &q_proj, double R);
+	std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double> &q, const std::vector<int> &q_proj, double R);
 	std::vector<int> calculate_q_proj(const std::vector<double> &q);
 	std::vector<std::vector<double>> get_dataset() { return p; }
 	double (*distance)(const std::vector<double> &, const std::vector<double> &);

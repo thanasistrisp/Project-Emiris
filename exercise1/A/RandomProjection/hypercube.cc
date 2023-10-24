@@ -124,7 +124,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 		return make_tuple(nearest_neighbors, dist);
 }
 
-vector<int> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj, double R) {
+tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj, double R) {
 	int num_points = 0;
 	int num_vertices = 0;
 
@@ -153,13 +153,15 @@ vector<int> hypercube::query_range(const vector<double> &q, const vector<int> &q
 
 	check:
 		vector<int> range;
+		vector<double> dist;
 		for (auto it = candidates.begin(); it != candidates.end(); it++) {
 			range.push_back(it->second);
+			dist.push_back(it->first);
 		}
 		// reset used_vertices
 		used_vertices->clear();
 
-		return range;
+		return make_tuple(range, dist);
 }
 
 vector<int> hypercube::calculate_q_proj(const vector<double> &q) {

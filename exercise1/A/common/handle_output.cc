@@ -68,10 +68,13 @@ void handle_ouput(hypercube &cube, ofstream &output, const vector<vector<double>
 		output << "tHypercube: " << elapsed_secs_ANN << endl;
 		output << "tTrue: " << elapsed_secs_ENN << endl;
 		output << "R-near neighbors:" << endl;
-		vector<int> range_neighbors = cube.query_range(queries[q], q_proj, R);
-		for (int i = 0; i < (int) range_neighbors.size(); i++) {
-			output << range_neighbors[i] << endl;
+		vector<int> rn_indices;	
+		vector<double> rn_distances;
+		tie(rn_indices, rn_distances) = cube.query_range(queries[q], q_proj, R);
+		for (int i = 0; i < (int) rn_indices.size(); i++) {
+			output << rn_indices[i] << endl;
 		}
+		output << endl;
 	}
 
 	output.close();
