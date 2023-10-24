@@ -80,8 +80,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// read input file
-	vector<vector<double>> dataset = read_mnist_data(input_file);
-	dataset.resize(1000);
+	vector<vector<double>> dataset = read_mnist_data(input_file, 1000);
 	
 	// read config file
 	tuple<int, int, int, int, int, int> config = read_config_file(config_file);

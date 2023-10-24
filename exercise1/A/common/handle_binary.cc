@@ -7,7 +7,7 @@ using namespace std;
 
 static int reverse_int(int);
 
-vector<vector<double>> read_mnist_data(const string &filename) {
+vector<vector<double>> read_mnist_data(const string &filename, int number_of_images) {
 	// read MNIST data from file
 	ifstream file(filename, ios::binary);
 
@@ -17,9 +17,10 @@ vector<vector<double>> read_mnist_data(const string &filename) {
 	magic_number = reverse_int(magic_number); // ignore it for our purposes
 
 	// read number of images
-	int number_of_images = 0;
-	file.read((char*)&number_of_images, sizeof(int));
-	number_of_images = reverse_int(number_of_images);
+	int temp = 0;
+	file.read((char*)&temp, sizeof(int));
+	if (number_of_images == 0)
+		number_of_images = reverse_int(temp);
 
 	// read number of rows
 	int rows = 0;
