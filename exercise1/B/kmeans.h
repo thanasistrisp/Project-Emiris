@@ -24,6 +24,10 @@ class KMeans
 
         void kmeanspp();
 
+        double min_dist_centroids() const;
+
+        void assign_lloyds_reverse();
+
         std::tuple<int,int> assign_lloyds(int);
         std::tuple<int,int> assign_lsh(int);
         std::tuple<int,int> assign_hypercube(int);

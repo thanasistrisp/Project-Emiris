@@ -23,6 +23,35 @@ KMeans::~KMeans()
 
 }
 
+double KMeans::min_dist_centroids() const
+{
+    double dist, min_dist = distance(centroids[0], centroids[1]);
+    for(int i = 0; i < (int) centroids.size(); i++){
+        for(int j = i + 1; j < (int) centroids.size(); j++){
+            dist = distance(centroids[i], centroids[j]);
+            if(dist < min_dist){
+                min_dist = dist;
+            }
+        }
+    }
+    return min_dist;
+}
+
+void KMeans::assign_lloyds_reverse()
+{
+    int old_cluster, new_cluster;
+    for(int i = 0; i < (int) dataset.size(); i++){
+        if(point_to_cluster[i] != -1){
+            continue;
+        }
+        // Prepare for Lloyd's.
+        clusters[0].insert(i);
+        point_to_cluster[i] = 0;
+        tie(old_cluster, new_cluster) = assign_lloyds(i);
+        point_2_cluster[i] = new_cluster;
+    }
+}
+
 tuple<int,int> KMeans::assign_lloyds(int index)
 {
     int old_cluster = point_to_cluster[index];
@@ -47,18 +76,9 @@ tuple<int,int> KMeans::assign_lsh(int index)
 {
     // Index n points into L hashtables: once for the entire algorithm.
     static LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, w, dataset);
-    double dist, radius = distance(centroids[0], centroids[1]);
-    for(int i = 0; i < (int) centroids.size(); i++){
-        for(int j = i + 1; j < (int) centroids.size(); j++){
-            dist = distance(centroids[i], centroids[j]);
-            if(dist < radius){
-                radius = dist;
-            }
-        }
-    }
 
     // Start with radius = min(dist between centroids) / 2.
-    radius /= 2;
+    double radius = min_dist_centroids() / 2;
     bool changed_assignment = true;
     vector<int> ball;
     vector<double> distances;
@@ -94,17 +114,7 @@ tuple<int,int> KMeans::assign_lsh(int index)
 
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
-    int old_cluster, new_cluster;
-    for(int i = 0; i < (int) dataset.size(); i++){
-        if(point_to_cluster[i] != -1){
-            continue;
-        }
-        // Prepare for Lloyd's.
-        clusters[0].insert(i);
-        point_to_cluster[i] = 0;
-        tie(old_cluster, new_cluster) = assign_lloyds(i);
-        point_2_cluster[i] = new_cluster;
-    }
+    assign_lloyds_reverse();
     return make_tuple(-1,-1);
 }
 
@@ -112,18 +122,9 @@ tuple<int,int> KMeans::assign_hypercube(int index)
 {
     // Index n points into the hypercube: once for the entire algorithm.
     static hypercube hypercube(dataset, k_hypercube, max_points_checked, probes);
-    double dist, radius = distance(centroids[0], centroids[1]);
-    for(int i = 0; i < (int) centroids.size(); i++){
-        for(int j = i + 1; j < (int) centroids.size(); j++){
-            dist = distance(centroids[i], centroids[j]);
-            if(dist < radius){
-                radius = dist;
-            }
-        }
-    }
 
     // Start with radius = min(dist between centroids) / 2.
-    radius /= 2;
+    double radius = min_dist_centroids() / 2;
     bool changed_assignment = true;
     vector<int> ball, centroid_proj;
     vector<double> distances;
@@ -160,17 +161,7 @@ tuple<int,int> KMeans::assign_hypercube(int index)
 
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
-    int old_cluster, new_cluster;
-    for(int i = 0; i < (int) dataset.size(); i++){
-        if(point_to_cluster[i] != -1){
-            continue;
-        }
-        // Prepare for Lloyd's.
-        clusters[0].insert(i);
-        point_to_cluster[i] = 0;
-        tie(old_cluster, new_cluster) = assign_lloyds(i);
-        point_2_cluster[i] = new_cluster;
-    }
+    assign_lloyds_reverse();
     return make_tuple(-1,-1);
 }
 
