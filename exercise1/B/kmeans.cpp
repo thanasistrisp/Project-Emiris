@@ -26,21 +26,19 @@ KMeans::~KMeans()
 tuple<int,int> KMeans::assign_lloyds(int index)
 {
     int old_cluster = point_to_cluster[index];
-    int new_cluster = 0;
-    bool changed = false;
-    double min_dist = distance(dataset[index], centroids[0]);
-    for(int i = 1; i < (int) centroids.size(); i++){
+    int new_cluster = -1;
+    double min_dist = -1;
+    for(int i = 0; i < (int) centroids.size(); i++){
         double dist = distance(dataset[index], centroids[i]);
-        if(dist < min_dist){
+        if(min_dist == -1 || dist < min_dist){
             min_dist = dist;
             new_cluster = i;
-            changed = true;
         }
     }
-    if (changed) {
-        point_to_cluster[index] = new_cluster; // update point's cluster
-        clusters[old_cluster].erase(index); // remove point from old cluster
-        clusters[new_cluster].insert(index); // add point to new cluster
+    if(old_cluster != new_cluster){
+        clusters[old_cluster].erase(index);
+        clusters[new_cluster].insert(index);
+        point_to_cluster[index] = new_cluster;
     }
     return make_tuple(old_cluster, new_cluster);
 }
@@ -176,7 +174,7 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
 {
     bool changed_centroids = false;
 
-    std::cout << old_cluster << " " << new_cluster << std::endl;
+    // std::cout << old_cluster << " " << new_cluster << std::endl;
 
     // For the old cluster:
     // new_centroid = (old_centroid * old_len - new_point) / new_len.
