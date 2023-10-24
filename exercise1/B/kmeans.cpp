@@ -8,6 +8,7 @@ using namespace std;
 
 #include "kmeans.h"
 #include "defines.hpp"
+#include "vector_utils.h"
 
 #include "lsh.h"
 #include "hypercube.hpp"
@@ -171,6 +172,36 @@ bool KMeans::update(int old_cluster, int new_cluster)
     return changed_centroids;
 }
 
+bool KMeans::update(int old_cluster, int new_cluster, int index)
+{
+    bool changed_centroids = false;
+
+    std::cout << old_cluster << " " << new_cluster << std::endl;
+
+    // For the old cluster:
+    // new_centroid = (old_centroid * old_len - new_point) / new_len.
+    vector<double> old_centroid = centroids[old_cluster];
+    vector<double> new_centroid = vector_scalar_mult(old_centroid, clusters[old_cluster].size());
+    new_centroid = vector_subtraction(new_centroid, dataset[index]);
+    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[new_cluster].size()));
+    if(new_centroid != old_centroid){
+        centroids[old_cluster] = new_centroid;
+        changed_centroids = true;
+    }
+
+    // For the new cluster:
+    // new_centroid = (old_centroid * old_len + new_point) / new_len.
+    old_centroid = centroids[new_cluster];
+    new_centroid = vector_scalar_mult(old_centroid, clusters[old_cluster].size());
+    new_centroid = vector_addition(new_centroid, dataset[index]);
+    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[old_cluster].size()));
+    if(new_centroid != old_centroid){
+        centroids[new_cluster] = new_centroid;
+        changed_centroids = true;
+    }
+    return changed_centroids;
+}
+
 void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
     tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
     clusters.resize(k);
@@ -207,7 +238,8 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
                 int old_cluster, new_cluster;
                 tie(old_cluster, new_cluster) = (this->*assign)(i);
                 if(method == CLASSIC && old_cluster != new_cluster && !first){
-                    update(old_cluster, new_cluster);
+                    // update(old_cluster, new_cluster);
+                    update(old_cluster, new_cluster, i);
                 }
             }
             first = false;
