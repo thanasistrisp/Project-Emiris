@@ -1,10 +1,10 @@
 {
 	"c_project": {
 		// Όνομα του εκτελέσιμου προγράμματος (μόνο για μεταγλώττιση πολλών αρχείων & make)
-		"program": "lsh",
+		"program": "cluster",
 
 		// Directory στο οποίο βρίσκεται το πρόγραμμα (μόνο για μεταγλώτισση με make)
-		"dir": "A/LSH",
+		"dir": "B",
 
 		// Οι τιμές που δηλώνονται στα arg1 - arg8 παρακάτω δίνονται αυτόματα σαν ορίσματα
 		// σε οποιοδήποτε πρόγραμμα τρέχουμε (είτε με Ctrl-Shift-B είτε στον debugger).
@@ -19,16 +19,25 @@
 		// ΠΡΟΣΟΧΗ: Ολα τα arg1 - arg8 πρέπει να δηλώνονται, αν τα βάλουμε σε σχόλια θα
 		//          πάρουμε μήνυμα λάθους. Αν θέλουμε λιγότερα απλά τερματίζουμε με "#".
 		//
-		"arg1": "#",
-		"arg2": "#",
-		"arg3": "#",
-		"arg4": "#",
-		"arg5": "#",
-		"arg6": "#",
-		"arg7": "#",
-		"arg8": "#",
+		"arg1": "-i",
+		"arg2": "../MNIST/input.dat",
+		"arg3": "-c",
+		"arg4": "cluster.conf",
+		"arg5": "-o",
+		"arg6": "../output/cluster.txt",
+		"arg7": "-complete",
+		"arg8": "-m",
+		"arg9": "Classic",
+		"arg10": "#",
+		"arg11": "#",
+		"arg12": "#",
+		"arg13": "#",
+		"arg14": "#",
+		"arg15": "#",
+		"arg16": "#"
 	},
 	"files.associations": {
+		"\"*.m\":\"matlab\"": "",
 		"stdio.h": "c",
 		"type_traits": "c",
 		"array": "cpp",
@@ -74,6 +83,42 @@
 		"stdexcept": "cpp",
 		"streambuf": "cpp",
 		"typeinfo": "cpp",
-		"complex": "cpp"
+		"complex": "cpp",
+		"chrono": "cpp",
+		"cstring": "cpp",
+		"ctime": "cpp",
+		"any": "cpp",
+		"hash_map": "cpp",
+		"strstream": "cpp",
+		"bitset": "cpp",
+		"cfenv": "cpp",
+		"charconv": "cpp",
+		"codecvt": "cpp",
+		"compare": "cpp",
+		"concepts": "cpp",
+		"condition_variable": "cpp",
+		"coroutine": "cpp",
+		"forward_list": "cpp",
+		"list": "cpp",
+		"map": "cpp",
+		"set": "cpp",
+		"unordered_set": "cpp",
+		"ratio": "cpp",
+		"source_location": "cpp",
+		"format": "cpp",
+		"future": "cpp",
+		"iomanip": "cpp",
+		"mutex": "cpp",
+		"numbers": "cpp",
+		"semaphore": "cpp",
+		"shared_mutex": "cpp",
+		"span": "cpp",
+		"stdfloat": "cpp",
+		"stop_token": "cpp",
+		"thread": "cpp",
+		"cinttypes": "cpp",
+		"typeindex": "cpp",
+		"valarray": "cpp",
+		"variant": "cpp"
 	},
 }

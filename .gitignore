@@ -12,11 +12,14 @@
 !*.mk
 !*.yml
 !*.tex
-!*.txt
 
 # vscode directory
 !launch.json
 !tasks.json
 !settings.json
+!cluster.conf
 !set_program_args.pl
 !visualize*
+
+# MNIST directory
+*ubyte

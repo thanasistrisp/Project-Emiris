@@ -42,7 +42,7 @@ INCLUDE := $(MY_PATH)include
 #
 # Το override επιτρέπει την προσθήκη επιπλέον παραμέτρων από τη γραμμή εντολών: make CFLAGS=...
 #
-override CXXFLAGS += -g -Wall -Wextra -Werror -MMD -I$(INCLUDE)
+override CXXFLAGS += -O3 -MMD -I$(INCLUDE) -I.
 
 # Linker options
 #   -lm        Link με τη math library
@@ -122,6 +122,7 @@ $(LIBS): $$($$@_OBJS)
 clean:
 	@$(RM) $(PROGS) $(LIBS) $(OBJS) $(DEPS) $(COV_FILES)
 	@$(RM) -r coverage
+	@$(RM) *vgcore*
 
 # Για κάθε εκτελέσιμο <prog> φτιάχνουμε ένα target run-<prog> που το εκτελεί με παραμέτρους <prog>_ARGS
 # Το run-% είναι "pattern rule", δημιουργεί έναν κανόνα για κάθε run-<foo>, θέτωντας το $* σε "foo".

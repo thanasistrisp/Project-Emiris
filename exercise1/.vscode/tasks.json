@@ -86,7 +86,15 @@
                 "${config:c_project.arg5}",
                 "${config:c_project.arg6}",
                 "${config:c_project.arg7}",
-                "${config:c_project.arg8}"
+                "${config:c_project.arg8}",
+                "${config:c_project.arg9}",
+				"${config:c_project.arg10}",
+				"${config:c_project.arg11}",
+				"${config:c_project.arg12}",
+				"${config:c_project.arg13}",
+				"${config:c_project.arg14}",
+				"${config:c_project.arg15}",
+                "${config:c_project.arg16}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -107,7 +115,15 @@
                 "${config:c_project.arg5}",
                 "${config:c_project.arg6}",
                 "${config:c_project.arg7}",
-                "${config:c_project.arg8}"
+                "${config:c_project.arg8}",
+                "${config:c_project.arg9}",
+				"${config:c_project.arg10}",
+				"${config:c_project.arg11}",
+				"${config:c_project.arg12}",
+				"${config:c_project.arg13}",
+				"${config:c_project.arg14}",
+				"${config:c_project.arg15}",
+                "${config:c_project.arg16}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -136,7 +152,15 @@
                 "${config:c_project.arg5}",
                 "${config:c_project.arg6}",
                 "${config:c_project.arg7}",
-                "${config:c_project.arg8}"
+                "${config:c_project.arg8}",
+                "${config:c_project.arg9}",
+				"${config:c_project.arg10}",
+				"${config:c_project.arg11}",
+				"${config:c_project.arg12}",
+				"${config:c_project.arg13}",
+				"${config:c_project.arg14}",
+				"${config:c_project.arg15}",
+                "${config:c_project.arg16}"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/${config:c_project.dir}"
@@ -164,7 +188,15 @@
                 "${config:c_project.arg5}",
                 "${config:c_project.arg6}",
                 "${config:c_project.arg7}",
-                "${config:c_project.arg8}"
+                "${config:c_project.arg8}",
+                "${config:c_project.arg9}",
+				"${config:c_project.arg10}",
+				"${config:c_project.arg11}",
+				"${config:c_project.arg12}",
+				"${config:c_project.arg13}",
+				"${config:c_project.arg14}",
+				"${config:c_project.arg15}",
+                "${config:c_project.arg16}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -189,7 +221,15 @@
                 "${config:c_project.arg5}",
                 "${config:c_project.arg6}",
                 "${config:c_project.arg7}",
-                "${config:c_project.arg8}"
+                "${config:c_project.arg8}",
+                "${config:c_project.arg9}",
+				"${config:c_project.arg10}",
+				"${config:c_project.arg11}",
+				"${config:c_project.arg12}",
+				"${config:c_project.arg13}",
+				"${config:c_project.arg14}",
+				"${config:c_project.arg15}",
+                "${config:c_project.arg16}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -214,7 +254,15 @@
                 "${config:c_project.arg5}",
                 "${config:c_project.arg6}",
                 "${config:c_project.arg7}",
-                "${config:c_project.arg8}"
+                "${config:c_project.arg8}",
+                "${config:c_project.arg9}",
+				"${config:c_project.arg10}",
+				"${config:c_project.arg11}",
+				"${config:c_project.arg12}",
+				"${config:c_project.arg13}",
+				"${config:c_project.arg14}",
+				"${config:c_project.arg15}",
+                "${config:c_project.arg16}"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/${config:c_project.dir}"
