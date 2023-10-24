@@ -109,9 +109,9 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
             if(dist < r){
                 s.insert(make_tuple(p_index, dist));
             }
-            if(s.size() > (unsigned int) 20 * number_of_hash_tables){
-                break;
-            }
+            // if(s.size() > (unsigned int) 20 * number_of_hash_tables){ // Optional.
+            //     break;
+            // }
         }
     }
     vector<int> indices;
