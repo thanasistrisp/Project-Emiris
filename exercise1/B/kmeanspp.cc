@@ -3,7 +3,7 @@
 #include <random>
 #include <algorithm>
 
-#include "kmeans.h"
+#include "kmeans.hpp"
 
 using namespace std;
 

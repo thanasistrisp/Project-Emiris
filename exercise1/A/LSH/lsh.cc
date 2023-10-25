@@ -4,9 +4,9 @@
 #include <set>
 // iterator is used for std::const_iterator, std::advance().
 
-#include "lsh.h"
-#include "list.h"
-#include "hash_table.h"
+#include "lsh.hpp"
+#include "list.hpp"
+#include "hash_table.hpp"
 
 using std::vector;
 using std::tuple;

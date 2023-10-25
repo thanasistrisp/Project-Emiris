@@ -1,10 +1,9 @@
-#ifndef LSH_H
-#define LSH_H
+#pragma once
 
 #include <vector>
 #include <tuple>
 
-#include "hash_table.h"
+#include "hash_table.hpp"
 
 class LSH
 {
@@ -31,5 +30,3 @@ class LSH
         std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double>&, double r,
                                                                 double (*distance)(const std::vector<double>&, const std::vector<double>&));
 };
-
-#endif /* LSH_H */

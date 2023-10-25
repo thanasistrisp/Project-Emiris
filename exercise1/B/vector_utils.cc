@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "vector_utils.h"
+#include "vector_utils.hpp"
 
 using namespace std;
 

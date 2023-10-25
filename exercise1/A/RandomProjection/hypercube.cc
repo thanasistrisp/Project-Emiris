@@ -4,7 +4,7 @@
 #include <limits>
 #include <algorithm>
 
-#include "lp_metric.h"
+#include "lp_metric.hpp"
 #include "hypercube.hpp"
 #include "defines.hpp"
 

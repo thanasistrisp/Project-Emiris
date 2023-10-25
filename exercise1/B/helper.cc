@@ -4,7 +4,7 @@
 #include <string>
 #include <ctime>
 
-#include "kmeans.h"
+#include "kmeans.hpp"
 
 using namespace std;
 
@@ -80,14 +80,14 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 	vector<vector<double>> centroids = kmeans.get_centroids();
 
 	for (int i = 0; i < k; i++) {
-		output << "CLUSTER-" << i + 1 << " {size: " << clusters[i].size() << ", centroid: [";
+		output << "CLUSTER-" << i + 1 << " {size: " << clusters[i].size() << ", centroid: ";
 		for (int j = 0; j < (int)centroids[i].size(); j++) {
 			output << centroids[i][j];
 			if (j != (int)centroids[i].size() - 1) {
 				output << ", ";
 			}
 		}
-		output << "]}" << endl;
+		output << "}" << endl;
 	}
 	output << "clustering_time: " << time << endl;
 
@@ -117,22 +117,19 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 	if (complete) {
 		for (int i = 0; i < (int) clusters.size(); i++) {
 			output << "CLUSTER-" << i + 1 << " {";
-			output << "[";
 			for (int j = 0; j < (int) centroids[i].size(); j++) {
 				output << centroids[i][j];
 				if (j != (int) centroids[i].size() - 1) {
 					output << ", ";
 				}
 			}
-			output << "], ";
-			output << "{";
 			for (int j = 0; j < (int) clusters[i].size(); j++) {
 				output << clusters[i][j];
 				if (j != (int) clusters[i].size() - 1) {
 					output << ", ";
 				}
 			}
-			output << "}}" << endl;
+			output << "}" << endl;
 		}
 		
 	}

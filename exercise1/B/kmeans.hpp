@@ -1,12 +1,11 @@
-#ifndef KMEANS_H
-#define KMEANS_H
+#pragma once
 
 #include <vector>
 #include <tuple>
 #include <unordered_set>
 #include <unordered_map>
 
-#include "lp_metric.h"
+#include "lp_metric.hpp"
 
 typedef enum {CLASSIC, REVERSE_LSH, REVERSE_HYPERCUBE} update_method;
 
@@ -33,7 +32,6 @@ class KMeans
         std::tuple<int,int> assign_hypercube(int);
 
         bool update();
-        bool update(int, int);
         bool update(int, int, int);
 
         int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes;
@@ -54,5 +52,3 @@ class KMeans
 
         int get_dataset_size() const { return dataset.size(); }
 };
-
-#endif /* KMEANS_H */

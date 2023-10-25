@@ -1,5 +1,4 @@
-#ifndef T_LIST_H
-#define T_LIST_H
+#pragma once
 
 #include <ostream>
 #include <cstdlib>
@@ -211,5 +210,3 @@ template <typename T> int List<T>::get_count() const
 {
     return count;
 }
-
-#endif /* T_LIST_H */

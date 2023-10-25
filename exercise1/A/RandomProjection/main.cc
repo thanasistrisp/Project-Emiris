@@ -88,7 +88,6 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	vector <vector<double>> dataset = read_mnist_data(input_file);
-	// dataset.resize(1000);
 
 	hypercube cube(dataset, k, M, probes);
 

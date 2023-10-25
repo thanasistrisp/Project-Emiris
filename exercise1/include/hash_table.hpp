@@ -1,11 +1,10 @@
-#ifndef T_HASH_TABLE_H
-#define T_HASH_TABLE_H
+#pragma once
 
 #include <iostream>
 #include <vector>
 
-#include "list.h"
-#include "hash_function.h"
+#include "list.hpp"
+#include "hash_function.hpp"
 
 template <typename V> class HashBucket
 {
@@ -243,5 +242,3 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid
     valid = true;
     return element;
 }
-
-#endif /* T_HASH_TABLE_H */
