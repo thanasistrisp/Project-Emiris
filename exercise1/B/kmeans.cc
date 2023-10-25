@@ -159,6 +159,7 @@ tuple<int,int> KMeans::assign_hypercube(int index)
                 }
             }
         }
+        ind++;
         radius *= 2; // Multiply radius by 2.
     }
 

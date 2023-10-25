@@ -136,13 +136,13 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
+				if (num_points >= M)
+					goto check;
 				if (distance(p[vertices[i][j]], q) < R)
 				{
 					candidates.insert(pair<double, int>(distance(p[vertices[i][j]], q), vertices[i][j]));
 				}
 				num_points++;
-				if (num_points >= M)
-					goto check;
 			}
 			num_vertices++;
 			if (num_vertices >= probes)
