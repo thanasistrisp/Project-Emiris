@@ -39,6 +39,20 @@ double KMeans::min_dist_centroids() const
     return min_dist;
 }
 
+double KMeans::max_dist_centroids() const
+{
+    double dist, max_dist = distance(centroids[0], centroids[1]);
+    for(int i = 0; i < (int) centroids.size(); i++){
+        for(int j = i + 1; j < (int) centroids.size(); j++){
+            dist = distance(centroids[i], centroids[j]);
+            if(dist > max_dist){
+                max_dist = dist;
+            }
+        }
+    }
+    return max_dist;
+}
+
 void KMeans::assign_lloyds_reverse()
 {
     int old_cluster, new_cluster;
@@ -74,19 +88,21 @@ tuple<int,int> KMeans::assign_lloyds(int index)
     return make_tuple(old_cluster, new_cluster);
 }
 
-tuple<int,int> KMeans::assign_lsh(int index)
+// tuple<int,int> KMeans::assign_lsh(int index)
+void KMeans::compute_clusters_reverse_lsh()
 {
     // Index n points into L hashtables: once for the entire algorithm.
     static LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, w, dataset);
 
     // Start with radius = min(dist between centroids) / 2.
     double radius = min_dist_centroids() / 2;
+    double max_radius = max_dist_centroids();
     bool changed_assignment = true;
     vector<int> ball;
     vector<double> distances;
     int p_index;
     unordered_map<int, int>::const_iterator iter;
-    while(changed_assignment){
+    while(changed_assignment || radius < max_radius){
         changed_assignment = false;
         for(int i = 0; i < (int) centroids.size(); i++){
             // At each iteration, for each centroid c, range/ball queries centered at c.
@@ -118,22 +134,22 @@ tuple<int,int> KMeans::assign_lsh(int index)
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
     assign_lloyds_reverse();
-    return make_tuple(-1,-1);
 }
 
-tuple<int,int> KMeans::assign_hypercube(int index)
+void KMeans::compute_clusters_reverse_hypercube()
 {
     // Index n points into the hypercube: once for the entire algorithm.
     static hypercube hypercube(dataset, k_hypercube, max_points_checked, probes);
 
     // Start with radius = min(dist between centroids) / 2.
     double radius = min_dist_centroids() / 2;
+    double max_radius = max_dist_centroids();
     bool changed_assignment = true;
     vector<int> ball, centroid_proj;
     vector<double> distances;
     int p_index;
     unordered_map<int, int>::const_iterator iter;
-    while(changed_assignment){
+    while(changed_assignment || radius < max_radius){
         changed_assignment = false;
         for(int i = 0; i < (int) centroids.size(); i++){
             // At each iteration, for each centroid c, range/ball queries centered at c.
@@ -166,7 +182,6 @@ tuple<int,int> KMeans::assign_hypercube(int index)
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
     assign_lloyds_reverse();
-    return make_tuple(-1,-1);
 }
 
 bool KMeans::update() // MacQueen's update rule
@@ -199,7 +214,12 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
     vector<double> old_centroid = centroids[old_cluster];
     vector<double> new_centroid = vector_scalar_mult(old_centroid, clusters[old_cluster].size() + 1);
     new_centroid = vector_subtraction(new_centroid, dataset[index]);
-    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[old_cluster].size() - 1));
+    if(clusters[old_cluster].size() == 0){
+        new_centroid = vector<double>(old_centroid.size(), 0);
+    }
+    else{
+        new_centroid = vector_scalar_mult(new_centroid, (double) 1 / clusters[old_cluster].size());
+    }
     if(new_centroid != old_centroid){
         centroids[old_cluster] = new_centroid;
         changed_centroids = true;
@@ -210,7 +230,7 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
     old_centroid = centroids[new_cluster];
     new_centroid = vector_scalar_mult(old_centroid, clusters[new_cluster].size() - 1);
     new_centroid = vector_addition(new_centroid, dataset[index]);
-    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / (clusters[new_cluster].size() + 1));
+    new_centroid = vector_scalar_mult(new_centroid, (double) 1 / clusters[new_cluster].size());
     if(new_centroid != old_centroid){
         centroids[new_cluster] = new_centroid;
         changed_centroids = true;
@@ -218,55 +238,23 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
     return changed_centroids;
 }
 
-void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
-    tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
-    clusters.resize(k);
-
-    // add all points to cluster 0
-    for(int i = 0; i < (int) dataset.size(); i++){
-        clusters[0].insert(i);
-        point_to_cluster[i] = 0;
-    }
-    
-    tuple<int,int> (KMeans::*assign)(int);
-    if(method == CLASSIC){
-        assign = &KMeans::assign_lloyds;
-    }
-    else if(method == REVERSE_LSH){
-        assign = &KMeans::assign_lsh;
-    }
-    else if(method == REVERSE_HYPERCUBE){
-        assign = &KMeans::assign_hypercube;
-    }
-
-    bool changed_centroids;
-
-    // Initialize centroids using KMeans++ algorithm.
-    kmeanspp();
-    // assign all points to nearest centroid
-    for(int i = 0; i < (int) dataset.size(); i++){
-       assign_lloyds(i);
-    }
+void KMeans::compute_clusters_lloyds()
+{
     bool first = true;
     while(true){
         bool flag = false;
-        if(method == CLASSIC){
-            if (first) {
-                first = false;
-                update();
-            }
-            for(int i = 0; i < (int) dataset.size(); i++){
-                // Assign point to cluster and apply MacQueen's update rule.
-                int old_cluster, new_cluster;
-                tie(old_cluster, new_cluster) = (this->*assign)(i);
-                if(old_cluster != new_cluster){
-                    update(old_cluster, new_cluster, i);
-                    flag = true;
-                }
-            }
+        if(first){
+            first = false;
+            update();
         }
-        else{
-            (this->*assign)(0);
+        for(int i = 0; i < (int) dataset.size(); i++){
+            // Assign point to cluster and apply MacQueen's update rule.
+            int old_cluster, new_cluster;
+            tie(old_cluster, new_cluster) = assign_lloyds(i);
+            if(old_cluster != new_cluster){
+                update(old_cluster, new_cluster, i);
+                flag = true;
+            }
         }
         ind++;
         if (!flag) {
@@ -274,6 +262,35 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
             break;
         }
     }
+}
+
+void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
+    tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
+    clusters.resize(k);
+
+    // Add all points to cluster 0
+    for(int i = 0; i < (int) dataset.size(); i++){
+        clusters[0].insert(i);
+        point_to_cluster[i] = 0;
+    }
+
+    // Initialize centroids using KMeans++ algorithm.
+    kmeanspp();
+
+    // Assign all points to nearest centroid
+    for(int i = 0; i < (int) dataset.size(); i++){
+       assign_lloyds(i);
+    }
+
+    if(method == CLASSIC){
+        compute_clusters_lloyds();
+    }
+    else if(method == REVERSE_LSH){
+        compute_clusters_reverse_lsh();
+    }
+    else{
+        compute_clusters_reverse_hypercube();
+    } 
 }
 
 std::vector<std::vector<double>> KMeans::get_centroids() const
