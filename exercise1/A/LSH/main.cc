@@ -9,9 +9,10 @@
 // cstdlib is used for srand().
 // ctime is used for time().
 
-#include "lsh.h"
+#include "lsh.hpp"
 #include "helper_LSH.hpp"
 #include "helper.hpp"
+#include "defines.hpp"
 
 using namespace std;
 
@@ -24,7 +25,6 @@ int main(int argc, char *argv[]) {
 	int k = 4;
 	int L = 5;
 	int N = 1;
-	int window = 1000;
 	double R = 10000;
 
 	for (int i = 1; i < argc; i++) {
@@ -87,11 +87,10 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	vector <vector<double>> dataset = read_mnist_data(input_file);
-	// dataset.resize(1000);
 
 	cout << "Read MNIST data" << endl;
 
-	LSH lsh(k, L, dataset.size() / 4, window, dataset);
+	LSH lsh(k, L, dataset.size() / 4, w, dataset);
 
 	cout << "Created LSH" << endl;
 

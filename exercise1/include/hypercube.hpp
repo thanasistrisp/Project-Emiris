@@ -5,8 +5,8 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include "lp_metric.h"
-#include "hash_function.h"
+#include "lp_metric.hpp"
+#include "hash_function.hpp"
 #include "binary_string.hpp"
 
 class hypercube

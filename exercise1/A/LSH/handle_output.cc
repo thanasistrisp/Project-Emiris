@@ -6,9 +6,10 @@
 #include <set>
 // iterator is used for std::back_insert_iterator, std::advance().
 
-#include "lsh.h"
+#include "lsh.hpp"
 #include "helper.hpp"
-#include "lp_metric.h"
+#include "lp_metric.hpp"
+#include "brute_force.hpp"
 
 using namespace std;
 
@@ -17,34 +18,6 @@ using std::tuple;
 using std::get;
 using std::make_tuple;
 using std::set;
-
-// brute force search for nearest neighbors
-tuple<vector<int>, vector<double>> brute_force(vector<vector<double>> dataset, vector<double> query, unsigned int N, double (*distance)(const vector<double>&, const vector<double>&))
-{
-	auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
-	set<tuple<int, double>, decltype(compare)> s(compare);
-
-	double dist;
-	for(int i = 0; (unsigned int) i < dataset.size(); i++){
-		dist = distance(dataset[i], query);
-		if(s.size() == N){
-			if(dist >= get<1>(*s.rbegin())){
-				continue;
-			}
-			s.erase(std::prev(s.end()));
-		}
-		s.insert(make_tuple(i, dist));
-	}
-
-	vector<int> indices;
-	vector<double> distances;
-	set<tuple<int, double>>::const_iterator iter;
-	for(iter = s.begin(); iter != s.end(); std::advance(iter, 1)){
-		indices.push_back(get<0>(*iter));
-		distances.push_back(get<1>(*iter));
-	}
-	return make_tuple(indices, distances);
-}
 
 void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int n, double r, ofstream &output) {
 	for (int q = 0; q < (int) queries.size(); q++) {
@@ -77,9 +50,8 @@ void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<
 		vector<int> indices_rnn = get<0>(rnn);
 		vector<double> distances_rnn = get<1>(rnn);
 		for(int i = 0; (unsigned int) i < indices_rnn.size(); i++){
-			output << indices_rnn[i] << " " << distances_rnn[i] << endl;
+			output << indices_rnn[i] << endl;
 		}
 	}
-
 	output.close();
 }

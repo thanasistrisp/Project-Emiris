@@ -5,7 +5,7 @@
 // iterator  is used for std::const_iterator, std::advance().
 // cmath     is used for abs(), pow().
 
-#include "lp_metric.h"
+#include "lp_metric.hpp"
 
 using std::vector;
 using std::string;

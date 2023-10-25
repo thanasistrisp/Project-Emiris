@@ -1,5 +1,4 @@
-#ifndef HASH_FUNCTION_H
-#define HASH_FUNCTION_H
+#pragma once
 
 #include <vector>
 
@@ -18,5 +17,3 @@ class HashFunction
 
         int hash(const std::vector<double>&);
 };
-
-#endif /* HASH_FUNCTION_H */

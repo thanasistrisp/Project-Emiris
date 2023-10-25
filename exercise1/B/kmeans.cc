@@ -6,11 +6,11 @@
 
 using namespace std;
 
-#include "kmeans.h"
+#include "kmeans.hpp"
 #include "defines.hpp"
-#include "vector_utils.h"
+#include "vector_utils.hpp"
 
-#include "lsh.h"
+#include "lsh.hpp"
 #include "hypercube.hpp"
 
 KMeans::KMeans(const vector<std::vector<double>> &dataset) : dataset(dataset)
@@ -186,38 +186,6 @@ bool KMeans::update() // MacQueen's update rule
     return changed_centroids;
 }
 
-bool KMeans::update(int old_cluster, int new_cluster)
-{
-    bool changed_centroids = false;
-    vector<double> new_centroid(dataset[0].size(), 0);
-    for(int j : clusters[old_cluster]){
-        for(int l = 0; l < (int) dataset[j].size(); l++){
-            new_centroid[l] += dataset[j][l];
-        }
-    }
-    for(int l = 0; l < (int) new_centroid.size(); l++){
-        new_centroid[l] /= clusters[old_cluster].size();
-    }
-    if(new_centroid != centroids[old_cluster]){
-        centroids[old_cluster] = new_centroid;
-        changed_centroids = true;
-    }
-    new_centroid = vector<double>(dataset[0].size(), 0);
-    for(int j : clusters[new_cluster]){
-        for(int l = 0; l < (int) dataset[j].size(); l++){
-            new_centroid[l] += dataset[j][l];
-        }
-    }
-    for(int l = 0; l < (int) new_centroid.size(); l++){
-        new_centroid[l] /= clusters[new_cluster].size();
-    }
-    if(new_centroid != centroids[new_cluster]){
-        centroids[new_cluster] = new_centroid;
-        changed_centroids = true;
-    }
-    return changed_centroids;
-}
-
 bool KMeans::update(int old_cluster, int new_cluster, int index)
 {
     bool changed_centroids = false;
@@ -284,7 +252,6 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
                 int old_cluster, new_cluster;
                 tie(old_cluster, new_cluster) = (this->*assign)(i);
                 if(method == CLASSIC && old_cluster != new_cluster && !first){
-                    // update(old_cluster, new_cluster);
                     update(old_cluster, new_cluster, i);
                 }
             }

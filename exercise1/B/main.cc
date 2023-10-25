@@ -6,7 +6,7 @@
 #include <tuple>
 #include <random>
 
-#include "kmeans.h"
+#include "kmeans.hpp"
 #include "helper_kmeans.hpp"
 #include "helper.hpp"
 
