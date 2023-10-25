@@ -220,27 +220,22 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
 void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
     tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
     clusters.resize(k);
+
+    // add all points to cluster 0
+    for(int i = 0; i < (int) dataset.size(); i++){
+        clusters[0].insert(i);
+        point_to_cluster[i] = 0;
+    }
     
     tuple<int,int> (KMeans::*assign)(int);
     if(method == CLASSIC){
         assign = &KMeans::assign_lloyds;
-        // add all points to cluster 0
-        for(int i = 0; i < (int) dataset.size(); i++){
-            clusters[0].insert(i);
-            point_to_cluster[i] = 0;
-        }
     }
     else if(method == REVERSE_LSH){
         assign = &KMeans::assign_lsh;
-        for(int i = 0; i < (int) dataset.size(); i++){
-            point_to_cluster[i] = -1;
-        }
     }
     else if(method == REVERSE_HYPERCUBE){
         assign = &KMeans::assign_hypercube;
-        for(int i = 0; i < (int) dataset.size(); i++){
-            point_to_cluster[i] = -1;
-        }
     }
 
     bool changed_centroids;
