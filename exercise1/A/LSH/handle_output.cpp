@@ -77,9 +77,8 @@ void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<
 		vector<int> indices_rnn = get<0>(rnn);
 		vector<double> distances_rnn = get<1>(rnn);
 		for(int i = 0; (unsigned int) i < indices_rnn.size(); i++){
-			output << indices_rnn[i] << " " << distances_rnn[i] << endl;
+			output << indices_rnn[i] << endl;
 		}
 	}
-
 	output.close();
 }
