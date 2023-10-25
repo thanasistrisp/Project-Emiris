@@ -13,6 +13,8 @@ using namespace std;
 #include "lsh.hpp"
 #include "hypercube.hpp"
 
+int ind = 0;
+
 KMeans::KMeans(const vector<std::vector<double>> &dataset) : dataset(dataset)
 {
     point_to_cluster.resize(dataset.size());
@@ -109,6 +111,7 @@ tuple<int,int> KMeans::assign_lsh(int index)
                 }
             }
         }
+        ind++;
         radius *= 2; // Multiply radius by 2.
     }
 
@@ -244,24 +247,34 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
 
     // Initialize centroids using KMeans++ algorithm.
     kmeanspp();
-    bool first = true; // flag to avoid updating centroids on first iteration
+    // assign all points to nearest centroid
+    for(int i = 0; i < (int) dataset.size(); i++){
+       assign_lloyds(i);
+    }
+    bool first = true;
     while(true){
+        bool flag = false;
         if(method == CLASSIC){
+            if (first) {
+                first = false;
+                update();
+            }
             for(int i = 0; i < (int) dataset.size(); i++){
                 // Assign point to cluster and apply MacQueen's update rule.
                 int old_cluster, new_cluster;
                 tie(old_cluster, new_cluster) = (this->*assign)(i);
-                if(method == CLASSIC && old_cluster != new_cluster && !first){
+                if(old_cluster != new_cluster){
                     update(old_cluster, new_cluster, i);
+                    flag = true;
                 }
             }
-            first = false;
         }
         else{
             (this->*assign)(0);
         }
-        changed_centroids = update();
-        if(!changed_centroids){
+        ind++;
+        if (!flag) {
+            cout << "Iterations: " << ind << endl;
             break;
         }
     }
