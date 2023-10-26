@@ -81,6 +81,15 @@ int main(int argc, char *argv[]) {
 
 	// read input file
 	vector<vector<double>> dataset = read_mnist_data(input_file);
+
+	// vector<vector<double>> dataset;
+	// for (int i = 0; i < 100; i++) {
+	// 	vector<double> point;
+	// 	for (int j = 0; j < 3; j++) {
+	// 		point.push_back(rand() % 100);
+	// 	}
+	// 	dataset.push_back(point);
+	// }
 	
 	// read config file
 	tuple<int, int, int, int, int, int> config = read_config_file(config_file);

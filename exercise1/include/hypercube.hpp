@@ -19,14 +19,16 @@ private:
 
 	std::unordered_map<int, int> *f_map;
 
+	// used in permutations calculation
 	std::unordered_set<binary_string, binary_string::hash> *used_vertices;
 
-	// define HashTable
 	typedef std::unordered_map<binary_string, std::vector<int>, binary_string::hash> HashTable;
 	HashTable *hash_table;
 
 	std::vector<HashFunction*> hash_functions;
 	int f(int x, int i);
+
+	// returns the vertices that are at hamming distance from q_proj
 	std::vector<std::vector<int>> pack(const std::vector<int> &q_proj, int hamming_distance);
 	std::set<std::vector<int>> get_permutation(const std::vector<int> &q_proj, int hamming_distance);
 public:
@@ -35,6 +37,7 @@ public:
 	~hypercube();
 	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<double> &q, const std::vector<int> &q_proj, int N);
 	std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double> &q, const std::vector<int> &q_proj, double R);
+	// returns the projection of q
 	std::vector<int> calculate_q_proj(const std::vector<double> &q);
 	std::vector<std::vector<double>> get_dataset() { return p; }
 	double (*distance)(const std::vector<double> &, const std::vector<double> &);

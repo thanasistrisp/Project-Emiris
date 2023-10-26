@@ -26,9 +26,9 @@ std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, in
 			return vector<vector<int>>();
 		}
 	}
-	// get all permutations of q_proj with hamming distance
+	// get all permutations of q_proj with specific hamming distance
 	set<vector<int>> permutation = get_permutation(q_proj, hamming_distance);
-	// for each permutation, find the vertex in hash_table
+	// for each permutation, find the vertex in hash_table if exists
 	vector<vector<int>> result;
 	int sz = permutation.size();
 	for (int i = 0; i < sz; i++) {
@@ -50,23 +50,24 @@ int hypercube::f(int x, int i) {
 	return f_map[i][x];
 }
 
-// get all permutations of q_proj based on hamming distance
 set<vector<int>> hypercube::get_permutation(const vector<int> &q_proj, int hamming_distance) {
 	set<vector<int>> result;
 	for (int i = 0; i < (int) q_proj.size(); i++) {
 		vector<int> permutation = q_proj;
 		permutation[i] = 1 - permutation[i];
-		// if not in used_vertices, insert
+		// edge case: hamming distance = 1
 		if (hamming_distance != 1)
 			result.insert(permutation);
+		// if not in used_vertices, insert
 		else if (used_vertices->find(permutation) == used_vertices->end()) {
 			result.insert(permutation);
 			used_vertices->insert(permutation);
 		}
 	}
-	if (hamming_distance == 1)
+	if (hamming_distance == 1) // base case
 		return result;
 	set<vector<int>> temp;
+	// for each permutation, get all permutations with hamming distance - 1
 	for (auto it = result.begin(); it != result.end(); it++) {
 		set<vector<int>> temp2 = get_permutation(*it, hamming_distance - 1);
 		temp.insert(temp2.begin(), temp2.end());

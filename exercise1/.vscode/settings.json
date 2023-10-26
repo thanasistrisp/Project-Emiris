@@ -27,7 +27,7 @@
 		"arg6": "../output/cluster.txt",
 		"arg7": "-complete",
 		"arg8": "-m",
-		"arg9": "Classic",
+		"arg9": "hypercube",
 		"arg10": "#",
 		"arg11": "#",
 		"arg12": "#",

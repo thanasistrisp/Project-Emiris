@@ -1,1 +1,232 @@
-# Exercise 1
+# Software Development for Algorithmic Problems - Winter Semester 2023-24
+
+# Project 1 - Vector Search and Clustering in C/C++
+
+Eleftheria Vrachoriti - 1115202000026
+
+Athanasios Trispiotis - 1115202000194
+
+# 1. Project structure
+
+```txt
+exercise1/
+├── A/                          # directory for source and header files for LSH and Hypercube
+│   ├── common/                     # directory for source files that are used by both `lsh` and `cube`
+│   │   ├── brute_force.cc              # Brute force Nearest Neighbour implementation for comparison
+│   │   ├── handle_binary.cc            # helper functions for reading data from input files
+│   │   ├── hash_function.cc            # helper functions for LSH hash functions h_i
+│   │   └── lp_metric.cc                # helper functions for lp metrics (e.g. euclidean metric)
+│   │
+│   ├── LSH/                        # directory for source files for LSH implementation
+│   │   ├── handle_output.cc            # helper functions for `lsh` output
+│   │   ├── helper_LSH.hpp              # header file for `handle_output.cc`
+│   │   ├── lsh.cc                      # LSH implementation
+│   │   ├── main.cc                     # `lsh` main function
+│   │   └── Makefile
+│   │
+│   └── RandomProjection/           # directory for source files for Hypercube implementation
+│       ├── binary_string.cc            # helper functions for handling binary strings
+│       ├── handle_output.cc            # helper functions for `cube` output
+│       ├── helper_RP.hpp               # header file for `handle_output.cc`
+│       ├── hypercube.cc                # Hypercube implementation
+│       ├── helper_cube.cc              # helper functions for Hypercube implementation
+│       ├── main.cc                     # `cube` main function
+│       └── Makefile
+│
+├── B/                          # directory for source and header files for KMeans
+│   ├── cluster.conf                # configuration file for `cluster`
+│   ├── helper.cc                   # helper functions for `cluster` output
+│   ├── helper_kmeans.hpp           # header file for `helper.cc`
+│   ├── kmeans.cc                   # KMeans implementation
+│   ├── kmeans.hpp                  # header file for `kmeans.cc`, KMeans class definition
+│   ├── kmeanspp.cc                 # KMeans++ implementation
+│   ├── main.cc                     # `cluster` main function
+│   ├── vector_utils.cc             # helper functions for numerical operations on vectors
+│   ├── vector_utils.hpp            # header file for `vector_utils.hpp`
+│   └── Makefile
+│
+├── include/                    # directory for header files used in all three programs
+│   ├── binary_string.hpp           # header file for `binary_string.cc`
+│   ├── brute_force.hpp             # header file for `brute_force.cc`
+│   ├── defines.hpp                 # definition of constants used throughout the whole program
+│   ├── hash_function.hpp           # header file for `hash_function.cc`
+│   ├── hash_table.hpp              # HashTable template class definition and implementation
+│   ├── helper.hpp                  # header file for `handle_binary.cc`
+│   ├── hypercube.hpp               # header file for `hypercube.cc`, Hypercube class implementation
+│   ├── list.hpp                    # List template class definition and implementation
+│   ├── lp_metric.hpp               # header file for `lp_metric.cc`
+│   └── lsh.hpp                     # header file for `lsh`, LSH class definition
+│
+├── MNIST/                      # directory for input and query data files
+│   ├── input.dat
+│   └── query.dat
+│
+├── output/                     # directory for result files
+│
+├── common.mk                   # main Makefile
+└── README.md                   # this documentation file
+```
+
+# 2. Compilation
+
+## 2.1. `lsh`
+
+Go to directory <code>exercise1/</code> and then run the following commands:
+
+    cd A/LSH/
+    make
+
+## 2.2. `cube`
+
+Go to directory <code>exercise1/</code> and then run the following commands:
+
+    cd A/RandomProjection/
+    make
+
+
+## 2.3. `cluster`
+
+Go to directory <code>exercise1/</code> and then run the following commands:
+
+    cd B/
+    make
+
+## 2.4. `clean`
+
+To remove dependency, object and executable files run the following command:
+
+    make clean
+
+at any of the three following directories:
+
++ `A/LSH`
++ `A/RandomProjection`
++ `B/`
+
+# 3. Execution
+
+## 3.1. `lsh`
+
+After running the commands in [2.1.](#21-lsh), run the following at the same directory:
+
+    ./lsh -d <input file> -q <query file> -k <int> -L <int> -o <output file> -N <number of nearest> -R <double>
+
+where:
+
++ `input file`: binary input data in the form that's specified in [[1]](#references)
++ `query file`: binary query data in the form that's specified in [[1]](#references)
++ `k`: number of LSH functions $h_i$ that will be used for defining $g$ functions
++ `L`: number of hash tables inside the LSH
++ `output file`: file for output
++ `N`: number of Approximate Nearest Neighbours of each query using LSH
++ `R`: radius for Range Search using LSH
+
+If any of the numeric arguments aren't specified, the following values will be used:
+
+| Argument | Default value |
+|:------:|:------:|
+| `k` | 4 |
+| `L` | 5 |
+| `N` | 1 |
+| `R` | 10000 |
+
+e.g.
+
+    ./lsh -d ../../MNIST/input.dat -q ../../MNIST/query.dat -k 4 -L 5 -o ../../output/output.txt -N 1 -R 10000
+
+Alternatively, you can skip [2.1.](#21-lsh) and compile and execute `lsh` with the default arguments using only the following commands:
+
+    cd A/LSH/
+    make run-lsh
+
+To check memory leaks with `valgrind`, use the following command:
+
+    make valgrind-lsh
+
+## 3.2. `cube`
+
+After running the commands in [2.2.](#22-cube), run the following at the same directory:
+
+    ./cube -d <input file> -q <query file> -k <int> -M <int> -probes <int> -o <output file> -N <number of nearest> -R <double>
+
+where:
+
++ `input file`: binary input data in the form that's specified in [[1]](#references)
++ `query file`: binary query data in the form that's specified in [[1]](#references)
++ `k`: number of dimensions for Random Projection ($d'$)
++ `M`: maximum number of candidate data points that will be checked
++ `probes`: maximum number of Hypercube vertices that will be checked
++ `output file`: file for output
++ `N`: number of Approximate Nearest Neighbours of each query using Hypercube
++ `R`: radius for Range Search using Hypercube
+
+e.g.
+
+    ./cube -d ../../MNIST/input.dat -q ../../MNIST/query.dat -k 14 -M 200 -probes 50 -o ../../output/output.txt -N 5 -R 10000
+
+If any of the numeric arguments aren't specified, the following values will be used:
+
+| Argument | Default value |
+|:------:|:------:|
+| `k` | 14 |
+| `M` | 10 |
+| `probes` | 2 |
+| `N`   | 1 |
+| `R` | 10000 |
+
+Alternatively, you can skip [2.2.](#22-cube) and compile and execute `cube` with the default arguments using only the following commands:
+
+    cd A/RandomProjection/
+    make run-cube
+
+To check memory leaks with `valgrind`, use the following command:
+
+    make valgrind-cube
+
+## 3.3. `cluster`
+
+After running the commands in [2.3.](#23-cluster), run the following at the same directory:
+
+    ./cluster -i <input file> -c <configuration file> -o <output file> -complete <optional> -m <method: Classic or LSH or Hypercube>
+
+where:
+
++ `input file`: input data in the form that's specified in [[1]](#references)
++ `configuration file`: configuration parameters for clustering using the Lloyd's method or Reverse Search using LSH or Hypercube. Have a look at `B/cluster.conf` file for more details.
++ `output file`: file for output
++ `-complete`: if specified, the data points inside each cluster will be appended at the end of the `output file`
++ `method`: `Classic` for Lloyd's method, `LSH` for Reverse Search using LSH or `Hypercube` for Reverse Search using Hypercube
+
+e.g.
+
+    ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m Classic
+    ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m LSH
+    ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m Hypercube
+
+Alternatively, you can skip [2.3.](#23-cluster) and compile and execute `cluster` using only the following commands:
+
+    cd B/
+    make run-cluster
+
+To check memory leaks with `valgrind`, use the following command:
+
+    make valgrind-cluster
+
+# 4. Documentation
+
+## 4.1. `lsh`
+
+## 4.2. `cube`
+
+## 4.3. `cluster`
+
+# References
+
+[1] LeCun, Y., Cortes, C., & Burges, Christopher, THE MNIST DATABASE
+of handwritten digits, https://yann.lecun.com/exdb/mnist/
+
+[2] Andoni, A., & Indyk, P. (2006). Near-optimal hashing algorithms for approximate nearest neighbor in high dimensions. *2006 47th Annual IEEE Symposium on Foundations of Computer Science (FOCS’06)*. https://doi.org/10.1109/focs.2006.49
+
+[3] Andoni, A., & Indyk, P. (2005). E^2LSH 0.1 User Manual. http://web.mit.edu/andoni/www/LSH/manual.pdf
+
+[4] Avarikioti, G., Emiris, I. Z., Psarros, I., & Samaras, G. (2016). Practical linear-space Approximate Near Neighbors in high dimension. *arXiv preprint arXiv:1612.07405*. https://arxiv.org/abs/1612.07405

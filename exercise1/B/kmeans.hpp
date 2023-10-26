@@ -24,15 +24,18 @@ class KMeans
         void kmeanspp();
 
         double min_dist_centroids() const;
+        double max_dist_centroids() const;
 
         void assign_lloyds_reverse();
 
         std::tuple<int,int> assign_lloyds(int);
-        std::tuple<int,int> assign_lsh(int);
-        std::tuple<int,int> assign_hypercube(int);
 
         bool update();
         bool update(int, int, int);
+        
+        void compute_clusters_lloyds();
+        void compute_clusters_reverse_lsh();
+        void compute_clusters_reverse_hypercube();
 
         int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes;
 
