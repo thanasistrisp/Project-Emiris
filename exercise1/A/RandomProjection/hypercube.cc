@@ -28,12 +28,11 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
         hash_functions.push_back(h);
     }
 
-	// Initialize f_map
+	// Initialize f_map so that that f_i(j) is calculated only once for specific j but could be different for different i
 	f_map = new unordered_map<int, int>[k];
 
 	// initialize HashTable
 	hash_table = new HashTable();
-	// store p_proj to vector
 	// for each point p, calculate h_i(p) and store p -> [f-i(h_i(p))] for i = 1, ..., d'=k in hash_table
 	for (int i = 0; i < (int) p.size(); i++) {
 		vector<int> p_proj;
@@ -41,12 +40,12 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
 			int h_j = hash_functions[j]->hash(p[i]);
 			p_proj.push_back(f(h_j, j));
 		}
-		binary_string bs(p_proj);
-		auto it = hash_table->find(bs);
-		if (it != hash_table->end()) {
+		binary_string bs(p_proj); // convert p_proj to binary string type
+		auto it = hash_table->find(bs); // check if bs exists in hash_table
+		if (it != hash_table->end()) { // if it exists, add i to bucket of bs
 			it->second.push_back(i);
 		}
-		else {
+		else { // if not, create new bucket
 			vector<int> v;
 			v.push_back(i);
 			hash_table->insert(pair<binary_string, vector<int>>(bs, v));
@@ -128,7 +127,7 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 	int num_points = 0;
 	int num_vertices = 0;
 
-	multimap<double, int> candidates;
+	multimap<double, int> candidates; // used multimap to sort candidates by distance and keep duplicates
 	int hamming_distance = 0;
 	while (true) {
 		// create all permutations of q_proj with hamming_distance = 0, 1, 2, ...

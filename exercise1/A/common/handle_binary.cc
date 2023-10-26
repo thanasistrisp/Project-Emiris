@@ -11,23 +11,20 @@ vector<vector<double>> read_mnist_data(const string &filename, int number_of_ima
 	// read MNIST data from file
 	ifstream file(filename, ios::binary);
 
-	// read magic number
 	int magic_number = 0;
 	file.read((char*)&magic_number, sizeof(int));
 	magic_number = reverse_int(magic_number); // ignore it for our purposes
 
-	// read number of images
+	// read number of images: if 0, read all images
 	int temp = 0;
 	file.read((char*)&temp, sizeof(int));
 	if (number_of_images == 0)
 		number_of_images = reverse_int(temp);
 
-	// read number of rows
 	int rows = 0;
 	file.read((char*)&rows, sizeof(int));
 	rows = reverse_int(rows);
 
-	// read number of columns
 	int cols = 0;
 	file.read((char*)&cols, sizeof(int));
 	cols = reverse_int(cols);
@@ -62,6 +59,8 @@ bool file_exists(const string &filename) {
 	ifstream file(filename);
 	return file.good();
 }
+
+// Unused, used for debugging
 
 void export_image(const vector<double> &image, string filename) {
 	// check if path exists else create folders
