@@ -10,61 +10,61 @@ Athanasios Trispiotis - 1115202000194
 
 ```txt
 exercise1/
-├── A/
-│   ├── common/
-│   │   ├── brute_force.cc
-│   │   ├── handle_binary.cc
-│   │   ├── hash_function.cc
-│   │   └── lp_metric.cc
+├── A/                          # directory for source and header files for LSH and Hypercube
+│   ├── common/                     # directory for source files that are used by both `lsh` and `cube`
+│   │   ├── brute_force.cc              # Brute force Nearest Neighbour implementation for comparison
+│   │   ├── handle_binary.cc            # helper functions for reading data from input files
+│   │   ├── hash_function.cc            # helper functions for LSH hash functions h_i
+│   │   └── lp_metric.cc                # helper functions for lp metrics (e.g. euclidean metric)
 │   │
-│   ├── LSH/
-│   │   ├── handle_output.cc
-│   │   ├── helper_LSH.hpp
-│   │   ├── lsh.cc
-│   │   ├── main.cc
+│   ├── LSH/                        # directory for source files for LSH implementation
+│   │   ├── handle_output.cc            # helper functions for `lsh` output
+│   │   ├── helper_LSH.hpp              # header file for `handle_output.cc`
+│   │   ├── lsh.cc                      # LSH implementation
+│   │   ├── main.cc                     # `lsh` main function
 │   │   └── Makefile
 │   │
-│   └── RandomProjection/
-│       ├── binary_string.cc
-│       ├── handle_output.cc
-│       ├── helper_cube.cc
-│       ├── helper_RP.hpp
-│       ├── hypercube.cc
-│       ├── main.cc
+│   └── RandomProjection/           # directory for source files for Hypercube implementation
+│       ├── binary_string.cc            # helper functions for handling binary strings
+│       ├── handle_output.cc            # helper functions for `cube` output
+│       ├── helper_RP.hpp               # header file for `handle_output.cc`
+│       ├── hypercube.cc                # Hypercube implementation
+│       ├── helper_cube.cc              # helper functions for Hypercube implementation
+│       ├── main.cc                     # `cube` main function
 │       └── Makefile
 │
-├── B/
-│   ├── cluster.conf
-│   ├── helper.cc
-│   ├── helper_kmeans.hpp
-│   ├── kmeans.cc
-│   ├── kmeans.hpp
-│   ├── kmeanspp.cc
-│   ├── main.cc
-│   ├── Makefile
-│   ├── vector_utils.cc
-│   └── vector_utils.hpp
+├── B/                          # directory for source and header files for KMeans
+│   ├── cluster.conf                # configuration file for `cluster`
+│   ├── helper.cc                   # helper functions for `cluster` output
+│   ├── helper_kmeans.hpp           # header file for `helper.cc`
+│   ├── kmeans.cc                   # KMeans implementation
+│   ├── kmeans.hpp                  # header file for `kmeans.cc`, KMeans class definition
+│   ├── kmeanspp.cc                 # KMeans++ implementation
+│   ├── main.cc                     # `cluster` main function
+│   ├── vector_utils.cc             # helper functions for numerical operations on vectors
+│   ├── vector_utils.hpp            # header file for `vector_utils.hpp`
+│   └── Makefile
 │
-├── include/
-│   ├── binary_string.hpp
-│   ├── brute_force.hpp
-│   ├── defines.hpp
-│   ├── hash_function.hpp
-│   ├── hash_table.hpp
-│   ├── helper.hpp
-│   ├── hypercube.hpp
-│   ├── list.hpp
-│   ├── lp_metric.hpp
-│   └── lsh.hpp
+├── include/                    # directory for header files used in all three programs
+│   ├── binary_string.hpp           # header file for `binary_string.cc`
+│   ├── brute_force.hpp             # header file for `brute_force.cc`
+│   ├── defines.hpp                 # definition of constants used throughout the whole program
+│   ├── hash_function.hpp           # header file for `hash_function.cc`
+│   ├── hash_table.hpp              # HashTable template class definition and implementation
+│   ├── helper.hpp                  # header file for `handle_binary.cc`
+│   ├── hypercube.hpp               # header file for `hypercube.cc`, Hypercube class implementation
+│   ├── list.hpp                    # List template class definition and implementation
+│   ├── lp_metric.hpp               # header file for `lp_metric.cc`
+│   └── lsh.hpp                     # header file for `lsh`, LSH class definition
 │
-├── MNIST/
+├── MNIST/                      # directory for input and query data files
 │   ├── input.dat
 │   └── query.dat
 │
-├── output/
+├── output/                     # directory for result files
 │
-├── common.mk
-└── README.md
+├── common.mk                   # main Makefile
+└── README.md                   # this documentation file
 ```
 
 # 2. Compilation
@@ -107,7 +107,7 @@ at any of the three following directories:
 
 ## 3.1. `lsh`
 
-After running the commands in [2.1.](#21-lsh), run the following:
+After running the commands in [2.1.](#21-lsh), run the following at the same directory:
 
     ./lsh -d <input file> -q <query file> -k <int> -L <int> -o <output file> -N <number of nearest> -R <double>
 
@@ -130,14 +130,22 @@ If any of the numeric arguments aren't specified, the following values will be u
 | `N` | 1 |
 | `R` | 10000 |
 
-
 e.g.
 
     ./lsh -d ../../MNIST/input.dat -q ../../MNIST/query.dat -k 4 -L 5 -o ../../output/output.txt -N 1 -R 10000
 
+Alternatively, you can skip [2.1.](#21-lsh) and compile and execute `lsh` with the default arguments using only the following commands:
+
+    cd A/LSH/
+    make run-lsh
+
+To check memory leaks with `valgrind`, use the following command:
+
+    make valgrind-lsh
+
 ## 3.2. `cube`
 
-After running the commands in [2.2.](#22-cube), run the following:
+After running the commands in [2.2.](#22-cube), run the following at the same directory:
 
     ./cube -d <input file> -q <query file> -k <int> -M <int> -probes <int> -o <output file> -N <number of nearest> -R <double>
 
@@ -166,9 +174,18 @@ If any of the numeric arguments aren't specified, the following values will be u
 | `N`   | 1 |
 | `R` | 10000 |
 
+Alternatively, you can skip [2.2.](#22-cube) and compile and execute `cube` with the default arguments using only the following commands:
+
+    cd A/RandomProjection/
+    make run-cube
+
+To check memory leaks with `valgrind`, use the following command:
+
+    make valgrind-cube
+
 ## 3.3. `cluster`
 
-After running the commands in [2.3.](#23-cluster), run the following:
+After running the commands in [2.3.](#23-cluster), run the following at the same directory:
 
     ./cluster -i <input file> -c <configuration file> -o <output file> -complete <optional> -m <method: Classic or LSH or Hypercube>
 
@@ -185,6 +202,23 @@ e.g.
     ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m Classic
     ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m LSH
     ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m Hypercube
+
+Alternatively, you can skip [2.3.](#23-cluster) and compile and execute `cluster` using only the following commands:
+
+    cd B/
+    make run-cluster
+
+To check memory leaks with `valgrind`, use the following command:
+
+    make valgrind-cluster
+
+# 4. Documentation
+
+## 4.1. `lsh`
+
+## 4.2. `cube`
+
+## 4.3. `cluster`
 
 # References
 
