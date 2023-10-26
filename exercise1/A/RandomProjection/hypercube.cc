@@ -84,6 +84,8 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
 			{
+				if (num_points >= M)
+					goto check;
 				double dist = distance(p[vertices[i][j]], q);
 				if (dist < best_distances[N - 1]) {
 					best_distances[N - 1] = dist;
@@ -100,8 +102,6 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 					}
 				}
 				num_points++;
-				if (num_points >= M)
-					goto check;
 			}
 			num_vertices++;
 			if (num_vertices >= probes)
