@@ -13,9 +13,6 @@ using namespace std;
 #include "lsh.hpp"
 #include "hypercube.hpp"
 
-int ind = 0; // for debugging
-int ind2 = 0; // for debugging
-
 KMeans::KMeans(const vector<std::vector<double>> &dataset) : dataset(dataset)
 {
     point_to_cluster.resize(dataset.size());
@@ -94,6 +91,8 @@ tuple<int,int> KMeans::assign_lloyds(int index)
 // tuple<int,int> KMeans::assign_lsh(int index)
 void KMeans::compute_clusters_reverse_lsh()
 {
+    int inner = 0, outer = 0; // For debugging.
+
     // Index n points into L hashtables: once for the entire algorithm.
     static LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, w, dataset);
 
@@ -108,7 +107,7 @@ void KMeans::compute_clusters_reverse_lsh()
     while(changed_assignment){
         changed_assignment = false;
         radius = min_dist_centroids() / 2;
-        max_radius = max_dist_centroids();
+        max_radius = max_dist_centroids() * 4;
         while(radius < max_radius){
             for(int i = 0; i < (int) centroids.size(); i++){
                 // At each iteration, for each centroid c, range/ball queries centered at c.
@@ -133,14 +132,14 @@ void KMeans::compute_clusters_reverse_lsh()
                     }
                 }
             }
-            ind++;
+            inner++;
             update();
             radius *= 2; // Multiply radius by 2.
         }
-        ind2++;
+        outer++;
     }
 
-    std::cout << ind << " " << ind2 << std::endl;
+    std::cout << inner << " inner and " << outer << " outer loops" << std::endl;
 
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
@@ -150,6 +149,8 @@ void KMeans::compute_clusters_reverse_lsh()
 
 void KMeans::compute_clusters_reverse_hypercube()
 {
+    int inner = 0, outer = 0; // For debugging.
+
     // Index n points into the hypercube: once for the entire algorithm.
     static hypercube hypercube(dataset, k_hypercube, max_points_checked, probes);
 
@@ -164,7 +165,7 @@ void KMeans::compute_clusters_reverse_hypercube()
     while(changed_assignment){
         changed_assignment = false;
         radius = min_dist_centroids() / 2;
-        max_radius = max_dist_centroids();
+        max_radius = max_dist_centroids() * 4;
         while(radius < max_radius){
             for(int i = 0; i < (int) centroids.size(); i++){
                 // At each iteration, for each centroid c, range/ball queries centered at c.
@@ -190,14 +191,14 @@ void KMeans::compute_clusters_reverse_hypercube()
                     }
                 }
             }
-            ind++;
+            inner++;
             update();
             radius *= 2; // Multiply radius by 2.
         }
-        ind2++;
+        outer++;
     }
 
-    std::cout << ind << " " << ind2 << std::endl;
+    std::cout << inner << " inner and " << outer << " outer loops" << std::endl;
 
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
@@ -260,6 +261,8 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
 
 void KMeans::compute_clusters_lloyds()
 {
+    int loops = 0; // For debugging.
+
     bool first = true;
     while(true){
         bool flag = false;
@@ -276,12 +279,13 @@ void KMeans::compute_clusters_lloyds()
                 flag = true;
             }
         }
-        ind++;
-        if (!flag) {
-            cout << "Iterations: " << ind << endl;
+        loops++;
+        if(!flag){
             break;
         }
     }
+
+    std::cout << loops << " iterations" << std::endl;
 }
 
 void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
