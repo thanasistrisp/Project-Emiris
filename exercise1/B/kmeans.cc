@@ -13,7 +13,8 @@ using namespace std;
 #include "lsh.hpp"
 #include "hypercube.hpp"
 
-int ind = 0;
+int ind = 0; // for debugging
+int ind2 = 0; // for debugging
 
 KMeans::KMeans(const vector<std::vector<double>> &dataset) : dataset(dataset)
 {
@@ -65,6 +66,7 @@ void KMeans::assign_lloyds_reverse()
         point_to_cluster[i] = 0;
         tie(old_cluster, new_cluster) = assign_lloyds(i);
         point_2_cluster[i] = new_cluster;
+        update(old_cluster, new_cluster, i);
     }
 }
 
@@ -88,6 +90,7 @@ tuple<int,int> KMeans::assign_lloyds(int index)
     return make_tuple(old_cluster, new_cluster);
 }
 
+
 // tuple<int,int> KMeans::assign_lsh(int index)
 void KMeans::compute_clusters_reverse_lsh()
 {
@@ -102,39 +105,48 @@ void KMeans::compute_clusters_reverse_lsh()
     vector<double> distances;
     int p_index;
     unordered_map<int, int>::const_iterator iter;
-    while(changed_assignment || radius < max_radius){
+    while(changed_assignment){
         changed_assignment = false;
-        for(int i = 0; i < (int) centroids.size(); i++){
-            // At each iteration, for each centroid c, range/ball queries centered at c.
-            // Avoid buckets with very few items.
-            tie(ball, distances) = lsh.query_range(centroids[i], radius, distance);
-            for(int j = 0; j < (int) ball.size(); j++){
-                p_index = ball[j];
-                iter = point_2_cluster.find(p_index);
-                if(iter == point_2_cluster.end()){
-                    point_2_cluster[p_index] = i;
-                    point_to_cluster[p_index] = i;
-                    clusters[i].insert(p_index);
-                    changed_assignment = true;
-                }
-                // If the point lies in >= 2 balls, assign it to the cluster with the closest centroid.
-                else if(distances[j] < distance(centroids[iter->second], dataset[p_index])){
-                    clusters[iter->second].erase(p_index);
-                    point_2_cluster[p_index] = i;
-                    point_to_cluster[p_index] = i;
-                    clusters[i].insert(p_index);
-                    changed_assignment = true;
+        radius = min_dist_centroids() / 2;
+        max_radius = max_dist_centroids();
+        while(radius < max_radius){
+            for(int i = 0; i < (int) centroids.size(); i++){
+                // At each iteration, for each centroid c, range/ball queries centered at c.
+                // Avoid buckets with very few items.
+                tie(ball, distances) = lsh.query_range(centroids[i], radius, distance);
+                for(int j = 0; j < (int) ball.size(); j++){
+                    p_index = ball[j];
+                    iter = point_2_cluster.find(p_index);
+                    if(iter == point_2_cluster.end()){
+                        point_2_cluster[p_index] = i;
+                        point_to_cluster[p_index] = i;
+                        clusters[i].insert(p_index);
+                        changed_assignment = true;
+                    }
+                    // If the point lies in >= 2 balls, assign it to the cluster with the closest centroid.
+                    else if(distances[j] < distance(centroids[iter->second], dataset[p_index])){
+                        clusters[iter->second].erase(p_index);
+                        point_2_cluster[p_index] = i;
+                        point_to_cluster[p_index] = i;
+                        clusters[i].insert(p_index);
+                        changed_assignment = true;
+                    }
                 }
             }
+            ind++;
+            update();
+            radius *= 2; // Multiply radius by 2.
         }
-        ind++;
-        radius *= 2; // Multiply radius by 2.
+        ind2++;
     }
+
+    std::cout << ind << " " << ind2 << std::endl;
 
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
     assign_lloyds_reverse();
 }
+
 
 void KMeans::compute_clusters_reverse_hypercube()
 {
@@ -149,35 +161,43 @@ void KMeans::compute_clusters_reverse_hypercube()
     vector<double> distances;
     int p_index;
     unordered_map<int, int>::const_iterator iter;
-    while(changed_assignment || radius < max_radius){
+    while(changed_assignment){
         changed_assignment = false;
-        for(int i = 0; i < (int) centroids.size(); i++){
-            // At each iteration, for each centroid c, range/ball queries centered at c.
-            // Avoid buckets with very few items.
-            centroid_proj = hypercube.calculate_q_proj(centroids[i]);
-            tie(ball, distances) = hypercube.query_range(centroids[i], centroid_proj, radius);
-            for(int j = 0; j < (int) ball.size(); j++){
-                p_index = ball[j];
-                iter = point_2_cluster.find(p_index);
-                if(iter == point_2_cluster.end()){
-                    point_2_cluster[p_index] = i;
-                    point_to_cluster[p_index] = i;
-                    clusters[i].insert(p_index);
-                    changed_assignment = true;
-                }
-                // If the point lies in >= 2 balls, assign it to the cluster with the closest centroid.
-                else if(distances[j] < distance(centroids[iter->second], dataset[p_index])){
-                    clusters[iter->second].erase(p_index);
-                    point_2_cluster[p_index] = i;
-                    point_to_cluster[p_index] = i;
-                    clusters[i].insert(p_index);
-                    changed_assignment = true;
+        radius = min_dist_centroids() / 2;
+        max_radius = max_dist_centroids();
+        while(radius < max_radius){
+            for(int i = 0; i < (int) centroids.size(); i++){
+                // At each iteration, for each centroid c, range/ball queries centered at c.
+                // Avoid buckets with very few items.
+                centroid_proj = hypercube.calculate_q_proj(centroids[i]);
+                tie(ball, distances) = hypercube.query_range(centroids[i], centroid_proj, radius);
+                for(int j = 0; j < (int) ball.size(); j++){
+                    p_index = ball[j];
+                    iter = point_2_cluster.find(p_index);
+                    if(iter == point_2_cluster.end()){
+                        point_2_cluster[p_index] = i;
+                        point_to_cluster[p_index] = i;
+                        clusters[i].insert(p_index);
+                        changed_assignment = true;
+                    }
+                    // If the point lies in >= 2 balls, assign it to the cluster with the closest centroid.
+                    else if(distances[j] < distance(centroids[iter->second], dataset[p_index])){
+                        clusters[iter->second].erase(p_index);
+                        point_2_cluster[p_index] = i;
+                        point_to_cluster[p_index] = i;
+                        clusters[i].insert(p_index);
+                        changed_assignment = true;
+                    }
                 }
             }
+            ind++;
+            update();
+            radius *= 2; // Multiply radius by 2.
         }
-        ind++;
-        radius *= 2; // Multiply radius by 2.
+        ind2++;
     }
+
+    std::cout << ind << " " << ind2 << std::endl;
 
     // For every unassigned point, compare its distances to all centers
     // i.e. apply Lloyd's method for assignment.
