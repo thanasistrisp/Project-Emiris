@@ -42,7 +42,7 @@ INCLUDE := $(MY_PATH)include
 #
 # Το override επιτρέπει την προσθήκη επιπλέον παραμέτρων από τη γραμμή εντολών: make CFLAGS=...
 #
-override CXXFLAGS += -O3 -g -MMD -I$(INCLUDE) -I.
+override CXXFLAGS += -O3 -MMD -I$(INCLUDE) -I.
 
 # Linker options
 #   -lm        Link με τη math library
@@ -141,11 +141,12 @@ valgrind: $(VAL_TARGETS)
 # Βοηθητικό target που εκτελεί το lcov. Χρησιμοποιείται ως dependency στα coverage-* targets
 lcov:
 	@mkdir -p coverage
-	lcov --rc lcov_branch_coverage=1 --capture --directory=$(MY_PATH) --output-file coverage/lcov.info
-	lcov --rc lcov_branch_coverage=1 --remove coverage/lcov.info '*.h' --output-file coverage/lcov.info
-	cd coverage && genhtml --rc lcov_branch_coverage=1 lcov.info
-	@echo "To see the report open the file below in your browser:"
-	@echo "$$PWD/coverage/index.html"
+	lcov --directory . --capture --output-file coverage/lcov.info
+	lcov --directory $(MY_PATH)A/common/ --capture --output-file coverage/lcov.info
+	lcov --remove coverage/lcov.info '/usr/*' --output-file coverage/lcov.info
+	lcov --list coverage/lcov.info
+	genhtml coverage/lcov.info --output-directory coverage
+	@echo "Coverage report generated in coverage/index.html"
 
 # Για κάθε εκτελέσιμο <prog> φτιάχνουμε ένα target coverage-<prog> που το εκτελεί και μετά φτιάχνει coverage report
 coverage-%: clean run-% lcov
