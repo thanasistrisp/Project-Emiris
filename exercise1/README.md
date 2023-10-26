@@ -67,8 +67,6 @@ exercise1/
 └── README.md
 ```
 
--------------------
-
 # 2. Compilation
 
 ## 2.1. `lsh`
@@ -105,8 +103,6 @@ at any of the three following directories:
 + `A/RandomProjection`
 + `B/`
 
--------------------
-
 # 3. Execution
 
 ## 3.1. `lsh`
@@ -124,6 +120,16 @@ where:
 + `output file`: file for output
 + `N`: number of Approximate Nearest Neighbours of each query using LSH
 + `R`: radius for Range Search using LSH
+
+If any of the numeric arguments aren't specified, the following values will be used:
+
+| Argument | Default value |
+|:------:|:------:|
+| `k` | 4 |
+| `L` | 5 |
+| `N` | 1 |
+| `R` | 10000 |
+
 
 e.g.
 
@@ -146,6 +152,19 @@ where:
 + `N`: number of Approximate Nearest Neighbours of each query using Hypercube
 + `R`: radius for Range Search using Hypercube
 
+e.g.
+
+    ./cube -d ../../MNIST/input.dat -q ../../MNIST/query.dat -k 14 -M 200 -probes 50 -o ../../output/output.txt -N 5 -R 10000
+
+If any of the numeric arguments aren't specified, the following values will be used:
+
+| Argument | Default value |
+|:------:|:------:|
+| `k` | 14 |
+| `M` | 10 |
+| `probes` | 2 |
+| `N`   | 1 |
+| `R` | 10000 |
 
 ## 3.3. `cluster`
 
@@ -161,7 +180,11 @@ where:
 + `-complete`: if specified, the data points inside each cluster will be appended at the end of the `output file`
 + `method`: `Classic` for Lloyd's method, `LSH` for Reverse Search using LSH or `Hypercube` for Reverse Search using Hypercube
 
--------------------
+e.g.
+
+    ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m Classic
+    ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m LSH
+    ./cluster -i ../MNIST/input.dat -c cluster.conf -o ../output/cluster.txt -complete -m Hypercube
 
 # References
 
@@ -173,5 +196,3 @@ of handwritten digits, https://yann.lecun.com/exdb/mnist/
 [3] Andoni, A., & Indyk, P. (2005). E^2LSH 0.1 User Manual. http://web.mit.edu/andoni/www/LSH/manual.pdf
 
 [4] Avarikioti, G., Emiris, I. Z., Psarros, I., & Samaras, G. (2016). Practical linear-space Approximate Near Neighbors in high dimension. *arXiv preprint arXiv:1612.07405*. https://arxiv.org/abs/1612.07405
-
-[5] Morissette, L., & Chartier, S. (2013). The K-means clustering technique: General considerations and implementation in Mathematica. *Tutorials in Quantitative Methods for Psychology, 9(1), 15–24*. https://doi.org/10.20982/tqmp.09.1.p015 
