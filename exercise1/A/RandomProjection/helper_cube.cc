@@ -44,6 +44,7 @@ std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, in
 }
 
 int hypercube::f(int x, int i) {
+	// if f_map[i] does not contain x, calculate f_i(x) and store it in f_map[i] else return the stored value
 	if (f_map[i].find(x) == f_map[i].end()) {
 		f_map[i][x] = rand() % 2;
 	}
@@ -58,10 +59,10 @@ set<vector<int>> hypercube::get_permutation(const vector<int> &q_proj, int hammi
 		// edge case: hamming distance = 1
 		if (hamming_distance != 1)
 			result.insert(permutation);
-		// if not in used_vertices, insert
+		// if permutation is already used, do not insert it to result
 		else if (used_vertices->find(permutation) == used_vertices->end()) {
 			result.insert(permutation);
-			used_vertices->insert(permutation);
+			used_vertices->insert(permutation); // update
 		}
 	}
 	if (hamming_distance == 1) // base case

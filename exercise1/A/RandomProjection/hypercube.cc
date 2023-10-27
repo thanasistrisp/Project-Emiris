@@ -73,7 +73,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	int num_points = 0;
 	int num_vertices = 0;
 	
-	// initialize k best candidates and distances
+	// initialize N best candidates and distances
 	vector<int> best_candidates(N);
 	vector<double> best_distances(N, numeric_limits<double>::max());
 
@@ -91,7 +91,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 					best_distances[N - 1] = dist;
 					best_candidates[N - 1] = vertices[i][j];
 					// sort best_distances and best_candidates
-					for (int k = N - 1; k > 0; k--) {
+					for (int k = N - 1; k > 0; k--) { // insertion sort (N is small)
 						if (best_distances[k] < best_distances[k - 1]) {
 							swap(best_distances[k], best_distances[k - 1]);
 							swap(best_candidates[k], best_candidates[k - 1]);
@@ -111,6 +111,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	}
 
 	check:
+		// convert multimap to vector to match the return type
 		vector<int> nearest_neighbors;
 		vector<double> dist;
 		for (int i = 0; i < N; i++) {
@@ -151,6 +152,7 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 	}
 
 	check:
+		// convert multimap to vector to match the return type
 		vector<int> range;
 		vector<double> dist;
 		for (auto it = candidates.begin(); it != candidates.end(); it++) {

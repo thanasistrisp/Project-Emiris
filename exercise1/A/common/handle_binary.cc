@@ -45,13 +45,13 @@ vector<vector<double>> read_mnist_data(const string &filename, int number_of_ima
 }
 
 static int reverse_int(int i) {
-	unsigned char c1, c2, c3, c4;
+	unsigned char c1, c2, c3, c4; // ci: byte i, int is 4 bytes
 
-	c1 = i & 255;
+	c1 = i & 255; // mask with 255 to get the first byte
 	c2 = (i >> 8) & 255;
 	c3 = (i >> 16) & 255;
 	c4 = (i >> 24) & 255;
-
+	//c1 << 24: shift c1 to the left by 24 bits (3 bytes), similar for c2, c3, c4
 	return ((int)c1 << 24) + ((int)c2 << 16) + ((int)c3 << 8) + c4;
 }
 
