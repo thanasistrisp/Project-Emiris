@@ -32,6 +32,8 @@ class KMeans
         double min_dist_centroids() const;
         double max_dist_centroids() const;
 
+        // Uses the Classic KMeans algoritm (Lloyd's algorithm) to assign
+        // any unassigned points in Reverse Search clustering algorithms.
         void assign_lloyds_reverse();
 
         // Assigns the given point to the cluster with the nearest centroid
@@ -42,7 +44,8 @@ class KMeans
         bool update();
         bool update(int, int, int);
         
-        // Classic KMeans (Lloyd's algorithm).
+        // Cluster computation using the Classic KMeans algoritm (Lloyd's algorithm),
+        // Reverse Search using LSH and Reverse Search using Hypercube respectively.
         void compute_clusters_lloyds();
         void compute_clusters_reverse_lsh();
         void compute_clusters_reverse_hypercube();
@@ -50,6 +53,8 @@ class KMeans
         int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes;
 
     public:
+        // Initializes an instance.
+        // The argument is the dataset the clustering algorithms will be applied to.
         KMeans(const std::vector<std::vector<double>>& dataset);
 
         // Computes internally the clusters using the number of clusters, the given method and the the following tuple:
@@ -62,8 +67,12 @@ class KMeans
          */
         void compute_clusters(int, update_method, const std::tuple<int,int,int,int,int> &config);
 
+        // Returns the centroid coordinates.
         std::vector<std::vector<double>> get_centroids() const;
+
+        // Returns the indices of the datapoints inside each cluster.
         std::vector<std::vector<int>> get_clusters() const;
+
         int get_dataset_size() const { return dataset.size(); }
 
         static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;

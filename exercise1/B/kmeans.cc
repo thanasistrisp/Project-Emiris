@@ -13,6 +13,8 @@ using namespace std;
 #include "lsh.hpp"
 #include "hypercube.hpp"
 
+// Initializes an instance.
+// The argument is the dataset the clustering algorithms will be applied to.
 KMeans::KMeans(const vector<std::vector<double>> &dataset) : dataset(dataset)
 {
     // Initialize with certain size to avoid reallocation.
@@ -47,6 +49,8 @@ double KMeans::max_dist_centroids() const
     return max_dist;
 }
 
+// Uses the Classic KMeans algoritm (Lloyd's algorithm) to assign
+// any unassigned points in Reverse Search clustering algorithms.
 void KMeans::assign_lloyds_reverse()
 {
     int old_cluster, new_cluster;
@@ -89,8 +93,7 @@ tuple<int,int> KMeans::assign_lloyds(int index)
     return make_tuple(old_cluster, new_cluster);
 }
 
-
-// tuple<int,int> KMeans::assign_lsh(int index)
+// Cluster computation using Reverse Search with LSH.
 void KMeans::compute_clusters_reverse_lsh()
 {
     int inner = 0, outer = 0; // For debugging.
@@ -148,7 +151,7 @@ void KMeans::compute_clusters_reverse_lsh()
     assign_lloyds_reverse();
 }
 
-
+// Cluster computation using Reverse Search with Hypercube.
 void KMeans::compute_clusters_reverse_hypercube()
 {
     int inner = 0, outer = 0; // For debugging.
@@ -208,20 +211,20 @@ void KMeans::compute_clusters_reverse_hypercube()
 }
 
 // Updates the centroids (if needed) and returns true if the centroids changed.
-bool KMeans::update() // MacQueen's update rule
+bool KMeans::update() // MacQueen's update rule.
 {
     bool changed_centroids = false;
-    for(int i = 0; i < (int) centroids.size(); i++){ // for each cluster
+    for(int i = 0; i < (int) centroids.size(); i++){ // For each cluster.
         vector<double> new_centroid(dataset[0].size(), 0);
-        for(int j : clusters[i]){ // for each point in cluster
+        for(int j : clusters[i]){ // For each point in cluster.
             for(int l = 0; l < (int) dataset[j].size(); l++){
-                new_centroid[l] += dataset[j][l]; // add point's coordinates
+                new_centroid[l] += dataset[j][l]; // Add point's coordinates.
             }
         }
         for(int l = 0; l < (int) new_centroid.size(); l++){
-            new_centroid[l] /= clusters[i].size(); // divide by number of points
+            new_centroid[l] /= clusters[i].size(); // Divide by number of points.
         }
-        if(new_centroid != centroids[i]){ // if centroid changed, update it
+        if(new_centroid != centroids[i]){ // If centroid changed, update it.
             centroids[i] = new_centroid;
             changed_centroids = true;
         }
@@ -263,7 +266,7 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
     return changed_centroids;
 }
 
-// Classic KMeans (Lloyd's algorithm).
+// Cluster computation using the Classic KMeans algoritm (Lloyd's algorithm).
 void KMeans::compute_clusters_lloyds()
 {
     int loops = 0; // For debugging.
@@ -299,7 +302,7 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
     // Again initialize with certain size to avoid reallocation.
     clusters.resize(k);
 
-    // Add all points to cluster 0
+    // Add all points to cluster 0.
     for(int i = 0; i < (int) dataset.size(); i++){
         clusters[0].insert(i);
         point_to_cluster[i] = 0;
@@ -308,7 +311,7 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
     // Initialize centroids using KMeans++ algorithm.
     kmeanspp();
 
-    // Assign all points to nearest centroid, need to be initialized for all methods first
+    // Assign all points to nearest centroid, need to be initialized for all methods first.
     for(int i = 0; i < (int) dataset.size(); i++){
        assign_lloyds(i);
     }
@@ -324,11 +327,13 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
     } 
 }
 
+// Returns the centroid coordinates.
 std::vector<std::vector<double>> KMeans::get_centroids() const
 {
     return centroids;
 }
 
+// Returns the indices of the datapoints inside each cluster.
 std::vector<std::vector<int>> KMeans::get_clusters() const
 {
     vector<vector<int>> clusters_vector;
@@ -352,7 +357,7 @@ double KMeans::silhouette(int i)
     }
     a /= clusters[cluster].size();
 
-    // Find second closest cluster
+    // Find second closest cluster.
     int c1 = cluster, c2 = -1;
     for(int j = 0; j < (int) centroids.size(); j++){
         if(j != c1){
