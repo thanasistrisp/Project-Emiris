@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 			goto cont;
 		}
 		queries = read_mnist_data(query_file);
-		queries.resize(10);
+		// queries.resize(10);
 
 		handle_ouput(cube, output, queries, R, N);
 

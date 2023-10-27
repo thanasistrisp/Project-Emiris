@@ -15,12 +15,8 @@ using namespace std;
 
 KMeans::KMeans(const vector<std::vector<double>> &dataset) : dataset(dataset)
 {
+    // Initialize with certain size to avoid reallocation.
     point_to_cluster.resize(dataset.size());
-}
-
-KMeans::~KMeans()
-{
-
 }
 
 double KMeans::min_dist_centroids() const
@@ -72,6 +68,7 @@ void KMeans::assign_lloyds_reverse()
 tuple<int,int> KMeans::assign_lloyds(int index)
 {
     int old_cluster = point_to_cluster[index];
+    // Find the closest centroid.
     int new_cluster = -1;
     double min_dist = -1;
     for(int i = 0; i < (int) centroids.size(); i++){
@@ -81,6 +78,7 @@ tuple<int,int> KMeans::assign_lloyds(int index)
             new_cluster = i;
         }
     }
+    // If the point changed cluster, update only the two affected centroids.
     if(old_cluster != new_cluster){
         clusters[old_cluster].erase(index);
         clusters[new_cluster].insert(index);
@@ -220,7 +218,7 @@ bool KMeans::update() // MacQueen's update rule
         for(int l = 0; l < (int) new_centroid.size(); l++){
             new_centroid[l] /= clusters[i].size(); // divide by number of points
         }
-        if(new_centroid != centroids[i]){
+        if(new_centroid != centroids[i]){ // if centroid changed, update it
             centroids[i] = new_centroid;
             changed_centroids = true;
         }
@@ -268,7 +266,7 @@ void KMeans::compute_clusters_lloyds()
     bool first = true;
     while(true){
         bool flag = false;
-        if(first){
+        if(first){ // Update centroids once before starting Lloyd's.
             first = false;
             update();
         }
@@ -276,13 +274,13 @@ void KMeans::compute_clusters_lloyds()
             // Assign point to cluster and apply MacQueen's update rule.
             int old_cluster, new_cluster;
             tie(old_cluster, new_cluster) = assign_lloyds(i);
-            if(old_cluster != new_cluster){
+            if(old_cluster != new_cluster){ // If the point changed cluster, update only the two affected centroids.
                 update(old_cluster, new_cluster, i);
                 flag = true;
             }
         }
         loops++;
-        if(!flag){
+        if(!flag){ // If no point changed cluster, we are done.
             break;
         }
     }
@@ -292,6 +290,7 @@ void KMeans::compute_clusters_lloyds()
 
 void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
     tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
+    // Again initialize with certain size to avoid reallocation.
     clusters.resize(k);
 
     // Add all points to cluster 0
@@ -303,7 +302,7 @@ void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,i
     // Initialize centroids using KMeans++ algorithm.
     kmeanspp();
 
-    // Assign all points to nearest centroid
+    // Assign all points to nearest centroid, need to be initialized for all methods first
     for(int i = 0; i < (int) dataset.size(); i++){
        assign_lloyds(i);
     }
@@ -346,6 +345,7 @@ double KMeans::silhouette(int i)
     }
     a /= clusters[cluster].size();
 
+    // Find second closest cluster
     int c1 = cluster, c2 = -1;
     for(int j = 0; j < (int) centroids.size(); j++){
         if(j != c1){
