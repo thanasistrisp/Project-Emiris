@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
-// used with unordered_map
+// Used with unordered_map.
 class binary_string
 {
 private:
@@ -13,7 +13,7 @@ public:
 
 	bool operator==(const binary_string &other) const;
 
-	// hash function that returns the decimal value of the binary string
+	// Hash function that returns the decimal value of the binary string.
 	struct hash {
 		size_t operator()(const binary_string &bs) const;
 	};

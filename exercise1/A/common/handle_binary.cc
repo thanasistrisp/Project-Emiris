@@ -7,15 +7,16 @@ using namespace std;
 
 static int reverse_int(int);
 
+// Reads the dataset from the given file and returns a vector of vectors (Important: it does not check if the file exists).
 vector<vector<double>> read_mnist_data(const string &filename, int number_of_images) {
-	// read MNIST data from file
+	// Read MNIST data from file.
 	ifstream file(filename, ios::binary);
 
 	int magic_number = 0;
 	file.read((char*)&magic_number, sizeof(int));
-	magic_number = reverse_int(magic_number); // ignore it for our purposes
+	magic_number = reverse_int(magic_number); // Ignore it for our purposes.
 
-	// read number of images: if 0, read all images
+	// Read number of images: if 0, read all images.
 	int temp = 0;
 	file.read((char*)&temp, sizeof(int));
 	if (number_of_images == 0)
@@ -29,7 +30,7 @@ vector<vector<double>> read_mnist_data(const string &filename, int number_of_ima
 	file.read((char*)&cols, sizeof(int));
 	cols = reverse_int(cols);
 
-	// read data
+	// Read data.
 	vector<vector<double>> mnist_data(number_of_images, vector<double>(rows * cols));
 	for (int i = 0; i < number_of_images; i++) {
 		for (int r = 0; r < rows; r++) {
@@ -47,7 +48,7 @@ vector<vector<double>> read_mnist_data(const string &filename, int number_of_ima
 static int reverse_int(int i) {
 	unsigned char c1, c2, c3, c4; // ci: byte i, int is 4 bytes
 
-	c1 = i & 255; // mask with 255 to get the first byte
+	c1 = i & 255; // Mask with 255 to get the first byte.
 	c2 = (i >> 8) & 255;
 	c3 = (i >> 16) & 255;
 	c4 = (i >> 24) & 255;
@@ -60,23 +61,22 @@ bool file_exists(const string &filename) {
 	return file.good();
 }
 
-// Unused, used for debugging
-
+// Unused, used for debugging.
 void export_image(const vector<double> &image, string filename) {
-	// check if path exists else create folders
+	// Check if path exists else create folders.
 	string path = filename.substr(0, filename.find_last_of("/"));
 	if (!file_exists(path)) {
 		system(("mkdir -p " + path).c_str());
 	}
-	// export image to file
+	// Export image to file.
 	ofstream file(filename, ios::binary);
 
-	// write header
+	// Write header.
 	file << "P6" << endl;
 	file << 28 << " " << 28 << endl;
 	file << 255 << endl;
 
-	// write data
+	// Write data.
 	for (int i = 0; i < (int) image.size(); i++) {
 		unsigned char temp = (unsigned char) image[i];
 		file.write((char*)&temp, sizeof(unsigned char));
