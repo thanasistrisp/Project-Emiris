@@ -8,11 +8,12 @@
 
 using namespace std;
 
+// Reads the config file and returns a tuple of the parameters (Important: it does not check if the file exists).
 tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 {
 	ifstream config_file(filename);
 
-	// default values
+	// Default values.
 	int K_of_Kmeans = 10;
 	int L = 3;
 	int k_of_LSH = 4;
@@ -20,7 +21,7 @@ tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 	int k_of_hypercube = 3;
 	int probes = 2;
 
-	// read line by line and parse and ignore // comments at begin or end of line
+	// Read line by line and parse and ignore // comments at begin or end of line.
 	string line;
 	while (getline(config_file, line)) {
 		if (line[0] == '#') {
@@ -51,6 +52,7 @@ tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 	return make_tuple(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes);
 }
 
+// Writes the results of the clustering to output file in the required format.
 void handle_cluster_output(KMeans &kmeans, const string &output_file, bool complete, update_method method, const tuple<int, int, int, int, int, int> &config)
 {
 	ofstream output(output_file);
@@ -94,14 +96,14 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 	output << "Silhouette: [";
 	vector<double> si(clusters.size(), 0);
 	double stotal = 0;
-	for (int i = 0; i < (int) clusters.size(); i++) { // for each cluster
-		for (int j = 0; j < (int) clusters[i].size(); j++) { // for each point in cluster
-			si[i] += kmeans.silhouette(clusters[i][j]); // add silhouette of point to cluster silhouette
+	for (int i = 0; i < (int) clusters.size(); i++) { // For each cluster.
+		for (int j = 0; j < (int) clusters[i].size(); j++) { // For each point in cluster.
+			si[i] += kmeans.silhouette(clusters[i][j]); // Add silhouette of point to cluster silhouette.
 		}
-		stotal += si[i]; // add cluster silhouette to total silhouette
+		stotal += si[i]; // Add cluster silhouette to total silhouette.
 		si[i] /= clusters[i].size();
 	}
-	stotal /= kmeans.get_dataset_size(); // calculate average silhouette of dataset (average of cluster silhouettes)
+	stotal /= kmeans.get_dataset_size(); // Calculate average silhouette of dataset (average of cluster silhouettes).
 	for (int i = 0; i < (int) si.size(); i++) {
 		output << si[i];
 		output << ", ";

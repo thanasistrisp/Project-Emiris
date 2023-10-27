@@ -65,6 +65,8 @@ void KMeans::assign_lloyds_reverse()
     }
 }
 
+// Assigns the given point to the cluster with the nearest centroid
+// and returns both old and new cluster of the point (they may be the same).
 tuple<int,int> KMeans::assign_lloyds(int index)
 {
     int old_cluster = point_to_cluster[index];
@@ -205,6 +207,7 @@ void KMeans::compute_clusters_reverse_hypercube()
     assign_lloyds_reverse();
 }
 
+// Updates the centroids (if needed) and returns true if the centroids changed.
 bool KMeans::update() // MacQueen's update rule
 {
     bool changed_centroids = false;
@@ -226,6 +229,7 @@ bool KMeans::update() // MacQueen's update rule
     return changed_centroids;
 }
 
+// Updates the centroids (if needed) and returns true if the centroids changed.
 bool KMeans::update(int old_cluster, int new_cluster, int index)
 {
     bool changed_centroids = false;
@@ -259,6 +263,7 @@ bool KMeans::update(int old_cluster, int new_cluster, int index)
     return changed_centroids;
 }
 
+// Classic KMeans (Lloyd's algorithm).
 void KMeans::compute_clusters_lloyds()
 {
     int loops = 0; // For debugging.
@@ -288,6 +293,7 @@ void KMeans::compute_clusters_lloyds()
     std::cout << loops << " iterations" << std::endl;
 }
 
+// Computes internally the clusters using the number of clusters, the given method and the the following tuple:
 void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
     tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
     // Again initialize with certain size to avoid reallocation.
@@ -336,6 +342,7 @@ std::vector<std::vector<int>> KMeans::get_clusters() const
     return clusters_vector;
 }
 
+// Returns the silhouette of the i-th point of the dataset.
 double KMeans::silhouette(int i)
 {
     int cluster = point_to_cluster[i];
