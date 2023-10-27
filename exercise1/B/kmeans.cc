@@ -54,8 +54,10 @@ double KMeans::max_dist_centroids() const
 void KMeans::assign_lloyds_reverse()
 {
     int old_cluster, new_cluster;
+    unordered_map<int, int>::const_iterator iter;
     for(int i = 0; i < (int) dataset.size(); i++){
-        if(point_to_cluster[i] != -1){
+        iter = point_2_cluster.find(i);
+        if(iter != point_2_cluster.end()){
             continue;
         }
         // Prepare for Lloyd's.
