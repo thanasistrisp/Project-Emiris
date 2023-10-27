@@ -15,8 +15,11 @@ using std::make_tuple;
 using std::set;
 using std::prev;
 
-// ---------- Public functions for class LSH ----------
+// ---------- Functions for class LSH ---------- //
 
+// Initializes an instance with the given number of hash functions,
+// number of hash tables, table size and window.
+// The last argument is the set of points the LSH algorithm will be applied to.
 LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int table_size, int window, const vector<vector<double>> &dataset)
 : number_of_dimensions(dataset.at(0).size()), number_of_hash_functions(number_of_hash_functions),
   table_size(table_size), number_of_hash_tables(number_of_hash_tables), dataset(dataset)
@@ -42,6 +45,7 @@ LSH::~LSH()
     delete[] hash_tables;
 }
 
+// Inserts the given data point with the given index to all L hash tables. 
 void LSH::insert(vector<double> p, int index)
 {
     for(int i = 0; i < number_of_hash_tables; i++){
@@ -49,6 +53,8 @@ void LSH::insert(vector<double> p, int index)
     }
 }
 
+// Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
+// and their distances to the query based on the given distance function.
 tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned int k,
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
@@ -67,11 +73,12 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
         while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
             vector<double> p = dataset.at(p_index);
 
-            // Choose only the points that share the same ID inside the bucket.
+            // Choose only the points that share the same ID inside the bucket (Querying trick).
             if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
                 continue;
             }
 
+            // Keep k items only to save space.
             dist = distance(p, q);
             if(s.size() == k){
                 if(dist >= get<1>(*s.rbegin())){
@@ -93,6 +100,9 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
     return make_tuple(indices, distances);
 }
 
+// Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
+// and their distances to the query based on the given distance function.
+// All the neighbours returned lie within radius r.
 tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, double r,
                                                     double (*distance)(const vector<double>&, const vector<double>&))
 {

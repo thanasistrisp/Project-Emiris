@@ -12,8 +12,10 @@ class HashFunction
         std::vector<double> v;    // d-dimensional vector with coordinates in N(0, 1).
 
     public:
+        // Initializes a hash function with the given number of dimensions and window.
         HashFunction(int, int);
         ~HashFunction();
 
+        // Returns the hashed value of the given vector.
         int hash(const std::vector<double>&);
 };
