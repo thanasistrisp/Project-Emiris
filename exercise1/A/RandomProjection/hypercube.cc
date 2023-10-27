@@ -10,6 +10,8 @@
 
 using namespace std;
 
+// Initializes an instance with the given dataset, number of dimensions k, maximum number of candidate data points checked,
+// maximum number of hypercube vertices checked (probes) based on the given distance function.
 hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, 
 					 double (*distance)(const std::vector<double> &, const std::vector<double> &)) : p(p)
 {
@@ -69,6 +71,7 @@ hypercube::~hypercube() {
 	delete used_vertices;
 }
 
+// Returns the indices of the N nearest neighbours of q and their distances to q.
 tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj, int N) {
 	int num_points = 0;
 	int num_vertices = 0;
@@ -124,6 +127,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 		return make_tuple(nearest_neighbors, dist);
 }
 
+// Returns the indices of the neighbours of q that lie within radius R and their distances to q.
 tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj, double R) {
 	int num_points = 0;
 	int num_vertices = 0;

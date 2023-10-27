@@ -12,10 +12,10 @@
 class hypercube
 {
 private:
-	const std::vector<std::vector<double>> &p;
-	int k;
-	int M;
-	int probes;
+	const std::vector<std::vector<double>> &p; // Dataset.
+	int k;      // Number of hash functions.
+	int M;      // Maximum number of candidate data points checked.
+	int probes; // Maximum number of hypercube vertices checked (probes).
 
 	std::unordered_map<int, int> *f_map;
 
@@ -38,6 +38,8 @@ private:
 	// Returns all permutations of q_proj with hamming distance.
 	std::set<std::vector<int>> get_permutation(const std::vector<int> &q_proj, int hamming_distance);
 public:
+	// Initializes an instance with the given dataset, number of dimensions k, maximum number of candidate data points checked,
+	// maximum number of hypercube vertices checked (probes) based on the given distance function.
 	hypercube(const std::vector<std::vector<double>> &p, int k, int M, int probes, 
 			  double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);
 	~hypercube();
