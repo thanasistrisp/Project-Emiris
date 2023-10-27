@@ -216,6 +216,32 @@ To check memory leaks with `valgrind`, use the following command:
 
 ## 4.1. `lsh`
 
+### Implementation details:
+
+The LSH implementation is based on class `LSH`, which contains objects of type `HashTable`.
+
+None of the STL data structures offers fixed table size for hash tables and custom hash functions and thus, the `HashTable` ADT had to be implemented from scratch.
+
+To support this implementation, additional ADTs had to be implemented as well, such as `HashBucket` and `List`.
+
+The `HashTable` has a fixed number of bucket chains, which are objects of class `List` containing `HashBucket` objects. Finally, each `HashBucket` object is a list of values of type `V`.
+
+Our implementation uses templates to ensure usability for different data types.
+<br></br>
+
+Each `HashTable` $j$ is has a set of `HashFunction` objects, representing $h_i$, $i = 0, \ldots, k$ and a set of random factors $r_i$, $i = 0, \ldots, k$, so that the value of the amplified hash function $g_j$ can be computed.
+<br></br>
+
+### Other details:
+
+The random factors $r_i$ that are multiplied with $h_i(p)$, $i = 1, \ldots, k$ are non-negative, according to the instructions given in the complimentary courses.
+<br></br>
+
+The Querying Trick has been implemented.
+<br></br>
+
+In Range Search, the bound of $20 \cdot L$ is not being used so that all approximate nearest neighbours within range are included in the output.
+
 ## 4.2. `cube`
 
 ## 4.3. `cluster`
