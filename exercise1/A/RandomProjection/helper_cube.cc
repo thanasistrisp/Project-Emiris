@@ -20,7 +20,7 @@ std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, in
 		if (it->first.hamming_distance(q_proj, hamming_distance)) {
 			// push every vertex in the bucket to result
 			result.push_back(it->second);
-			used_vertices->erase(it->first);
+			remaining_vertices->erase(it->first);
 		}
 	}
 	return result;

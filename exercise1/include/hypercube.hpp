@@ -19,7 +19,8 @@ private:
 
 	std::unordered_map<int, int> *f_map;
 
-	std::unordered_set<binary_string, binary_string::hash> *used_vertices;
+	// Set of vertices that have been used in the query so far.
+	std::unordered_set<binary_string, binary_string::hash> *remaining_vertices;
 
 	// Define hash table type that maps binary strings to vectors of indices.
 	typedef std::unordered_map<binary_string, std::vector<int>, binary_string::hash> HashTable;
@@ -34,8 +35,6 @@ private:
 	// Returns the vertices that are at hamming distance from q_proj.
 	std::vector<std::vector<int>> pack(const std::vector<int> &q_proj, int hamming_distance);
 
-	// Returns all permutations of q_proj with hamming distance.
-	std::set<std::vector<int>> get_permutation(const std::vector<int> &q_proj, int hamming_distance);
 public:
 	// Initializes an instance with the given dataset, number of dimensions k, maximum number of candidate data points checked,
 	// maximum number of hypercube vertices checked (probes) based on the given distance function.

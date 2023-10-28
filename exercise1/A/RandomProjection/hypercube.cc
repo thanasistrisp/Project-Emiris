@@ -29,7 +29,7 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
     }
 
 	// Initialize used_vertices.
-	used_vertices = new unordered_set<binary_string, binary_string::hash>();
+	remaining_vertices = new unordered_set<binary_string, binary_string::hash>();
 	// Initialize f_map so that that f_i(j) is calculated only once for specific j but could be different for different i.
 	f_map = new unordered_map<int, int>[k];
 
@@ -44,7 +44,7 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
 		}
 		binary_string bs(p_proj); // Convert p_proj to binary string type.
 		auto it = hash_table->find(bs); // Check if bs exists in hash_table.
-		used_vertices->insert(bs); // Add bs to used_vertices.
+		remaining_vertices->insert(bs); // Add bs to used_vertices.
 		if (it != hash_table->end()) { // If it exists, add i to bucket of bs.
 			it->second.push_back(i);
 		}
@@ -66,7 +66,7 @@ hypercube::~hypercube() {
 	}	
 	delete[] f_map;
 	delete hash_table;
-	delete used_vertices;
+	delete remaining_vertices;
 }
 
 tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj, int N) {
@@ -78,12 +78,12 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	vector<double> best_distances(N, numeric_limits<double>::max());
 
 	// deep copy of used_vertices
-	unordered_set<binary_string, binary_string::hash> *used_vertices_copy = new unordered_set<binary_string, binary_string::hash>(*used_vertices);
+	unordered_set<binary_string, binary_string::hash> *used_vertices_copy = new unordered_set<binary_string, binary_string::hash>(*remaining_vertices);
 
 	int hamming_distance = 0;
 	while (true) {
 		// Create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
-		if (used_vertices->empty()) {
+		if (remaining_vertices->empty()) {
 			break;
 		}
 		vector<vector<int>> vertices = pack(q_proj, hamming_distance);
@@ -125,7 +125,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 			dist.push_back(best_distances[i]);
 		}
 		// Restore used_vertices.
-		*used_vertices = *used_vertices_copy;
+		*remaining_vertices = *used_vertices_copy;
 		delete used_vertices_copy;
 
 		return make_tuple(nearest_neighbors, dist);
@@ -138,12 +138,12 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 	multimap<double, int> candidates; // Used multimap to sort candidates by distance and keep duplicates.
 
 	// deep copy of used_vertices
-	unordered_set<binary_string, binary_string::hash> *used_vertices_copy = new unordered_set<binary_string, binary_string::hash>(*used_vertices);
+	unordered_set<binary_string, binary_string::hash> *used_vertices_copy = new unordered_set<binary_string, binary_string::hash>(*remaining_vertices);
 
 	int hamming_distance = 0;
 	while (true) {
 		// Create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
-		if (used_vertices->empty()) {
+		if (remaining_vertices->empty()) {
 			break;
 		}
 		vector<vector<int>> vertices = pack(q_proj, hamming_distance);
@@ -174,7 +174,7 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 			dist.push_back(it->first);
 		}
 		// Restore used_vertices.
-		*used_vertices = *used_vertices_copy;
+		*remaining_vertices = *used_vertices_copy;
 		delete used_vertices_copy;
 
 		return make_tuple(range, dist);
