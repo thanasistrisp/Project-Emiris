@@ -19,7 +19,6 @@ private:
 
 	std::unordered_map<int, int> *f_map;
 
-	// Used in permutations calculation to avoid duplicates.
 	std::unordered_set<binary_string, binary_string::hash> *used_vertices;
 
 	// Define hash table type that maps binary strings to vectors of indices.
