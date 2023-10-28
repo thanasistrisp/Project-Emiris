@@ -12,7 +12,6 @@ static vector<double> calculate_P(const vector<double> &D);
 static void normalize_vector(vector<double> &v);
 static int binary_search(const vector<double> &p, double x);
 
-// Initializes centroids with random points from dataset using KMeans++ algorithm.
 void KMeans::kmeanspp() {
 	// Deep copy of the dataset using copy constructor.
 	vector<vector<double>> p(dataset);
@@ -42,7 +41,6 @@ void KMeans::kmeanspp() {
 
 // Helper functions
 
-// Calculates the distance of each point to the nearest centroid.
 static vector<double> calculate_D(const vector<vector<double>> &p, const vector<vector<double>> &c) {
 	vector<double> D(p.size());
 	for (int i = 0; i < (int) p.size(); i++) {
@@ -58,7 +56,6 @@ static vector<double> calculate_D(const vector<vector<double>> &p, const vector<
 	return D;
 }
 
-// Calculates the cumulative probability distribution of D.
 static vector<double> calculate_P(const vector<double> &D) {
 	vector<double> P(D.size());
 	double sum = 0;
@@ -70,7 +67,6 @@ static vector<double> calculate_P(const vector<double> &D) {
 	return P;
 }
 
-// Normalizes the given vector.
 static void normalize_vector(vector<double> &v) {
 	double max = v[0];
 	for (int i = 1; i < (int) v.size(); i++) {
@@ -83,7 +79,6 @@ static void normalize_vector(vector<double> &v) {
 	}
 }
 
-// Binary search in already sorted vector.
 static int binary_search(const vector<double> &p, double x) {
 	int l = 0;
 	int r = p.size() - 1;

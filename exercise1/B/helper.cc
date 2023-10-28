@@ -8,7 +8,6 @@
 
 using namespace std;
 
-// Reads the config file and returns a tuple of the parameters (Important: it does not check if the file exists).
 tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 {
 	ifstream config_file(filename);
@@ -52,7 +51,6 @@ tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 	return make_tuple(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes);
 }
 
-// Writes the results of the clustering to output file in the required format.
 void handle_cluster_output(KMeans &kmeans, const string &output_file, bool complete, update_method method, const tuple<int, int, int, int, int, int> &config)
 {
 	ofstream output(output_file);

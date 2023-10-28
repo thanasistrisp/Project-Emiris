@@ -12,7 +12,6 @@
 
 using namespace std;
 
-// Writes the results of the queries to output file in the required format.
 void handle_ouput(hypercube &cube, ofstream &output, const vector<vector<double>> &queries, double R, int N)
 {
 	for (int q = 0; q < (int) queries.size(); q++) {

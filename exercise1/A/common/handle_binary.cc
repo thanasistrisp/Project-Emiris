@@ -7,7 +7,6 @@ using namespace std;
 
 static int reverse_int(int);
 
-// Reads the dataset from the given file and returns a vector of vectors (Important: it does not check if the file exists).
 vector<vector<double>> read_mnist_data(const string &filename, int number_of_images) {
 	// Read MNIST data from file.
 	ifstream file(filename, ios::binary);

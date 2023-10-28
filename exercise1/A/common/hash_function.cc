@@ -13,7 +13,6 @@ using std::vector;
 
 // ---------- Functions for class HashFunction ---------- //
 
-// Initializes a hash function with the given number of dimensions and window.
 HashFunction::HashFunction(int number_of_dimensions, int window)
 : number_of_dimensions(number_of_dimensions), window(window)
 {
@@ -35,7 +34,6 @@ HashFunction::~HashFunction()
 
 }
 
-// Returns the hashed value of the given vector.
 int HashFunction::hash(const vector<double>& p)
 {
     if(p.size() == 0){

@@ -10,7 +10,6 @@
 using std::vector;
 using std::string;
 
-// Returns the euclidean distance between two vectors, or -1 if an error occurs.
 double euclidean_distance(const std::vector<double>& v1, const std::vector<double>& v2)
 {
     if(v1.size() != v2.size() || v1.size() == 0){
@@ -24,8 +23,6 @@ double euclidean_distance(const std::vector<double>& v1, const std::vector<doubl
     return sqrt(sum);
 }
 
-// Returns the lp-distance between two vectors, or -1 if an error occurs.
-// Third argument is p.
 double lp_metric(vector<double>& v1, vector<double>& v2, int p = 2)
 {
     if(p < 0 || v1.size() != v2.size() || v1.size() == 0){
@@ -39,7 +36,6 @@ double lp_metric(vector<double>& v1, vector<double>& v2, int p = 2)
     return pow(sum, 1 / p);
 }
 
-// Returns the lp-metric for the given vector.
 double lp_metric(vector<double>& v, string p)
 {
     if(v.size() == 0 || p.compare("inf") != 0){

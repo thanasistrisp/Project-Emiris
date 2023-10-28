@@ -13,7 +13,6 @@
 
 using namespace std;
 
-// Returns the vertices that are at hamming distance from q_proj.
 std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, int hamming_distance)
 {
 	if (hamming_distance == 0) {
@@ -44,7 +43,6 @@ std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, in
 	return result;
 }
 
-// Define f_i(x) = 0 or 1.
 int hypercube::f(int x, int i) {
 	// If f_map[i] does not contain x, calculate f_i(x) and store it in f_map[i] else return the stored value.
 	if (f_map[i].find(x) == f_map[i].end()) {
@@ -53,7 +51,6 @@ int hypercube::f(int x, int i) {
 	return f_map[i][x];
 }
 
-// Returns all permutations of q_proj with hamming distance.
 set<vector<int>> hypercube::get_permutation(const vector<int> &q_proj, int hamming_distance) {
 	set<vector<int>> result;
 	for (int i = 0; i < (int) q_proj.size(); i++) {
