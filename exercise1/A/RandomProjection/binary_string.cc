@@ -19,3 +19,13 @@ size_t binary_string::hash::operator()(const binary_string &bs) const {
 	}
 	return hash;
 }
+
+bool binary_string::hamming_distance(const binary_string &other, int d) const {
+	int count = 0;
+	for (int i = 0; i < (int) p.size(); i++) {
+		if (p[i] != other.p[i]) {
+			count++;
+		}
+	}
+	return count == d;
+}

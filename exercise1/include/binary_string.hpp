@@ -17,4 +17,7 @@ public:
 	struct hash {
 		size_t operator()(const binary_string &bs) const;
 	};
+
+	// Returns true if the hamming distance between this binary string and other is == d.
+	bool hamming_distance(const binary_string &other, int d) const;
 };
