@@ -258,6 +258,20 @@ For a fixed query point, similarly as above we found its corresponding bucket to
 
 ## 4.3. `cluster`
 
+### General details:
+
+To be able to find in which cluster a point belongs to to, but also which points a cluster has, we need two structures for O(1) lookup: an array, which position i indicates the point of dataset (zero indexed), its value array[i] its cluster and an array of set of points.
+
+After initialing centroid with the kmeans++ algorithm, we need to assign each point to a cluster. We do this by first assigning all points to first cluster and then without touching the centroids, for all algorithms, we assign each point using Lloyd's to its nearest centroid-cluster.
+
+Updating centroid is done by macqueen algorithm, which updates them each time a point is assigned to a cluster.
+
+In Silhouette metric of a point i, b(i) is the average distance of i to objects in the cluster of the 2nd closest centroid and *not* the smallest mean distance of i to all points in any other cluster.
+
+#### Lloyd's
+
+We assign each point to its nearest centroid and then update centroids. We repeat this until no point changes cluster (no other convergence criteria is used, as iteration are in general small).
+
 # References
 
 [1] LeCun, Y., Cortes, C., & Burges, Christopher, THE MNIST DATABASE
