@@ -16,6 +16,7 @@ using namespace std;
 std::vector<std::vector<int>> hypercube::pack(const std::vector<int> &q_proj, int hamming_distance)
 {
 	if (hamming_distance == 0) {
+		// If q_proj exists in hash_table, return the corresponding bucket else return empty vector.
 		binary_string bs(q_proj);
 		auto it = hash_table->find(bs);
 		if (it != hash_table->end()) {
