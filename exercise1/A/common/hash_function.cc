@@ -11,7 +11,7 @@
 
 using std::vector;
 
-// ---------- Public functions for class HashFunction ----------
+// ---------- Functions for class HashFunction ---------- //
 
 HashFunction::HashFunction(int number_of_dimensions, int window)
 : number_of_dimensions(number_of_dimensions), window(window)
@@ -44,5 +44,3 @@ int HashFunction::hash(const vector<double>& p)
     double result = std::inner_product(p.begin(), p.end(), v.begin(), t);
     return floor(abs(result) / window);
 }
-
-// todo: find a way to fix case p * v < 0

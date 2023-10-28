@@ -8,10 +8,11 @@
 
 using namespace std;
 
-// returns (K of K-means, L of LSH, k of LSH, M of Hypercube, k of Hypercube, probes of Hypercube
 tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 {
 	ifstream config_file(filename);
+
+	// Default values.
 	int K_of_Kmeans = 10;
 	int L = 3;
 	int k_of_LSH = 4;
@@ -19,7 +20,7 @@ tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 	int k_of_hypercube = 3;
 	int probes = 2;
 
-	// read line by line and parse and ignore // comments at begin or end of line
+	// Read line by line and parse and ignore // comments at begin or end of line.
 	string line;
 	while (getline(config_file, line)) {
 		if (line[0] == '#') {
@@ -65,17 +66,14 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 		break;
 	}
 	cout << "Running clustering algorithm..." << endl;
-	// set timer
 	clock_t start = clock();
 	tuple<int, int, int, int, int> kmean_args = make_tuple(get<1>(config), get<2>(config), get<3>(config), get<4>(config), get<5>(config));
 	int k = get<0>(config);
 	kmeans.compute_clusters(k, method, kmean_args);
 	clock_t end = clock();
-	// compute time
 	double time = (double)(end - start) / CLOCKS_PER_SEC;
 	cout << "Clustering time: " << time << endl;
 
-	// get clusters
 	vector<vector<int>> clusters = kmeans.get_clusters();
 	vector<vector<double>> centroids = kmeans.get_centroids();
 
@@ -96,14 +94,14 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 	output << "Silhouette: [";
 	vector<double> si(clusters.size(), 0);
 	double stotal = 0;
-	for (int i = 0; i < (int) clusters.size(); i++) {
-		for (int j = 0; j < (int) clusters[i].size(); j++) {
-			si[i] += kmeans.silhouette(clusters[i][j]);
+	for (int i = 0; i < (int) clusters.size(); i++) { // For each cluster.
+		for (int j = 0; j < (int) clusters[i].size(); j++) { // For each point in cluster.
+			si[i] += kmeans.silhouette(clusters[i][j]); // Add silhouette of point to cluster silhouette.
 		}
-		stotal += si[i];
+		stotal += si[i]; // Add cluster silhouette to total silhouette.
 		si[i] /= clusters[i].size();
 	}
-	stotal /= kmeans.get_dataset_size();
+	stotal /= kmeans.get_dataset_size(); // Calculate average silhouette of dataset (average of cluster silhouettes).
 	for (int i = 0; i < (int) si.size(); i++) {
 		output << si[i];
 		output << ", ";
@@ -112,7 +110,6 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 	clock_t end_silhouette = clock();
 	double silhouette_time = (double)(end_silhouette - start_silhouette) / CLOCKS_PER_SEC;
 	cout << "Silhouette time: " << silhouette_time << endl;
-
 
 	if (complete) {
 		for (int i = 0; i < (int) clusters.size(); i++) {

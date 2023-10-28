@@ -4,6 +4,7 @@
 #include <cstdlib>
 // cstdlib is used for NULL macro.
 
+// Template class ListNode, representing the nodes of the list.
 template <typename T> class ListNode
 {
     private:
@@ -11,12 +12,17 @@ template <typename T> class ListNode
         ListNode* next_node;
 
     public:
+        // Initializes a list node with the given data.
         ListNode(T);
         ~ListNode();
 
+        // Returns the data stored in the node.
         T get_data() const;
+
+        // Returns a pointer to the next node.
         ListNode* get_next_node() const;
 
+        // Sets the given node as the next node.
         void set_next_node(ListNode *);
 
         friend std::ostream& operator<<(std::ostream& os, const ListNode<T>& node)
@@ -25,28 +31,40 @@ template <typename T> class ListNode
         }
 };
 
+// Template class List.
 template <typename T> class List
 {
     private:
         ListNode<T> *head;
         int count;
 
-        ListNode<T> *recent_node;
-        int recent_index;
+        ListNode<T> *recent_node; // Most recently accessed node, meant to be used as an iterator.
+        int recent_index;         // Index of the most recently accessed node.
 
     public:
         List();
-        ~List();
-        // Deletes list and nodes, but not their contents.
 
+        // Deletes list and nodes, but not their contents.
+        ~List();
+
+        // Inserts the given data in the first node.
         void insert_first(T);
+
+        // Inserts the given data in the last node.
         void insert_last(T);
 
+        // Removes and returns the data stored in the first node.
         T remove_first();
+
+        // Removes and returns the data stored in the last node.
         T remove_last();
 
+        // Returns the data stored in the node specified by index (0-based indexing).
+        // Second argument shows the validity of the value returned,
+        // i.e. whether the returned value is a legit instance of type T.
         T get_data(int, bool&);
 
+        // Returns the number of nodes in the list.
         int get_count() const;
 
         friend std::ostream& operator<<(std::ostream& os, const List<T>& list)
@@ -63,6 +81,7 @@ template <typename T> class List
 
 // ---------- Functions for class ListNode ---------- //
 
+// Initializes a list node with the given data.
 template <typename T> ListNode<T>::ListNode(T data)
 : data(data), next_node(NULL)
 {
@@ -74,16 +93,19 @@ template <typename T> ListNode<T>::~ListNode()
     
 }
 
+// Returns the data stored in the node.
 template <typename T> T ListNode<T>::get_data() const
 {
     return data;
 }
 
+// Returns a pointer to the next node.
 template <typename T> ListNode<T>* ListNode<T>::get_next_node() const
 {
     return next_node;
 }
 
+// Sets the given node as the next node.
 template <typename T> void ListNode<T>::set_next_node(ListNode<T> *node)
 {
     next_node = node;
@@ -97,6 +119,7 @@ template <class T> List<T>::List()
 
 }
 
+// Deletes list and nodes, but not their contents.
 template <class T> List<T>::~List()
 {
     while(head != NULL){
@@ -104,6 +127,7 @@ template <class T> List<T>::~List()
     }
 }
 
+// Inserts the given data in the first node.
 template <typename T> void List<T>::insert_first(T data)
 {
     ListNode<T> *new_first_node = new ListNode<T>(data);
@@ -113,6 +137,7 @@ template <typename T> void List<T>::insert_first(T data)
     count++;
 }
 
+// Inserts the given data in the last node.
 template <typename T> void List<T>::insert_last(T data)
 {
     if(count == 0){
@@ -130,6 +155,7 @@ template <typename T> void List<T>::insert_last(T data)
     count++;
 }
 
+// Removes and returns the data stored in the first node.
 template <typename T> T List<T>::remove_first()
 {
     if(count == 0){
@@ -144,6 +170,7 @@ template <typename T> T List<T>::remove_first()
     return data;
 }
 
+// Removes and returns the data stored in the last node.
 template <typename T> T List<T>::remove_last()
 {
     if(count == 0){
@@ -167,14 +194,17 @@ template <typename T> T List<T>::remove_last()
     return data;
 }
 
-// valid is true if the value is valid (i.e. legit instance of type T stored in the list)
+// Returns the data stored in the node specified by index (0-based indexing).
+// Second argument shows the validity of the value returned,
+// i.e. whether the returned value is a legit instance of type T.
 template <typename T> T List<T>::get_data(int index, bool &valid)
 {
-    // if recent node = null, search from the start (index 0) until index
-    // if recent index is the right previous index, then go to next node and return
-    // if recent index < index, start from recent index and traverse until you find the index
-    // if index < recent index, start from the begining
+    // If index is out of bounds, return V().
+    // If recent node = NULL, start from the beginning (index 0) until index is found.
+    // If index < recent index, start from the begining (index 0) until index is found.
+    // If recent index is the right previous index, then move recent node to the next node and return its data.
     valid = false;
+
     // Check if index is out of bounds.
     if(index < 0 || index >= count){
         return T();
@@ -206,6 +236,7 @@ template <typename T> T List<T>::get_data(int index, bool &valid)
     return recent_node->get_data();
 }
 
+// Returns the number of nodes in the list.
 template <typename T> int List<T>::get_count() const
 {
     return count;

@@ -19,7 +19,9 @@ using std::get;
 using std::make_tuple;
 using std::set;
 
-void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int n, double r, ofstream &output) {
+// Writes the results of the queries to output file in the required format.
+void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int n, double r, ofstream &output)
+{
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
 		output << "Query: " << q << endl;

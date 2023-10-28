@@ -17,16 +17,24 @@ class LSH
 
         const std::vector<std::vector<double>> &dataset;
     
+        // Inserts the given data point with the given index to all L hash tables. 
         void insert(std::vector<double>, int);
 
     public:
-        // number of hash functions, number of hash tables, tablesize, window, dataset
+        // Initializes an instance with the given number of hash functions,
+        // number of hash tables, table size and window.
+        // The last argument is the set of points the LSH algorithm will be applied to.
         LSH(int, int, int, int, const std::vector<std::vector<double>>&);
         ~LSH();
 
+        // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
+        // and their distances to the query based on the given distance function.
         std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,
                                                                 double (*distance)(const std::vector<double>&, const std::vector<double>&));
 
+        // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
+        // and their distances to the query based on the given distance function.
+        // All the neighbours returned lie within radius r.
         std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double>&, double r,
                                                                 double (*distance)(const std::vector<double>&, const std::vector<double>&));
 };

@@ -28,31 +28,31 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
         hash_functions.push_back(h);
     }
 
-	// Initialize f_map so that that f_i(j) is calculated only once for specific j but could be different for different i
+	// Initialize f_map so that that f_i(j) is calculated only once for specific j but could be different for different i.
 	f_map = new unordered_map<int, int>[k];
 
-	// initialize HashTable
+	// Initialize HashTable.
 	hash_table = new HashTable();
-	// for each point p, calculate h_i(p) and store p -> [f-i(h_i(p))] for i = 1, ..., d'=k in hash_table
+	// For each point p, calculate h_i(p) and store p -> [f-i(h_i(p))] for i = 1, ..., d'=k in hash_table.
 	for (int i = 0; i < (int) p.size(); i++) {
 		vector<int> p_proj;
 		for (int j = 0; j < k; j++) {
 			int h_j = hash_functions[j]->hash(p[i]);
 			p_proj.push_back(f(h_j, j));
 		}
-		binary_string bs(p_proj); // convert p_proj to binary string type
-		auto it = hash_table->find(bs); // check if bs exists in hash_table
-		if (it != hash_table->end()) { // if it exists, add i to bucket of bs
+		binary_string bs(p_proj); // Convert p_proj to binary string type.
+		auto it = hash_table->find(bs); // Check if bs exists in hash_table.
+		if (it != hash_table->end()) { // If it exists, add i to bucket of bs.
 			it->second.push_back(i);
 		}
-		else { // if not, create new bucket
+		else { // If not, create new bucket.
 			vector<int> v;
 			v.push_back(i);
 			hash_table->insert(pair<binary_string, vector<int>>(bs, v));
 		}
 	}
 
-	// initialize used_vertices
+	// Initialize used_vertices.
 	used_vertices = new unordered_set<binary_string, binary_string::hash>();
 
 	clock_t end = clock();
@@ -73,13 +73,13 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	int num_points = 0;
 	int num_vertices = 0;
 	
-	// initialize k best candidates and distances
+	// Initialize N best candidates and distances.
 	vector<int> best_candidates(N);
 	vector<double> best_distances(N, numeric_limits<double>::max());
 
 	int hamming_distance = 0;
 	while (true) {
-		// create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
+		// Create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
 		vector<vector<int>> vertices = pack(q_proj, hamming_distance);
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
@@ -90,8 +90,8 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 				if (dist < best_distances[N - 1]) {
 					best_distances[N - 1] = dist;
 					best_candidates[N - 1] = vertices[i][j];
-					// sort best_distances and best_candidates
-					for (int k = N - 1; k > 0; k--) {
+					// Sort best_distances and best_candidates.
+					for (int k = N - 1; k > 0; k--) { // Insertion sort (N is small).
 						if (best_distances[k] < best_distances[k - 1]) {
 							swap(best_distances[k], best_distances[k - 1]);
 							swap(best_candidates[k], best_candidates[k - 1]);
@@ -111,13 +111,14 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 	}
 
 	check:
+		// Convert multimap to vector to match the return type.
 		vector<int> nearest_neighbors;
 		vector<double> dist;
 		for (int i = 0; i < N; i++) {
 			nearest_neighbors.push_back(best_candidates[i]);
 			dist.push_back(best_distances[i]);
 		}
-		// reset used_vertices
+		// Reset used_vertices.
 		used_vertices->clear();
 
 		return make_tuple(nearest_neighbors, dist);
@@ -127,10 +128,10 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 	int num_points = 0;
 	int num_vertices = 0;
 
-	multimap<double, int> candidates; // used multimap to sort candidates by distance and keep duplicates
+	multimap<double, int> candidates; // Used multimap to sort candidates by distance and keep duplicates.
 	int hamming_distance = 0;
 	while (true) {
-		// create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
+		// Create all permutations of q_proj with hamming_distance = 0, 1, 2, ...
 		vector<vector<int>> vertices = pack(q_proj, hamming_distance);
 		for (int i = 0; i < (int) vertices.size(); i++) {
 			for (int j = 0; j < (int)vertices[i].size(); j++)
@@ -151,13 +152,14 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 	}
 
 	check:
+		// Convert multimap to vector to match the return type.
 		vector<int> range;
 		vector<double> dist;
 		for (auto it = candidates.begin(); it != candidates.end(); it++) {
 			range.push_back(it->second);
 			dist.push_back(it->first);
 		}
-		// reset used_vertices
+		// Reset used_vertices.
 		used_vertices->clear();
 
 		return make_tuple(range, dist);
