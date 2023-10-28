@@ -272,6 +272,25 @@ In Silhouette metric of a point i, b(i) is the average distance of i to objects 
 
 We assign each point to its nearest centroid and then update centroids. We repeat this until no point changes cluster (no other convergence criteria is used, as iteration are in general small).
 
+## 4.4. Parameters
+
+The default parameters we found to be the most appropriate for each program defines in each program's Makefile, e.g.:
+```
+cube_ARGS = -d ../../MNIST/input.dat -q ../../MNIST/query.dat -k 14 -M 200 -probes 50 -o ../../output/output.txt -N 5 -R 10000
+```
+
+The window size used in all programs is declared in `defines.hpp` and is equal to 1000. Smaller values are are not recommended for the MNIST dataset of 60000 points, especially in the lsh knn problem where the query trick is used.
+
+### 4.4.1. `lsh`
+
+### 4.4.2. `cube`
+
+Better results are achieved with higher values of `M`, `probes`, `R` and lower values of `k`. Less probes are needed with lower `k` values as the buckets are exponentially smaller with more points in each bucket. For `M` candidates, the more are checked we have higher probability of finding the nearest neighbor(s), same for `R`. `M` should always be at least same as `N`, for better results (not so good in practice though) at least `2N`.
+
+### 4.4.3. `cluster`
+
+For the given dataset, k should be exact 10, as there are 10 different handwritten digits. The parameters here are all declared in a configuration file (cluster.conf) and the update method in Makefile as above.
+
 # References
 
 [1] LeCun, Y., Cortes, C., & Burges, Christopher, THE MNIST DATABASE
