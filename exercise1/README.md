@@ -268,7 +268,7 @@ Updating centroid is done by macqueen algorithm, which updates them each time a 
 
 In Silhouette metric of a point $i$, $b(i)$ is the average distance of $i$ to objects in the cluster of the 2nd closest centroid and *not* the smallest mean distance of i to all points in any other cluster.
 
-#### Lloyd's
+#### Lloyd's algorithm
 
 We assign each point to its nearest centroid and then update centroids. We repeat this until no point changes cluster (no other convergence criteria is used, as iteration are in general small).
 
@@ -283,9 +283,13 @@ The window size used in all programs is declared in `defines.hpp` and is equal t
 
 ### 4.4.1. `lsh`
 
+Better resutls are yielded with higher values of `L`, as each data point has a higher probability to lie in the same bucket as the query. However, adding more hash tables increases the memory footprint and the querying time as well, so anything ranging from $3$ to $7$ should be enough for satisfying results with distances less than $2 \cdot trueDist$.
+
+The value of parameter `k` determines the randomness of the hashed value that will be used for inserting elements inside the hash tables, but increasing this parameter over the range of $[4 - 10]$ doesn't necessarily improve the quality of the results.
+
 ### 4.4.2. `cube`
 
-Better results are achieved with higher values of `M`, `probes`, `R` and lower values of `k`. Less probes are needed with lower `k` values as the buckets are exponentially smaller with more points in each bucket. For `M` candidates, the more are checked we have higher probability of finding the nearest neighbor(s), same for `R`. `M` should always be at least same as `N`, for better results (not so good in practice though) at least `2N`.
+Better results are yielded with higher values of `M`, `probes`, `R` and lower values of `k`. Less probes are needed with lower `k` values as the buckets are exponentially smaller with more points in each bucket. For `M` candidates, the more are checked we have higher probability of finding the nearest neighbor(s), same for `R`. `M` should always be at least same as `N`, for better results (not so good in practice though) at least `2N`.
 
 ### 4.4.3. `cluster`
 
