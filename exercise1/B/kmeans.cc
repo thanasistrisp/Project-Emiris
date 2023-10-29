@@ -92,7 +92,7 @@ void KMeans::compute_clusters_reverse_lsh()
     int inner = 0, outer = 0; // For debugging.
 
     // Index n points into L hashtables: once for the entire algorithm.
-    static LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, w, dataset);
+    LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, w, dataset);
 
     // Start with radius = min(dist between centroids) / 2.
     double radius = min_dist_centroids() / 2;
@@ -149,7 +149,7 @@ void KMeans::compute_clusters_reverse_hypercube()
     int inner = 0, outer = 0; // For debugging.
 
     // Index n points into the hypercube: once for the entire algorithm.
-    static hypercube hypercube(dataset, k_hypercube, max_points_checked, probes);
+    hypercube hypercube(dataset, k_hypercube, max_points_checked, probes);
 
     // Start with radius = min(dist between centroids) / 2.
     double radius = min_dist_centroids() / 2;
