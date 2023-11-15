@@ -65,7 +65,7 @@ vector<Vertex*> DirectedGraph::get_successors(int index) const
 
 vector<Vertex*> DirectedGraph::get_successors(int index, int number_succ) const
 {
-    if(number_succ <= 0 | index < 0 || index >= adjacency_lists.size()){
+    if(number_succ <= 0 || index < 0 || index >= adjacency_lists.size()){
         return vector<Vertex*>();
     }
     if(number_succ == adjacency_lists[index].size()){
