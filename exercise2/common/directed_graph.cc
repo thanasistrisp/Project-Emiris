@@ -12,7 +12,11 @@ DirectedGraph::DirectedGraph()
 
 DirectedGraph::~DirectedGraph()
 {
-
+    for(int i = 0; i < adjacency_lists.size(); i++){
+        for(int j = 0; j < adjacency_lists[i].size(); j++){
+            delete adjacency_lists[i][j];
+        }
+    }
 }
 
 void DirectedGraph::add_vertex(int index)
@@ -25,28 +29,29 @@ void DirectedGraph::add_vertex(int index)
     adjacency_lists.push_back(dummy);
 }
 
-void DirectedGraph::add_edge(int origin, Vertex& destination)
+void DirectedGraph::add_edge(int origin, int destination, double distance)
 {
     if(origin == adjacency_lists.size()){
         add_vertex(origin);
     }
-    adjacency_lists[origin].push_back(&destination);
+    Vertex *vertex = new Vertex(destination, distance);
+    adjacency_lists[origin].push_back(vertex);
 }
 
-void DirectedGraph::add_edge(int origin, const vector<Vertex*>& destinations)
+void DirectedGraph::add_edge(int origin, const vector<int>& destinations, const vector<double>& distances)
 {
     if(origin == adjacency_lists.size()){
         add_vertex(origin);
     }
-    if(adjacency_lists[origin].size() == 0){
-        adjacency_lists[origin] = destinations;
+    if(destinations.size() != distances.size()){
         return;
     }
     for(int i; i < destinations.size(); i++){
-        if(destinations[i]->get_index() >= adjacency_lists.size()){
-            add_vertex(destinations[i]->get_index());
+        if(destinations[i] >= adjacency_lists.size()){
+            add_vertex(destinations[i]);
         }
-        adjacency_lists[origin].push_back(destinations[i]);
+        Vertex *vertex = new Vertex(destinations[i], distances[i]);
+        adjacency_lists[origin].push_back(vertex);
     }
 }
 
