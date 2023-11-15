@@ -2,10 +2,12 @@
 
 #include <vector>
 
+#include "vertex.hpp"
+
 class DirectedGraph
 {
     private:
-        std::vector<std::vector<int>> adjacency_lists;
+        std::vector<std::vector<Vertex*>> adjacency_lists; 
 
     public:
         DirectedGraph();
@@ -13,8 +15,8 @@ class DirectedGraph
 
         void add_vertex(int);
 
-        void add_edge(int, int);
-        void add_edge(int, const std::vector<int>&);
+        void add_edge(int, Vertex&);
+        void add_edge(int, const std::vector<Vertex*>&);
 
-        std::vector<int> get_successors(int) const;
+        std::vector<Vertex*> get_successors(int) const;
 };
