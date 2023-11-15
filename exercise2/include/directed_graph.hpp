@@ -19,4 +19,5 @@ class DirectedGraph
         void add_edge(int, const std::vector<Vertex*>&);
 
         std::vector<Vertex*> get_successors(int) const;
+        std::vector<Vertex*> get_successors(int, int) const;
 };

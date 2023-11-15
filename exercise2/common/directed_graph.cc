@@ -57,3 +57,14 @@ vector<Vertex*> DirectedGraph::get_successors(int index) const
     }
     return adjacency_lists[index];
 }
+
+vector<Vertex*> DirectedGraph::get_successors(int index, int number_succ) const
+{
+    if(number_succ <= 0 | index < 0 || index >= adjacency_lists.size()){
+        return vector<Vertex*>();
+    }
+    if(number_succ == adjacency_lists[index].size()){
+        return get_successors(index);
+    }
+    return vector<Vertex*>(adjacency_lists[index].begin(), adjacency_lists[index].begin() + number_succ);
+}
