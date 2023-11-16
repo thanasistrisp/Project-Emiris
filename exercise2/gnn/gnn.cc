@@ -43,7 +43,11 @@ GNN::~GNN()
 tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N,
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
-	multimap<double, int> S;
+	auto cmp = [](pair<double, int> left, pair<double, int> right) { return left.first < right.first; };
+	set<pair<double, int>, decltype(cmp)> S(cmp);
+
+	unordered_set<int> unique_indices;
+
 	for (int i = 0; i < R; i++) {
 		int y0, y1, y0_dist, y1_dist;
 		unordered_set<int> visited;
@@ -54,14 +58,22 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
 			vector<Vertex*> neighbors = G->get_successors(y0, E);
 			y1 = neighbors[0]->get_index();
 			y1_dist = distance(q, dataset[y1]);
-			S.insert(make_pair(y1_dist, y1));
+			// check if y1 is in S
+			if (unique_indices.find(y1) == unique_indices.end()) {
+				S.insert(make_pair(y1_dist, y1));
+				unique_indices.insert(y1);
+			}
 			for (int j = 1; j < (int)neighbors.size(); j++) {
-				int y2 = neighbors[j]->get_index();
-				double y2_dist = distance(q, dataset[y2]);
-				S.insert(make_pair(y2_dist, y2));
-				if (y2_dist < y1_dist) {
-					y1 = y2;
-					y1_dist = y2_dist;
+				int temp = neighbors[j]->get_index();
+				double temp_dist = distance(q, dataset[temp]);
+				// check if temp is in S
+				if (unique_indices.find(temp) == unique_indices.end()) {
+					S.insert(make_pair(temp_dist, temp));
+					unique_indices.insert(temp);
+				}
+				if (temp_dist < y1_dist) {
+					y1 = temp;
+					y1_dist = temp_dist;
 				}
 			}
 
@@ -82,9 +94,10 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
 	}
 	vector<int> S_N;
 	vector<double> S_N_dist;
-	for (int i = 0; i < (int)N; i++) {
-		S_N.push_back(S.begin()->second);
-		S_N_dist.push_back(S.begin()->first);
+	uint i = 0;
+	for (auto it = S.begin(); it != S.end() && i < N; it++, i++) {
+		S_N.push_back(it->second);
+		S_N_dist.push_back(it->first);
 	}
 	return make_tuple(S_N, S_N_dist);
 }
