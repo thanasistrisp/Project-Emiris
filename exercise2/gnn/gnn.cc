@@ -19,6 +19,10 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 	int k_lsh = 4;
 	int L = 5;
 	lsh = new LSH(k_lsh, L, dataset.size()/4, w, dataset);
+	clock_t end_lsh = clock();
+	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
+	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
+	start = clock();
 	
 	// initialize G
 	for (int i = 0; i < (int)dataset.size(); i++) {
@@ -26,11 +30,16 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 	}
 	for(int i = 0; i < (int)dataset.size(); i++){
 		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance);
+		if (get<0>(neighbors).size() != k) {
+			cout << "LSH query returned " << get<0>(neighbors).size() << " neighbors instead of " << k << endl;
+			exit(1);
+		}
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
 		for(int j = 0; j < (int)neighbors_indices.size(); j++){
 			G->add_edge(i, neighbors_indices[j], neighbors_distances[j]);
 		}
+		cout << "LSH query " << i << endl;
 	}
 
 	clock_t end = clock();
