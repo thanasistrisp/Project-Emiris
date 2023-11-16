@@ -64,11 +64,11 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
     double dist;
     int p_index;
     bool valid = true;
-    unsigned int q_secondary_key;
+    // unsigned int q_secondary_key;
 
     for(int i = 0; i < number_of_hash_tables; i++){
 
-        q_secondary_key = hash_tables[i]->secondary_hash_function(q);
+        // q_secondary_key = hash_tables[i]->secondary_hash_function(q);
 
         while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
             vector<double> p = dataset.at(p_index);
@@ -79,9 +79,9 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
             }
 
             // Choose only the points that share the same ID inside the bucket (Querying trick).
-            if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
-                continue;
-            }
+            // if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
+            //     continue;
+            // }
 
             // Keep k items only to save space.
             dist = distance(p, q);
