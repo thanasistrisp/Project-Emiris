@@ -70,7 +70,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
 
     for(int i = 0; i < number_of_hash_tables; i++){
 
-        // q_secondary_key = hash_tables[i]->secondary_hash_function(q);
+        q_secondary_key = hash_tables[i]->secondary_hash_function(q);
 
         while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
             vector<double> p = dataset.at(p_index);
