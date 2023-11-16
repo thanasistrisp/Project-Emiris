@@ -92,6 +92,8 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 			{
 				if (num_points >= M)
 					goto check;
+				if (p[vertices[i][j]] == q) // If p == q, skip.
+					continue;
 				double dist = distance(p[vertices[i][j]], q);
 				if (dist < best_distances[N - 1]) {
 					best_distances[N - 1] = dist;

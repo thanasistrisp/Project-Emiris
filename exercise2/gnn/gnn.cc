@@ -1,28 +1,31 @@
 #include "gnn.hpp"
-#include "lsh.hpp"
+#include "hypercube.hpp"
 #include "defines.hpp"
 #include "lp_metric.hpp"
 #include <tuple>
 #include <set>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include <map>
+#include <unordered_set>
 
 using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
 	G = new DirectedGraph();
-	int k_lsh = 4;
-	int L = 5;
-	lsh = new LSH(k_lsh, L, dataset.size()/4, w, dataset);
+	cube = new hypercube(dataset, 7, 100, 100, euclidean_distance);
 	
 	// initialize G
 	for (int i = 0; i < (int)dataset.size(); i++) {
 		G->add_vertex(i);
 	}
 	for(int i = 0; i < (int)dataset.size(); i++){
-		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance);
+		vector<double> q = dataset[i];
+		// convert to q_proj
+		vector<int> q_proj = cube->calculate_q_proj(q);
+		tuple<vector<int>, vector<double>> neighbors = cube->query_n_nearest_neighbors(dataset[i], q_proj, k);
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
 		for(int j = 0; j < (int)neighbors_indices.size(); j++){
@@ -34,7 +37,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 GNN::~GNN()
 {
 	delete G;
-	delete lsh;
+	delete cube;
 }
 
 tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N,
@@ -43,30 +46,38 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
 	multimap<double, int> S;
 	for (int i = 0; i < R; i++) {
 		int y0, y1, y0_dist, y1_dist;
+		unordered_set<int> visited;
 		y0 = rand() % dataset.size();
 		y0_dist = distance(q, dataset[y0]);
+		visited.insert(y0);
 		while (true) {
 			vector<Vertex*> neighbors = G->get_successors(y0, E);
 			for (int j = 0; j < (int)neighbors.size(); j++) {
-				S.insert(make_pair(neighbors[j]->get_distance(), neighbors[j]->get_index()));
+				S.insert(make_pair(distance(q, dataset[neighbors[j]->get_index()]), neighbors[j]->get_index()));
 			}
 
 			// y1 is minimum from neighbors
 			y1 = neighbors[0]->get_index();
-			y1_dist = neighbors[0]->get_distance();
+			y1_dist = distance(q, dataset[y1]);
 			for (int j = 1; j < (int)neighbors.size(); j++) {
-				if (neighbors[j]->get_distance() < y1_dist) {
+				if (distance(q, dataset[neighbors[j]->get_index()]) < y1_dist) {
 					y1 = neighbors[j]->get_index();
-					y1_dist = neighbors[j]->get_distance();
+					y1_dist = distance(q, dataset[y1]);
 				}
 			}
 
-			// if we reached a local minimum, break
-			if (y1_dist < y0_dist) {
-				y0 = y1;
+			if (y0_dist < y1_dist) {
+				break;
 			}
 			else {
-				break;
+				if (visited.find(y1) != visited.end()) {
+					break;
+				}
+				else {
+					y0 = y1;
+					y0_dist = y1_dist;
+					visited.insert(y0);
+				}
 			}
 		}
 	}

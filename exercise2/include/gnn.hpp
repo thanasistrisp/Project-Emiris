@@ -3,13 +3,13 @@
 #include <tuple>
 
 #include "directed_graph.hpp"
-#include "lsh.hpp"
+#include "hypercube.hpp"
 
 class GNN
 {
 private:
 	DirectedGraph *G;
-	LSH *lsh;
+	hypercube *cube;
 	const std::vector<std::vector<double>> &dataset;
 	int R;
 	int E;
