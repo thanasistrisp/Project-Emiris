@@ -73,6 +73,11 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
         while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
             vector<double> p = dataset.at(p_index);
 
+            // Skip query if found.
+            if(p == q){
+                continue;
+            }
+
             // Choose only the points that share the same ID inside the bucket (Querying trick).
             if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
                 continue;
