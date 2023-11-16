@@ -50,17 +50,16 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
 		visited.insert(y0);
 		while (true) {
 			vector<Vertex*> neighbors = G->get_successors(y0, E);
-			for (int j = 0; j < (int)neighbors.size(); j++) {
-				S.insert(make_pair(distance(q, dataset[neighbors[j]->get_index()]), neighbors[j]->get_index()));
-			}
-
-			// y1 is minimum from neighbors
 			y1 = neighbors[0]->get_index();
 			y1_dist = distance(q, dataset[y1]);
+			S.insert(make_pair(y1_dist, y1));
 			for (int j = 1; j < (int)neighbors.size(); j++) {
-				if (distance(q, dataset[neighbors[j]->get_index()]) < y1_dist) {
-					y1 = neighbors[j]->get_index();
-					y1_dist = distance(q, dataset[y1]);
+				int y2 = neighbors[j]->get_index();
+				double y2_dist = distance(q, dataset[y2]);
+				S.insert(make_pair(y2_dist, y2));
+				if (y2_dist < y1_dist) {
+					y1 = y2;
+					y1_dist = y2_dist;
 				}
 			}
 
