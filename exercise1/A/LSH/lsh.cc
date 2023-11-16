@@ -8,12 +8,7 @@
 #include "list.hpp"
 #include "hash_table.hpp"
 
-using std::vector;
-using std::tuple;
-using std::get;
-using std::make_tuple;
-using std::set;
-using std::prev;
+using namespace std;
 
 // ---------- Functions for class LSH ---------- //
 
@@ -66,13 +61,20 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
     double dist;
     int p_index;
     bool valid = true;
-    unsigned int q_secondary_key;
+    unsigned int q_id;
+    unsigned int p_id;
 
     for(int i = 0; i < number_of_hash_tables; i++){
+        // Hash query.
+        q_id = hash_tables[i]->secondary_hash_function(q);
 
-        q_secondary_key = hash_tables[i]->secondary_hash_function(q);
+        while(true){
+            tie(p_index, p_id) = hash_tables[i]->get_data(q, valid);
 
-        while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
+            if(p_index == 0 && !valid){
+                break;
+            }
+
             vector<double> p = dataset.at(p_index);
 
             // Skip query if found.
@@ -81,7 +83,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
             }
 
             // Choose only the points that share the same ID inside the bucket (Querying trick).
-            if(querying_trick && hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
+            if(querying_trick && p_id != q_id){
                 continue;
             }
 
@@ -118,9 +120,15 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
 
     double dist;
     int p_index;
+    unsigned int p_id;
     bool valid = true;
     for(int i = 0; i < number_of_hash_tables; i++){
-        while((p_index = hash_tables[i]->get_data(q, valid)) != 0 || valid){
+        while(true){
+            tie(p_index, p_id) = hash_tables[i]->get_data(q, valid);
+
+            if(p_index == 0 && !valid){
+                break;
+            }
             vector<double> p = dataset.at(p_index);
             dist = distance(p, q);
             if(dist < r){
