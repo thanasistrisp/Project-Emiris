@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <unordered_set>
 
 using namespace std;
 
@@ -43,30 +44,38 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
 	multimap<double, int> S;
 	for (int i = 0; i < R; i++) {
 		int y0, y1, y0_dist, y1_dist;
+		unordered_set<int> visited;
 		y0 = rand() % dataset.size();
 		y0_dist = distance(q, dataset[y0]);
+		visited.insert(y0);
 		while (true) {
 			vector<Vertex*> neighbors = G->get_successors(y0, E);
 			for (int j = 0; j < (int)neighbors.size(); j++) {
-				S.insert(make_pair(neighbors[j]->get_distance(), neighbors[j]->get_index()));
+				S.insert(make_pair(distance(q, dataset[neighbors[j]->get_index()]), neighbors[j]->get_index()));
 			}
 
 			// y1 is minimum from neighbors
 			y1 = neighbors[0]->get_index();
-			y1_dist = neighbors[0]->get_distance();
+			y1_dist = distance(q, dataset[y1]);
 			for (int j = 1; j < (int)neighbors.size(); j++) {
-				if (neighbors[j]->get_distance() < y1_dist) {
+				if (distance(q, dataset[neighbors[j]->get_index()]) < y1_dist) {
 					y1 = neighbors[j]->get_index();
-					y1_dist = neighbors[j]->get_distance();
+					y1_dist = distance(q, dataset[y1]);
 				}
 			}
 
-			// if we reached a local minimum, break
-			if (y1_dist < y0_dist) {
-				y0 = y1;
+			if (y0_dist <= y1_dist) {
+				break;
 			}
 			else {
-				break;
+				if (visited.find(y1) != visited.end()) {
+					break;
+				}
+				else {
+					y0 = y1;
+					y0_dist = y1_dist;
+					visited.insert(y0);
+				}
 			}
 		}
 	}
