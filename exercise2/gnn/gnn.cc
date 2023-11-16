@@ -25,7 +25,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 		G->add_vertex(i);
 	}
 	for(int i = 0; i < (int)dataset.size(); i++){
-		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance, false);
+		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance);
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
 		for(int j = 0; j < (int)neighbors_indices.size(); j++){
