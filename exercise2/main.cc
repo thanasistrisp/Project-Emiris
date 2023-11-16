@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 		cout << "File " << input_file << " does not exist" << endl;
 		exit(1);
 	}
-	vector <vector<double>> dataset = read_mnist_data(input_file, 100);
+	vector <vector<double>> dataset = read_mnist_data(input_file);
 
 	cout << "Read MNIST data" << endl;
 

@@ -13,6 +13,8 @@ using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
+	clock_t start = clock();
+
 	G = new DirectedGraph();
 	int k_lsh = 4;
 	int L = 5;
@@ -23,13 +25,15 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 		G->add_vertex(i);
 	}
 	for(int i = 0; i < (int)dataset.size(); i++){
-		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance);
+		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance, false);
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
-		for(int j = 0; j < (int)neighbors_indices.size(); j++){
-			G->add_edge(i, neighbors_indices[j], neighbors_distances[j]);
-		}
+		G->add_edge(i, neighbors_indices, neighbors_distances);
 	}
+
+	clock_t end = clock();
+	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
+	cout << "GNN initialization time: " << elapsed_secs << endl;
 }
 
 GNN::~GNN()
