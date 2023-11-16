@@ -28,7 +28,9 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance, false);
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
-		G->add_edge(i, neighbors_indices, neighbors_distances);
+		for(int j = 0; j < (int)neighbors_indices.size(); j++){
+			G->add_edge(i, neighbors_indices[j], neighbors_distances[j]);
+		}
 	}
 
 	clock_t end = clock();
