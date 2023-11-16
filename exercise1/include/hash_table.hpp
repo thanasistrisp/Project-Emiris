@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <tuple>
 
 #include "list.hpp"
 #include "hash_function.hpp"
@@ -63,12 +64,13 @@ template <typename K, typename V> class HashTable
 
         // Inserts the given value with the given key inside the hash table.
         void insert(K, V);
-
-        // Returns the value of one element that lies in the same bucket chain as the element with the given key.
+ 
+        // Returns a tuple containing the value and the ID of one element that lies in the same bucket chain
+        // as the element with the given key.
         // The i-th call returns the value of the i-th element inside the same bucket chain.
         // Second argument shows the validity of the value returned,
         // i.e. whether the returned value is a legit instance of type V. 
-        V get_data(K, bool&);
+        std::tuple<V, unsigned int> get_data(K, bool&);
 };
 
 // ---------- Functions for class HashBucket ---------- //
@@ -221,15 +223,17 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
     }
 }
 
-// Returns the value of one element that lies in the same bucket chain as the element with the given key.
+// Returns a tuple containing the value and the ID of one element that lies in the same bucket chain
+// as the element with the given key.
 // The i-th call returns the value of the i-th element inside the same bucket chain.
 // Second argument shows the validity of the value returned,
-// i.e. whether the returned value is a legit instance of type V. 
-template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid)
+// i.e. whether the returned value is a legit instance of type V.
+template <typename K, typename V> std::tuple<V, unsigned int> HashTable<K, V>::get_data(K key, bool &valid)
 {
     List<HashBucket<V>*> *chain;
     HashBucket<V> *bucket;
     V element;
+    unsigned int bucket_id = -1;
     bool fvalid = false; // To be used in this scope only.
     valid = false;
 
@@ -244,17 +248,18 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid
     // Check again, in case recent_chain_index is obsolete.
     if(chain == NULL){
         finished_chain_search = true;
-        return V();
+        return std::make_tuple(V(), bucket_id);
     }
 
     // If the chain exists, check if we have seen through all buckets.
     bucket = chain->get_data(recent_bucket_index, fvalid);
     if(bucket == NULL){
         finished_chain_search = true;
-        return V();
+        return std::make_tuple(V(), bucket_id);
     }
     recent_element_index++;
     element = bucket->get_data(recent_element_index, valid);
+    bucket_id = bucket->get_id();
 
     // If reached the end of the bucket, look for the next bucket in the same chain.
     if(element == V() && valid == false){
@@ -262,15 +267,16 @@ template <typename K, typename V> V HashTable<K, V>::get_data(K key, bool &valid
         bucket = chain->get_data(recent_bucket_index, fvalid);
         if(bucket == NULL){
             finished_chain_search = true;
-            return V();
+            return std::make_tuple(V(), bucket_id);
         }
         recent_element_index = 0;
         element = bucket->get_data(recent_element_index, valid);
+        bucket_id = bucket->get_id();
         if(element == V() && valid == false){
             finished_chain_search = true;
-            return element;
+            return std::make_tuple(element, bucket_id);
         }
     }
     valid = true;
-    return element;
+    return std::make_tuple(element, bucket_id);
 }
