@@ -9,12 +9,13 @@ int main()
 {
     DirectedGraph g;
     g.add_vertex(0);
+    g.add_vertex(1);
+    g.add_vertex(2);
     g.add_edge(0, 1, 3.0);
     g.add_edge(0, 2, 1.2);
     g.add_edge(0, 3, 0.2);
     g.add_edge(1, 0, 2);
     g.add_edge(1, 2, 0.3);
-    g.add_vertex(3);
     cout << "Sucessors of vertex with index 0" << endl;
     vector<Vertex*> s = g.get_successors(0, 2);
     for(int i = 0; i < s.size(); i++){
