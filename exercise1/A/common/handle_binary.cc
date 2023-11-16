@@ -3,11 +3,13 @@
 #include <vector>
 #include <string>
 
+#include "defines.hpp"
+
 using namespace std;
 
 static int reverse_int(int);
 
-vector<vector<double>> read_mnist_data(const string &filename, int number_of_images) {
+vector<vector<point>> read_mnist_data(const string &filename, int number_of_images) {
 	// Read MNIST data from file.
 	ifstream file(filename, ios::binary);
 
@@ -30,13 +32,13 @@ vector<vector<double>> read_mnist_data(const string &filename, int number_of_ima
 	cols = reverse_int(cols);
 
 	// Read data.
-	vector<vector<double>> mnist_data(number_of_images, vector<double>(rows * cols));
+	vector<vector<point>> mnist_data(number_of_images, vector<point>(rows * cols));
 	for (int i = 0; i < number_of_images; i++) {
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 				unsigned char temp = 0;
 				file.read((char*)&temp, sizeof(unsigned char));
-				mnist_data[i][(rows * r) + c] = (double)temp;
+				mnist_data[i][r * cols + c] = (point) temp;
 			}
 		}
 	}
@@ -61,7 +63,7 @@ bool file_exists(const string &filename) {
 }
 
 // Unused, used for debugging.
-void export_image(const vector<double> &image, string filename) {
+void export_image(const vector<point> &image, string filename) {
 	// Check if path exists else create folders.
 	string path = filename.substr(0, filename.find_last_of("/"));
 	if (!file_exists(path)) {

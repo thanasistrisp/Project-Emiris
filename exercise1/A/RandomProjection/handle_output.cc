@@ -12,10 +12,10 @@
 
 using namespace std;
 
-void handle_ouput(hypercube &cube, ofstream &output, const vector<vector<double>> &queries, double R, int N)
+void handle_ouput(hypercube &cube, ofstream &output, const vector<vector<point>> &queries, double R, int N)
 {
 	for (int q = 0; q < (int) queries.size(); q++) {
-		vector<vector<double>> dataset = cube.get_dataset();
+		vector<vector<point>> dataset = cube.get_dataset();
 		vector<int> q_proj = cube.calculate_q_proj(queries[q]);
 		cout << "Query: " << q << endl;
 		output << "Query: " << q << endl;

@@ -10,8 +10,8 @@
 
 using namespace std;
 
-hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, 
-					 double (*distance)(const std::vector<double> &, const std::vector<double> &)) : p(p)
+hypercube::hypercube(const vector<vector<point>> &p, int k, int M, int probes, 
+					 double (*distance)(const std::vector<point> &, const std::vector<point> &)) : p(p)
 {
 	this->k = k;
 	this->M = M;
@@ -69,7 +69,7 @@ hypercube::~hypercube() {
 	delete remaining_vertices;
 }
 
-tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj, int N) {
+tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<point> &q, const vector<int> &q_proj, int N) {
 	int num_points = 0;
 	int num_vertices = 0;
 	
@@ -131,7 +131,7 @@ tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const ve
 		return make_tuple(nearest_neighbors, dist);
 }
 
-tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &q, const vector<int> &q_proj, double R) {
+tuple<vector<int>, vector<double>> hypercube::query_range(const vector<point> &q, const vector<int> &q_proj, double R) {
 	int num_points = 0;
 	int num_vertices = 0;
 
@@ -180,7 +180,7 @@ tuple<vector<int>, vector<double>> hypercube::query_range(const vector<double> &
 		return make_tuple(range, dist);
 }
 
-vector<int> hypercube::calculate_q_proj(const vector<double> &q) {
+vector<int> hypercube::calculate_q_proj(const vector<point> &q) {
 	vector<int> q_proj;
 	for (int i = 0; i < k; i++) {
 		q_proj.push_back(f(hash_functions[i]->hash(q), i));

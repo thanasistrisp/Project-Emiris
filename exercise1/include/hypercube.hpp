@@ -8,11 +8,12 @@
 #include "lp_metric.hpp"
 #include "hash_function.hpp"
 #include "binary_string.hpp"
+#include "defines.hpp"
 
 class hypercube
 {
 private:
-	const std::vector<std::vector<double>> &p; // Dataset.
+	const std::vector<std::vector<point>> &p; // Dataset.
 	int k;      // Number of hash functions.
 	int M;      // Maximum number of candidate data points checked.
 	int probes; // Maximum number of hypercube vertices checked (probes).
@@ -38,21 +39,21 @@ private:
 public:
 	// Initializes an instance with the given dataset, number of dimensions k, maximum number of candidate data points checked,
 	// maximum number of hypercube vertices checked (probes) based on the given distance function.
-	hypercube(const std::vector<std::vector<double>> &p, int k, int M, int probes, 
-			  double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);
+	hypercube(const std::vector<std::vector<point>> &p, int k, int M, int probes, 
+			  double (*distance)(const std::vector<point> &, const std::vector<point> &) = euclidean_distance);
 	~hypercube();
 
 	// Returns the indices of the N nearest neighbours of q and their distances to q.
-	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<double> &q, const std::vector<int> &q_proj, int N);
+	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<point> &q, const std::vector<int> &q_proj, int N);
 	
 	// Returns the indices of the neighbours of q that lie within radius R and their distances to q.
-	std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double> &q, const std::vector<int> &q_proj, double R);
+	std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<point> &q, const std::vector<int> &q_proj, double R);
 	
 	// Returns the projection of q.
-	std::vector<int> calculate_q_proj(const std::vector<double> &q);
+	std::vector<int> calculate_q_proj(const std::vector<point> &q);
 
-	std::vector<std::vector<double>> get_dataset() { return p; }
+	std::vector<std::vector<point>> get_dataset() { return p; }
 	
 	// Distance function.
-	double (*distance)(const std::vector<double> &, const std::vector<double> &);
+	double (*distance)(const std::vector<point> &, const std::vector<point> &);
 };

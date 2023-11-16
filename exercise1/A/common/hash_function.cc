@@ -8,6 +8,7 @@
 // random   is used for std::random_device, std::default_random_engine generator, std::normal_distribution, std::uniform_real_distribution and rand().
 
 #include "hash_function.hpp"
+#include "defines.hpp"
 
 using std::vector;
 
@@ -34,7 +35,7 @@ HashFunction::~HashFunction()
 
 }
 
-int HashFunction::hash(const vector<double>& p)
+int HashFunction::hash(const vector<point>& p)
 {
     if(p.size() == 0){
         return -1;

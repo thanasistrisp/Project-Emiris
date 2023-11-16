@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "defines.hpp"
+
 // Hash function in Euclidean space.
 class HashFunction
 {
@@ -17,5 +19,5 @@ class HashFunction
         ~HashFunction();
 
         // Returns the hashed value of the given vector.
-        int hash(const std::vector<double>&);
+        int hash(const std::vector<point>&);
 };

@@ -1,10 +1,11 @@
 #include <vector>
 #include <tuple>
 #include <set>
+#include "defines.hpp"
 
 using namespace std;
 
-tuple<vector<int>, vector<double>> brute_force(vector<vector<double>> dataset, vector<double> query, unsigned int N, double (*distance)(const vector<double>&, const vector<double>&))
+tuple<vector<int>, vector<double>> brute_force(vector<vector<point>> dataset, vector<point> query, unsigned int N, double (*distance)(const vector<point>&, const vector<point>&))
 {
 	auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
 	set<tuple<int, double>, decltype(compare)> s(compare);

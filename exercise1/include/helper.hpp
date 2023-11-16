@@ -4,8 +4,10 @@
 #include <string>
 #include <tuple>
 
+#include "defines.hpp"
+
 // Reads the dataset from the given file and returns a vector of vectors (Important: it does not check if the file exists).
-std::vector<std::vector<double>> read_mnist_data(const std::string &filename, int num=0);
+std::vector<std::vector<point>> read_mnist_data(const std::string &filename, int num=0);
 
 // Reads the config file and returns a tuple of the parameters (Important: it does not check if the file exists).
 /* The tuple contains:
@@ -18,6 +20,6 @@ std::vector<std::vector<double>> read_mnist_data(const std::string &filename, in
  */
 std::tuple<int, int, int, int, int, int> read_config_file(const std::string &filename);
 
-void export_image(const std::vector<double> &image, std::string filename);
+void export_image(const std::vector<point> &image, std::string filename);
 
 bool file_exists(const std::string &filename);

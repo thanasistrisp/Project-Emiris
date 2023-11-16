@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 		cout << "File " << input_file << " does not exist" << endl;
 		exit(1);
 	}
-	vector <vector<double>> dataset = read_mnist_data(input_file);
+	vector <vector<point>> dataset = read_mnist_data(input_file);
 
 	hypercube cube(dataset, k, M, probes);
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
 	double elapsed_secs = 0;
 
-	vector <vector<double>> queries;
+	vector <vector<point>> queries;
 
 	clock_t start, end;
 

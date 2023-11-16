@@ -15,13 +15,13 @@ using namespace std;
 // Initializes an instance with the given number of hash functions,
 // number of hash tables, table size and window.
 // The last argument is the set of points the LSH algorithm will be applied to.
-LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int table_size, int window, const vector<vector<double>> &dataset)
+LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int table_size, int window, const vector<vector<point>> &dataset)
 : number_of_dimensions(dataset.at(0).size()), number_of_hash_functions(number_of_hash_functions),
   table_size(table_size), number_of_hash_tables(number_of_hash_tables), dataset(dataset)
 {
-    hash_tables = new HashTable<vector<double>, int>*[number_of_hash_tables];
+    hash_tables = new HashTable<vector<point>, int>*[number_of_hash_tables];
     for(int i = 0; i < number_of_hash_tables; i++){
-        hash_tables[i] = new HashTable<vector<double>, int>(table_size, number_of_dimensions, number_of_hash_functions, window);
+        hash_tables[i] = new HashTable<vector<point>, int>(table_size, number_of_dimensions, number_of_hash_functions, window);
     }
 
     // Insert data to all hash tables.
@@ -41,7 +41,7 @@ LSH::~LSH()
 }
 
 // Inserts the given data point with the given index to all L hash tables. 
-void LSH::insert(vector<double> p, int index)
+void LSH::insert(vector<point> p, int index)
 {
     for(int i = 0; i < number_of_hash_tables; i++){
         hash_tables[i]->insert(p, index);
@@ -51,8 +51,8 @@ void LSH::insert(vector<double> p, int index)
 // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
 // and their distances to the query based on the given distance function.
 // Last parameter indicates whether or not the Querying trick is applied.
-tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned int k,
-                                              double (*distance)(const vector<double>&, const vector<double>&),
+tuple<vector<int>, vector<double>> LSH::query(const vector<point>& q, unsigned int k,
+                                              double (*distance)(const vector<point>&, const vector<point>&),
                                               bool querying_trick)
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
@@ -75,7 +75,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
                 break;
             }
 
-            vector<double> p = dataset.at(p_index);
+            vector<point> p = dataset.at(p_index);
 
             // Skip query if found.
             if(p == q){
@@ -112,8 +112,8 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
 // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
 // and their distances to the query based on the given distance function.
 // All the neighbours returned lie within radius r.
-tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, double r,
-                                                    double (*distance)(const vector<double>&, const vector<double>&))
+tuple<vector<int>, vector<double>> LSH::query_range(const vector<point>& q, double r,
+                                                    double (*distance)(const vector<point>&, const vector<point>&))
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     set<tuple<int, double>, decltype(compare)> s(compare);
@@ -129,7 +129,7 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
             if(p_index == 0 && !valid){
                 break;
             }
-            vector<double> p = dataset.at(p_index);
+            vector<point> p = dataset.at(p_index);
             dist = distance(p, q);
             if(dist < r){
                 s.insert(make_tuple(p_index, dist));

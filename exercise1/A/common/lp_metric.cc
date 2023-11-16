@@ -10,7 +10,7 @@
 using std::vector;
 using std::string;
 
-double euclidean_distance(const std::vector<double>& v1, const std::vector<double>& v2)
+double euclidean_distance(const std::vector<point>& v1, const std::vector<point>& v2)
 {
     if(v1.size() != v2.size() || v1.size() == 0){
         return -1;
@@ -23,7 +23,7 @@ double euclidean_distance(const std::vector<double>& v1, const std::vector<doubl
     return sqrt(sum);
 }
 
-double lp_metric(vector<double>& v1, vector<double>& v2, int p = 2)
+double lp_metric(vector<point>& v1, vector<point>& v2, int p = 2)
 {
     if(p < 0 || v1.size() != v2.size() || v1.size() == 0){
         return -1;
@@ -36,13 +36,13 @@ double lp_metric(vector<double>& v1, vector<double>& v2, int p = 2)
     return pow(sum, 1 / p);
 }
 
-double lp_metric(vector<double>& v, string p)
+double lp_metric(vector<point>& v, string p)
 {
     if(v.size() == 0 || p.compare("inf") != 0){
         return -1;
     }
     double max = v.at(0);
-    vector<double>::const_iterator iter;
+    vector<point>::const_iterator iter;
     for(iter = v.begin(); iter != v.end(); std::advance(iter, 1)){
         if(*iter > max){
             max = *iter;
