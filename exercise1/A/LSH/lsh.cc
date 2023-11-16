@@ -55,8 +55,10 @@ void LSH::insert(vector<double> p, int index)
 
 // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
 // and their distances to the query based on the given distance function.
+// Last parameter indicates whether or not the Querying trick is applied.
 tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned int k,
-                                              double (*distance)(const vector<double>&, const vector<double>&))
+                                              double (*distance)(const vector<double>&, const vector<double>&),
+                                              bool querying_trick)
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     set<tuple<int, double>, decltype(compare)> s(compare);
@@ -79,7 +81,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
             }
 
             // Choose only the points that share the same ID inside the bucket (Querying trick).
-            if(hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
+            if(querying_trick && hash_tables[i]->secondary_hash_function(p) != q_secondary_key){
                 continue;
             }
 

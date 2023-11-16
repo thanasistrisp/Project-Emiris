@@ -29,8 +29,10 @@ class LSH
 
         // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
         // and their distances to the query based on the given distance function.
+        // Last parameter indicates whether or not the Querying trick is applied.
         std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,
-                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&));
+                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&),
+                                                                bool querying_trick=true);
 
         // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
         // and their distances to the query based on the given distance function.
