@@ -66,7 +66,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
     double dist;
     int p_index;
     bool valid = true;
-    // unsigned int q_secondary_key;
+    unsigned int q_secondary_key;
 
     for(int i = 0; i < number_of_hash_tables; i++){
 
