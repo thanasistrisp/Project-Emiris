@@ -16,7 +16,8 @@ using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
-	multiset<pair<int, double>*, decltype(&cmp)> neighbors_set(&cmp);
+	// multiset<pair<int, double>*, decltype(&cmp)> neighbors_set(&cmp);
+	unordered_set<pair<int, double>*, decltype(&hash), decltype(&equal)> neighbors_set(8, &hash, &equal);
 
 	unordered_set<int> unique_indices;
 
@@ -64,7 +65,8 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 				add_neighbors_random(i, neighbors_set, unique_indices, k);
 			}
 
-			// Convert set of pairs back to vectors.
+			// Sort and convert set of pairs back to vectors.
+			sort(neighbors_set.begin(), neighbors_set.end(), &cmp);
 			neighbors_indices.clear();
 			neighbors_distances.clear();
 			for(auto iter = neighbors_set.begin(); iter != neighbors_set.end(); iter++){
@@ -149,7 +151,7 @@ void GNN::add_neighbors_random(int index, vector<int>& neighbors_indices, vector
 	}
 }
 
-void GNN::add_neighbors_pred(int index, multiset<pair<int, double>*, decltype(&cmp)>& neighbors, int k)
+void GNN::add_neighbors_pred(int index, unordered_set<pair<int, double>*, decltype(&hash), decltype(&equal)>& neighbors, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double distance;
@@ -184,7 +186,7 @@ void GNN::add_neighbors_pred(int index, multiset<pair<int, double>*, decltype(&c
 	cout << "end of function " << neighbors.size() << endl;
 }
 
-void GNN::add_neighbors_random(int index, multiset<pair<int, double>*, decltype(&cmp)>& neighbors, unordered_set<int>& unique_indices, int k)
+void GNN::add_neighbors_random(int index, unordered_set<pair<int, double>*, decltype(&hash), decltype(&equal)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	double distance;
 	ptrdiff_t pos;
