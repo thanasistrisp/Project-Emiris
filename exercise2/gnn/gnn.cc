@@ -16,8 +16,7 @@ using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
-	auto cmp = [](pair<int, double> left, pair<int, double> right) { return left.second < right.second; };
-	set<pair<int, double>, decltype(cmp)> neighbors_set(cmp);
+	set<pair<int, double>, decltype(&cmp)> neighbors_set(&cmp);
 
 	unordered_set<int> unique_indices;
 
@@ -138,7 +137,7 @@ void GNN::add_neighbors_random(int index, vector<int>& neighbors_indices, vector
 	}
 }
 
-void GNN::add_neighbors_pred(int index, set<pair<int, double>>& neighbors, int k)
+void GNN::add_neighbors_pred(int index, set<pair<int, double>, decltype(&cmp)>& neighbors, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double distance;
@@ -167,7 +166,7 @@ void GNN::add_neighbors_pred(int index, set<pair<int, double>>& neighbors, int k
 	}
 }
 
-void GNN::add_neighbors_random(int index, set<pair<int, double>>& neighbors, unordered_set<int>& unique_indices, int k)
+void GNN::add_neighbors_random(int index, set<pair<int, double>, decltype(&cmp)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	double distance;
 	ptrdiff_t pos;
