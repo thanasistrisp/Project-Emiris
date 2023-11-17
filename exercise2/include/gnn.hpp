@@ -1,6 +1,8 @@
 #pragma once
 
 #include <tuple>
+#include <unordered_set>
+#include <set>
 
 #include "directed_graph.hpp"
 #include "lsh.hpp"
@@ -16,6 +18,9 @@ class GNN
 
 		void add_neighbors_pred(int, std::vector<int>&, std::vector<double>&, int);
 		void add_neighbors_random(int, std::vector<int>&, std::vector<double>&, int);
+
+		void add_neighbors_pred(int, std::set<std::pair<int, double>>&, int);
+		void add_neighbors_random(int, std::set<std::pair<int, double>>&, std::unordered_set<int>&, int);
 
 	public:
 		GNN(int k, const std::vector<std::vector<double>> &dataset, int R, int E);
