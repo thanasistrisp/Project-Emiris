@@ -16,7 +16,7 @@ using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
-	set<pair<int, double>*, decltype(&cmp)> neighbors_set(&cmp);
+	multiset<pair<int, double>*, decltype(&cmp)> neighbors_set(&cmp);
 
 	unordered_set<int> unique_indices;
 
@@ -72,12 +72,11 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 				neighbors_distances.push_back((*iter)->second);
 			}
 
-			// Clean set and vector of unique values.
-			while(!neighbors_set.empty()){
-				auto iter = neighbors_set.begin();
-				iter = neighbors_set.erase(iter);
+			// Clean set and pairs
+			for(auto iter = neighbors_set.begin(); iter != neighbors_set.end(); iter++){
 				delete *iter;
 			}
+			neighbors_set.clear();
 			unique_indices.clear();
 
 			cout << "Gathered " << neighbors_indices.size() << " neighbours" << endl; // debug.
@@ -150,7 +149,7 @@ void GNN::add_neighbors_random(int index, vector<int>& neighbors_indices, vector
 	}
 }
 
-void GNN::add_neighbors_pred(int index, set<pair<int, double>*, decltype(&cmp)>& neighbors, int k)
+void GNN::add_neighbors_pred(int index, multiset<pair<int, double>*, decltype(&cmp)>& neighbors, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double distance;
@@ -185,7 +184,7 @@ void GNN::add_neighbors_pred(int index, set<pair<int, double>*, decltype(&cmp)>&
 	cout << "end of function " << neighbors.size() << endl;
 }
 
-void GNN::add_neighbors_random(int index, set<pair<int, double>*, decltype(&cmp)>& neighbors, unordered_set<int>& unique_indices, int k)
+void GNN::add_neighbors_random(int index, multiset<pair<int, double>*, decltype(&cmp)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	double distance;
 	ptrdiff_t pos;
@@ -230,7 +229,7 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
 	auto cmp = [](pair<double, int> left, pair<double, int> right) { return left.first < right.first; };
-	set<pair<double, int>, decltype(cmp)> S(cmp);
+	multiset<pair<double, int>, decltype(cmp)> S(cmp);
 
 	unordered_set<int> unique_indices;
 
