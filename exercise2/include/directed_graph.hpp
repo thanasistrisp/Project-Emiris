@@ -20,4 +20,7 @@ class DirectedGraph
 
         std::vector<Vertex*> get_successors(int) const;
         std::vector<Vertex*> get_successors(int, int) const;
+
+        std::vector<int> get_predecessors(int) const;
+        std::vector<int> get_predecessors(int, int) const;
 };
