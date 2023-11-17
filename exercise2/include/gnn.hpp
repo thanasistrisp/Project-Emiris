@@ -20,9 +20,6 @@ class GNN
 		static bool hash(const std::pair<int, double> *p){ return std::hash<int>()(p->first); };
 		static bool equal(const std::pair<int, double> *p1, const std::pair<int, double> *p2){ return p1->first == p2->first; };
 
-		void add_neighbors_pred(int, std::vector<int>&, std::vector<double>&, int);
-		void add_neighbors_random(int, std::vector<int>&, std::vector<double>&, int);
-
 		void add_neighbors_pred(int, std::unordered_multiset<std::pair<int, double>*, decltype(&hash), decltype(&equal)>&, int);
 		void add_neighbors_random(int, std::unordered_multiset<std::pair<int, double>*, decltype(&hash), decltype(&equal)>&, std::unordered_set<int>&, int);
 
