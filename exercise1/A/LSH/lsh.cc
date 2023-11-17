@@ -56,7 +56,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
                                               bool querying_trick)
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
-    set<tuple<int, double>, decltype(compare)> s(compare);
+    multiset<tuple<int, double>, decltype(compare)> s(compare);
 
     double dist;
     int p_index;
@@ -116,7 +116,7 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
                                                     double (*distance)(const vector<double>&, const vector<double>&))
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
-    set<tuple<int, double>, decltype(compare)> s(compare);
+    multiset<tuple<int, double>, decltype(compare)> s(compare);
 
     double dist;
     int p_index;
