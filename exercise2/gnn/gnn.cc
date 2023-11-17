@@ -30,9 +30,6 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
 	start = clock();
-
-	double distance;
-	ptrdiff_t pos;
 	
 	// initialize G
 	for (int i = 0; i < (int) dataset.size(); i++) {
@@ -43,7 +40,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
 
-		if (get<0>(neighbors).size() != k) {
+		if ((int) neighbors_indices.size() < k) {
 			// cout << "LSH query returned " << get<0>(neighbors).size() << " neighbors instead of " << k << endl; // debug.
 
 			// Merge vectors into a set of pairs.
@@ -104,7 +101,6 @@ void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, d
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double distance;
-	ptrdiff_t pos;
 
 	if((int) pred.size() > 0){
 		vector<Vertex*> pred_successors = G->get_successors(pred[0]);
@@ -125,7 +121,6 @@ void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, d
 void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*, decltype(&hash), decltype(&equal)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	double distance;
-	ptrdiff_t pos;
 
 	while((int) neighbors.size() < k){
 		int r_index = rand() % dataset.size();
