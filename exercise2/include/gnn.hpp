@@ -7,15 +7,19 @@
 
 class GNN
 {
-private:
-	DirectedGraph *G;
-	LSH *lsh;
-	const std::vector<std::vector<double>> &dataset;
-	int R;
-	int E;
-public:
-	GNN(int k, const std::vector<std::vector<double>> &dataset, int R, int E);
-	~GNN();
-	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,
-                                                            double (*distance)(const std::vector<double>&, const std::vector<double>&));
+	private:
+		DirectedGraph *G;
+		LSH *lsh;
+		const std::vector<std::vector<double>> &dataset;
+		int R;
+		int E;
+
+		void add_neighbors_pred(int, std::vector<int>&, std::vector<double>&, int);
+		void add_neighbors_random(int, std::vector<int>&, std::vector<double>&, int);
+
+	public:
+		GNN(int k, const std::vector<std::vector<double>> &dataset, int R, int E);
+		~GNN();
+		std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,
+																double (*distance)(const std::vector<double>&, const std::vector<double>&));
 };

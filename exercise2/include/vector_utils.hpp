@@ -1,0 +1,5 @@
+#pragma once
+
+#include <vector>
+
+void insertion_sort(std::vector<double>&, double);

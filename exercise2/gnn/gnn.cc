@@ -9,6 +9,7 @@
 #include "lsh.hpp"
 #include "defines.hpp"
 #include "lp_metric.hpp"
+#include "vector_utils.hpp"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 	clock_t start = clock();
 
 	G = new DirectedGraph();
-	int k_lsh = 5;
+	int k_lsh = 7;
 	int L = 5;
 	lsh = new LSH(k_lsh, L, dataset.size()/4, w, dataset);
 	clock_t end_lsh = clock();
@@ -37,54 +38,21 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
 		if (get<0>(neighbors).size() != k) {
-			// cout << "LSH query returned " << get<0>(neighbors).size() << " neighbors instead of " << k << endl; // debug.
-			// exit(1);
+			cout << "LSH query returned " << get<0>(neighbors).size() << " neighbors instead of " << k << endl; // debug.
 
-			// Get successors of the same predecessor as neighbours.
-			vector<int> pred = G->get_predecessors(i, 1);
+			// Add successors of the same predecessor as neighbors.
+			add_neighbors_pred(i, neighbors_indices, neighbors_distances, k);
 
-			if((int) pred.size() > 0){
-				vector<Vertex*> pred_successors = G->get_successors(pred[0]);
-
-				// cout << "Found " << pred_successors.size() << " successors of predecessor" << endl; // debug.
-				
-				for(int j = 0; j < (int) pred_successors.size(); j++){
-					int ps_index = pred_successors[j]->get_index();
-					distance = euclidean_distance(dataset[i], dataset[ps_index]);
-					neighbors_distances.push_back(distance);
-					sort(neighbors_distances.begin(), neighbors_distances.end(), [](double left, double right) { return left < right; });
-					pos = find(neighbors_distances.begin(), neighbors_distances.end(), distance) - neighbors_distances.begin();
-					neighbors_indices.insert(neighbors_indices.begin() + pos, ps_index);
-					if((int) neighbors_indices.size() == k){
-						break;
-					}
-				}
+			// If problem persists, add random vertices as neighbors.
+			if((int) neighbors_indices.size() < k){
+				add_neighbors_random(i, neighbors_indices, neighbors_distances, k);
 			}
-
-			// If the problem persists, add random vertices as neighbours.
-			while((int) neighbors_indices.size() < k){
-
-				// cout << "Random vertex as neighbor" << endl; // debug.
-
-				int index = rand() % dataset.size();
-				if(find(neighbors_indices.begin(), neighbors_indices.end(), index) != neighbors_indices.end()){
-					continue;
-				}
-				distance = euclidean_distance(dataset[i], dataset[index]);
-				neighbors_distances.push_back(distance);
-				sort(neighbors_distances.begin(), neighbors_distances.end(), [](double left, double right) { return left < right; });
-				pos = find(neighbors_distances.begin(), neighbors_distances.end(), distance) - neighbors_distances.begin();
-				neighbors_indices.insert(neighbors_indices.begin() + pos, index);
-				if((int) neighbors_indices.size() == k){
-					break;
-				}
-			}
-			// cout << "Gathered " << neighbors_indices.size() << " neighbours" << endl; // debug.
+			cout << "Gathered " << neighbors_indices.size() << " neighbours" << endl; // debug.
 		}
 		for(int j = 0; j < (int) neighbors_indices.size(); j++){
 			G->add_edge(i, neighbors_indices[j], neighbors_distances[j]);
 		}
-		// cout << "LSH query " << i << endl;
+		cout << "LSH query " << i << endl;
 	}
 
 	clock_t end = clock();
@@ -96,6 +64,57 @@ GNN::~GNN()
 {
 	delete G;
 	delete lsh;
+}
+
+void GNN::add_neighbors_pred(int index, vector<int>& neighbors_indices, vector<double>& neighbors_distances, int k)
+{
+	vector<int> pred = G->get_predecessors(index, 1);
+	double distance;
+	ptrdiff_t pos;
+
+	if((int) pred.size() > 0){
+		vector<Vertex*> pred_successors = G->get_successors(pred[0]);
+
+		cout << "Found " << pred_successors.size() << " successors of predecessor" << endl; // debug.
+		
+		for(int i = 0; i < (int) pred_successors.size(); i++){
+			int ps_index = pred_successors[i]->get_index();
+			distance = euclidean_distance(dataset[index], dataset[ps_index]);
+			insertion_sort(neighbors_distances, distance);
+			// neighbors_distances.push_back(distance);
+			// sort(neighbors_distances.begin(), neighbors_distances.end(), [](double left, double right) { return left < right; });
+			pos = find(neighbors_distances.begin(), neighbors_distances.end(), distance) - neighbors_distances.begin();
+			neighbors_indices.insert(neighbors_indices.begin() + pos, ps_index);
+			if((int) neighbors_indices.size() == k){
+				break;
+			}
+		}
+	}
+}
+
+void GNN::add_neighbors_random(int index, vector<int>& neighbors_indices, vector<double>& neighbors_distances, int k)
+{
+	double distance;
+	ptrdiff_t pos;
+
+	while((int) neighbors_indices.size() < k){
+
+		cout << "Random vertex as neighbor" << endl; // debug.
+
+		int r_index = rand() % dataset.size();
+		if(find(neighbors_indices.begin(), neighbors_indices.end(), r_index) != neighbors_indices.end()){
+			continue;
+		}
+		distance = euclidean_distance(dataset[index], dataset[r_index]);
+		insertion_sort(neighbors_distances, distance);
+		// neighbors_distances.push_back(distance);
+		// sort(neighbors_distances.begin(), neighbors_distances.end(), [](double left, double right) { return left < right; });
+		pos = find(neighbors_distances.begin(), neighbors_distances.end(), distance) - neighbors_distances.begin();
+		neighbors_indices.insert(neighbors_indices.begin() + pos, r_index);
+		if((int) neighbors_indices.size() == k){
+			break;
+		}
+	}
 }
 
 tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N,
