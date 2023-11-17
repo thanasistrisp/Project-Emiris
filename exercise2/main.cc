@@ -16,6 +16,7 @@
 #include "handling.hpp"
 
 using namespace std;
+using std::cout;
 
 int main(int argc, char *argv[]) {
 	srand(time(NULL));
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
 	int E = 30;
 	int R = 1;
 	int N = 1;
+	int l = 20;
 
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-d") == 0) {
@@ -50,7 +52,11 @@ int main(int argc, char *argv[]) {
 			i++;
 		}
 		else if (strcmp(argv[i], "-R") == 0) {
-			R = atof(argv[i + 1]);
+			R = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-l") == 0) {
+			l = atoi(argv[i + 1]);
 			i++;
 		}
 		else if (strcmp(argv[i], "-o") == 0) {
