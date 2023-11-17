@@ -16,7 +16,7 @@ using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
-	set<pair<int, double>, decltype(&cmp)> neighbors_set(&cmp);
+	set<pair<int, double>*, decltype(&cmp)> neighbors_set(&cmp);
 
 	unordered_set<int> unique_indices;
 
@@ -48,25 +48,38 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 
 			// Merge vectors into a set of pairs.
 			for(int j = 0; j < (int) neighbors_indices.size(); j++){
-				neighbors_set.insert(make_pair(neighbors_indices[j], neighbors_distances[j]));
+				pair<int, double> *p = new pair(neighbors_indices[j], neighbors_distances[j]);
+				neighbors_set.insert(p);
 			}
 
-			add_neighbors_pred(i, neighbors_set, k);
-
 			// Add successors of the same predecessor as neighbors.
-			// add_neighbors_pred(i, neighbors_indices, neighbors_distances, k);
-			// add_neighbors_pred(i, neighbors, k);
+			add_neighbors_pred(i, neighbors_set, k);
 
 			// If problem persists, add random vertices as neighbors.
 			if((int) neighbors_indices.size() < k){
 				
 				for(int j = 0; j < (int) neighbors_indices.size(); j++){
-					unique_indices.insert(neighbors_indices[i]);
+					unique_indices.insert(neighbors_indices[j]);
 				}
-
-				// add_neighbors_random(i, neighbors_indices, neighbors_distances, k);
 				add_neighbors_random(i, neighbors_set, unique_indices, k);
 			}
+
+			// Convert set of pairs back to vectors.
+			neighbors_indices.clear();
+			neighbors_distances.clear();
+			for(auto iter = neighbors_set.begin(); iter != neighbors_set.end(); iter++){
+				neighbors_indices.push_back((*iter)->first);
+				neighbors_distances.push_back((*iter)->second);
+			}
+
+			// Clean set and vector of unique values.
+			while(!neighbors_set.empty()){
+				auto iter = neighbors_set.begin();
+				iter = neighbors_set.erase(iter);
+				delete *iter;
+			}
+			unique_indices.clear();
+
 			cout << "Gathered " << neighbors_indices.size() << " neighbours" << endl; // debug.
 		}
 		for(int j = 0; j < (int) neighbors_indices.size(); j++){
@@ -137,11 +150,13 @@ void GNN::add_neighbors_random(int index, vector<int>& neighbors_indices, vector
 	}
 }
 
-void GNN::add_neighbors_pred(int index, set<pair<int, double>, decltype(&cmp)>& neighbors, int k)
+void GNN::add_neighbors_pred(int index, set<pair<int, double>*, decltype(&cmp)>& neighbors, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double distance;
 	ptrdiff_t pos;
+
+	cout << "start of function " << neighbors.size() << endl;
 
 	if((int) pred.size() > 0){
 		vector<Vertex*> pred_successors = G->get_successors(pred[0]);
@@ -152,7 +167,9 @@ void GNN::add_neighbors_pred(int index, set<pair<int, double>, decltype(&cmp)>& 
 			int ps_index = pred_successors[i]->get_index();
 			distance = euclidean_distance(dataset[index], dataset[ps_index]);
 
-			neighbors.insert(make_pair(ps_index, distance));
+			// neighbors.insert(make_pair(ps_index, distance));
+			pair<int, double>* p = new pair(ps_index, distance);
+			neighbors.insert(p);
 
 			// insertion_sort(neighbors_distances, distance);
 			// neighbors_distances.push_back(distance);
@@ -164,18 +181,22 @@ void GNN::add_neighbors_pred(int index, set<pair<int, double>, decltype(&cmp)>& 
 			}
 		}
 	}
+
+	cout << "end of function " << neighbors.size() << endl;
 }
 
-void GNN::add_neighbors_random(int index, set<pair<int, double>, decltype(&cmp)>& neighbors, unordered_set<int>& unique_indices, int k)
+void GNN::add_neighbors_random(int index, set<pair<int, double>*, decltype(&cmp)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	double distance;
 	ptrdiff_t pos;
 
+	cout << "start of function " << neighbors.size() << endl;
+
 	while((int) neighbors.size() < k){
 
-		cout << "Random vertex as neighbor" << endl; // debug.
-
 		int r_index = rand() % dataset.size();
+
+		cout << "Random vertex as neighbor " << r_index << endl; // debug.
 
 		if(unique_indices.find(r_index) != unique_indices.end()){
 			continue;
@@ -187,16 +208,22 @@ void GNN::add_neighbors_random(int index, set<pair<int, double>, decltype(&cmp)>
 		// }
 		distance = euclidean_distance(dataset[index], dataset[r_index]);
 
-		neighbors.insert(make_pair(r_index, distance));
+		// neighbors.insert(make_pair(r_index, distance));
+
+		pair<int, double>* p = new pair(r_index, distance);
+		neighbors.insert(p);
+
 		// insertion_sort(neighbors_distances, distance);
 		// neighbors_distances.push_back(distance);
 		// sort(neighbors_distances.begin(), neighbors_distances.end(), [](double left, double right) { return left < right; });
 		// pos = find(neighbors_distances.begin(), neighbors_distances.end(), distance) - neighbors_distances.begin();
 		// neighbors_indices.insert(neighbors_indices.begin() + pos, r_index);
-		if((int) neighbors.size() == k){
-			break;
-		}
+		// if((int) neighbors.size() == k){
+		// 	break;
+		// }
 	}
+
+	cout << "end of function " << neighbors.size() << endl;
 }
 
 tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N,
