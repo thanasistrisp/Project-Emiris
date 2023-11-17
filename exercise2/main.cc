@@ -11,6 +11,7 @@
 
 #include "helper.hpp"
 #include "gnn.hpp"
+#include "mrng.hpp"
 #include "defines.hpp"
 #include "handling.hpp"
 
@@ -86,7 +87,7 @@ int main(int argc, char *argv[]) {
 		cout << "File " << input_file << " does not exist" << endl;
 		exit(1);
 	}
-	vector <vector<double>> dataset = read_mnist_data(input_file);
+	vector <vector<double>> dataset = read_mnist_data(input_file, 100);
 
 	cout << "Read MNIST data" << endl;
 
@@ -95,7 +96,7 @@ int main(int argc, char *argv[]) {
 	time_t start1, end1;
 	time(&start1);
 
-	GNN gnn(k, dataset, R, E);
+	MRNG mrng(k, dataset, R, E);
 
 	time(&end1);
 
@@ -122,7 +123,7 @@ int main(int argc, char *argv[]) {
 		queries = read_mnist_data(query_file);
 		queries.resize(10);
 
-		handle_ouput(gnn, dataset, queries, N, output);
+		handle_ouput(mrng, dataset, queries, N, output);
 
 		end = clock();
 		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;

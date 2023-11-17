@@ -7,6 +7,7 @@
 // iterator is used for std::back_insert_iterator, std::advance().
 
 #include "gnn.hpp"
+#include "mrng.hpp"
 #include "lp_metric.hpp"
 #include "brute_force.hpp"
 
@@ -19,13 +20,13 @@ using std::make_tuple;
 using std::set;
 
 // Writes the results of the queries to output file in the required format.
-void handle_ouput(GNN &gnn, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int N, ofstream &output)
+void handle_ouput(MRNG &mrng, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int N, ofstream &output)
 {
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
 		output << "Query: " << q << endl;
 		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = gnn.query(queries[q], N, euclidean_distance);
+		tuple<vector<int>, vector<double>> ann = mrng.query(queries[q], N, euclidean_distance);
 		clock_t end_ANN = clock();
 		double elapsed_secs_ANN = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
