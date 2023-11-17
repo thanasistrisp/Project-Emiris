@@ -4,16 +4,22 @@
 #include <algorithm>
 #include <map>
 #include <unordered_set>
+#include <set>
 
 #include "gnn.hpp"
 #include "lsh.hpp"
 #include "defines.hpp"
 #include "lp_metric.hpp"
+#include "vector_utils.hpp"
 
 using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
+	unordered_multiset<pair<int, double>*, decltype(&hash), decltype(&equal)> neighbors_set(8, &hash, &equal);
+
+	unordered_set<int> unique_indices;
+
 	clock_t start = clock();
 
 	G = new DirectedGraph();
@@ -24,9 +30,6 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
 	start = clock();
-
-	double distance;
-	ptrdiff_t pos;
 	
 	// initialize G
 	for (int i = 0; i < (int) dataset.size(); i++) {
@@ -36,49 +39,45 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance);
 		vector<int> neighbors_indices = get<0>(neighbors);
 		vector<double> neighbors_distances = get<1>(neighbors);
-		if (get<0>(neighbors).size() != k) {
+
+		if ((int) neighbors_indices.size() < k) {
 			// cout << "LSH query returned " << get<0>(neighbors).size() << " neighbors instead of " << k << endl; // debug.
-			// exit(1);
 
-			// Get successors of the same predecessor as neighbours.
-			vector<int> pred = G->get_predecessors(i, 1);
+			// Merge vectors into a set of pairs.
+			for(int j = 0; j < (int) neighbors_indices.size(); j++){
+				pair<int, double> *p = new pair(neighbors_indices[j], neighbors_distances[j]);
+				neighbors_set.insert(p);
+			}
 
-			if((int) pred.size() > 0){
-				vector<Vertex*> pred_successors = G->get_successors(pred[0]);
+			// Add successors of the same predecessor as neighbors.
+			add_neighbors_pred(i, neighbors_set, k);
 
-				// cout << "Found " << pred_successors.size() << " successors of predecessor" << endl; // debug.
+			// If problem persists, add random vertices as neighbors.
+			if((int) neighbors_indices.size() < k){
 				
-				for(int j = 0; j < (int) pred_successors.size(); j++){
-					int ps_index = pred_successors[j]->get_index();
-					distance = euclidean_distance(dataset[i], dataset[ps_index]);
-					neighbors_distances.push_back(distance);
-					sort(neighbors_distances.begin(), neighbors_distances.end(), [](double left, double right) { return left < right; });
-					pos = find(neighbors_distances.begin(), neighbors_distances.end(), distance) - neighbors_distances.begin();
-					neighbors_indices.insert(neighbors_indices.begin() + pos, ps_index);
-					if((int) neighbors_indices.size() == k){
-						break;
-					}
+				for(int j = 0; j < (int) neighbors_indices.size(); j++){
+					unique_indices.insert(neighbors_indices[j]);
 				}
+				add_neighbors_random(i, neighbors_set, unique_indices, k);
 			}
 
-			// If the problem persists, add random vertices as neighbours.
-			while((int) neighbors_indices.size() < k){
-
-				// cout << "Random vertex as neighbor" << endl; // debug.
-
-				int index = rand() % dataset.size();
-				if(find(neighbors_indices.begin(), neighbors_indices.end(), index) != neighbors_indices.end()){
-					continue;
-				}
-				distance = euclidean_distance(dataset[i], dataset[index]);
-				neighbors_distances.push_back(distance);
-				sort(neighbors_distances.begin(), neighbors_distances.end(), [](double left, double right) { return left < right; });
-				pos = find(neighbors_distances.begin(), neighbors_distances.end(), distance) - neighbors_distances.begin();
-				neighbors_indices.insert(neighbors_indices.begin() + pos, index);
-				if((int) neighbors_indices.size() == k){
-					break;
-				}
+			// Convert set to vector, sort it and then and split it to two vectors.
+			vector<pair<int, double>*> neighbors_set_vec(neighbors_set.begin(), neighbors_set.end());
+			sort(neighbors_set_vec.begin(), neighbors_set_vec.end(), cmp);
+			neighbors_indices.clear();
+			neighbors_distances.clear();
+			for(int j = 0; j < (int) neighbors_set_vec.size(); j++){
+				neighbors_indices.push_back(neighbors_set_vec[j]->first);
+				neighbors_distances.push_back(neighbors_set_vec[j]->second);
 			}
+
+			// Clean set and pairs.
+			for(auto iter = neighbors_set.begin(); iter != neighbors_set.end(); iter++){
+				delete *iter;
+			}
+			neighbors_set.clear();
+			unique_indices.clear();
+
 			// cout << "Gathered " << neighbors_indices.size() << " neighbours" << endl; // debug.
 		}
 		for(int j = 0; j < (int) neighbors_indices.size(); j++){
@@ -98,11 +97,49 @@ GNN::~GNN()
 	delete lsh;
 }
 
+void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&hash), decltype(&equal)>& neighbors, int k)
+{
+	vector<int> pred = G->get_predecessors(index, 1);
+	double distance;
+
+	if((int) pred.size() > 0){
+		vector<Vertex*> pred_successors = G->get_successors(pred[0]);
+		
+		for(int i = 0; i < (int) pred_successors.size(); i++){
+			int ps_index = pred_successors[i]->get_index();
+			distance = euclidean_distance(dataset[index], dataset[ps_index]);
+			pair<int, double>* p = new pair(ps_index, distance);
+			neighbors.insert(p);
+
+			if((int) neighbors.size() == k){
+				break;
+			}
+		}
+	}
+}
+
+void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*, decltype(&hash), decltype(&equal)>& neighbors, unordered_set<int>& unique_indices, int k)
+{
+	double distance;
+
+	while((int) neighbors.size() < k){
+		int r_index = rand() % dataset.size();
+		if(unique_indices.find(r_index) != unique_indices.end()){
+			continue;
+		}
+		unique_indices.insert(r_index);
+
+		distance = euclidean_distance(dataset[index], dataset[r_index]);
+		pair<int, double>* p = new pair(r_index, distance);
+		neighbors.insert(p);
+	}
+}
+
 tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N,
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
 	auto cmp = [](pair<double, int> left, pair<double, int> right) { return left.first < right.first; };
-	set<pair<double, int>, decltype(cmp)> S(cmp);
+	multiset<pair<double, int>, decltype(cmp)> S(cmp);
 
 	unordered_set<int> unique_indices;
 
