@@ -23,8 +23,8 @@ class GNN
 		void add_neighbors_pred(int, std::vector<int>&, std::vector<double>&, int);
 		void add_neighbors_random(int, std::vector<int>&, std::vector<double>&, int);
 
-		void add_neighbors_pred(int, std::unordered_set<std::pair<int, double>*, decltype(&hash), decltype(&equal)>&, int);
-		void add_neighbors_random(int, std::unordered_set<std::pair<int, double>*, decltype(&hash), decltype(&equal)>&, std::unordered_set<int>&, int);
+		void add_neighbors_pred(int, std::unordered_multiset<std::pair<int, double>*, decltype(&hash), decltype(&equal)>&, int);
+		void add_neighbors_random(int, std::unordered_multiset<std::pair<int, double>*, decltype(&hash), decltype(&equal)>&, std::unordered_set<int>&, int);
 
 	public:
 		GNN(int k, const std::vector<std::vector<double>> &dataset, int R, int E);
