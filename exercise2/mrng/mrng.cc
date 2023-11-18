@@ -59,11 +59,11 @@ MRNG::MRNG(int k, const vector<vector<double>> &dataset, int R, int E): dataset(
 					Lp->insert(r);
 				}
 			}
-			// for each Lp add edge (p, l)
-			for (int l : *Lp) {
-				G->add_edge(p, l);
-			}
 		}
+        // for each Lp add edge (p, l)
+        for (int l : *Lp) {
+            G->add_edge(p, l);
+        }
 		Lp->clear();
 		Rp->clear();
 	}
