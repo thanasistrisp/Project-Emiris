@@ -43,7 +43,7 @@ INCLUDE1 := $(MY_PATH)../exercise1/include
 #
 # Το override επιτρέπει την προσθήκη επιπλέον παραμέτρων από τη γραμμή εντολών: make CFLAGS=...
 #
-override CXXFLAGS += -O3 -MMD -I$(INCLUDE) -I$(INCLUDE1) -I.
+override CXXFLAGS += -O3 -MMD -I$(INCLUDE) -I$(INCLUDE1) -I. -std=c++17
 
 # Linker options
 #   -lm        Link με τη math library
