@@ -14,7 +14,9 @@ using namespace std;
 
 MRNG::MRNG(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
-	
+	k++;
+    R++;
+    E++;
 }
 
 MRNG::~MRNG()
@@ -25,5 +27,10 @@ MRNG::~MRNG()
 tuple<vector<int>, vector<double>> MRNG::query(const vector<double>& q, unsigned int N,
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
+    vector<double> v1 = vector<double>();
+    vector<double> v2 = vector<double>();
+    distance(v1, v2);
+    cout << q[0];
+    N++;
 	return make_tuple(vector<int>(), vector<double>());
 }
