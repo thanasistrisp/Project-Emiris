@@ -26,13 +26,17 @@ MRNG::MRNG(int k, const vector<vector<double>> &dataset, int R, int E): dataset(
 		S.insert(i);
 	}
 	int i = 0;
-	unordered_set<int> *Rp =  new unordered_set<int>(S);
+	unordered_set<int> *Rp =  new unordered_set<int>();
 	unordered_set<int> *Lp = new unordered_set<int>();
 	for (int p: S) {
 		i++;
 		cout << i << endl;
 		// Rp is S - {p}
-		Rp->erase(p);
+		for (int r : S) {
+			if (r != p) {
+				Rp->insert(r);
+			}
+		}
 		find_neighbors_with_min_distance(p, Lp);
 		bool condition = true;
 		// for r in Rp and r not in Lp
