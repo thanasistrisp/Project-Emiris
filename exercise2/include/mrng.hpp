@@ -15,7 +15,7 @@ private:
 	int R;
 	int E;
 
-	void find_neighbors_with_min_distance(int, std::unordered_set<int>&);
+	void find_neighbors_with_min_distance(int, std::unordered_set<int>*);
 public:
 	MRNG(int k, const std::vector<std::vector<double>> &dataset, int R, int E);
 	~MRNG();
