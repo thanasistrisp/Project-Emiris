@@ -1,8 +1,6 @@
 #include <tuple>
-#include <set>
 #include <vector>
 #include <algorithm>
-#include <map>
 #include <unordered_set>
 #include <set>
 
@@ -11,12 +9,13 @@
 #include "defines.hpp"
 #include "lp_metric.hpp"
 #include "vector_utils.hpp"
+#include "set_utils.hpp"
 
 using namespace std;
 
 GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
 {
-	unordered_multiset<pair<int, double>*, decltype(&hash), decltype(&equal)> neighbors_set(8, &hash, &equal);
+	unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)> neighbors_set(8, &set_hash, &set_equal);
 
 	unordered_set<int> unique_indices;
 
@@ -63,7 +62,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 
 			// Convert set to vector, sort it and then and split it to two vectors.
 			vector<pair<int, double>*> neighbors_set_vec(neighbors_set.begin(), neighbors_set.end());
-			sort(neighbors_set_vec.begin(), neighbors_set_vec.end(), cmp);
+			sort(neighbors_set_vec.begin(), neighbors_set_vec.end(), set_cmp);
 			neighbors_indices.clear();
 			neighbors_distances.clear();
 			for(int j = 0; j < (int) neighbors_set_vec.size(); j++){
@@ -97,7 +96,7 @@ GNN::~GNN()
 	delete lsh;
 }
 
-void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&hash), decltype(&equal)>& neighbors, int k)
+void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double distance;
@@ -118,7 +117,7 @@ void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, d
 	}
 }
 
-void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*, decltype(&hash), decltype(&equal)>& neighbors, unordered_set<int>& unique_indices, int k)
+void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	double distance;
 
