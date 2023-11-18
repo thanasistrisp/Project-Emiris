@@ -37,14 +37,13 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 	for(int i = 0; i < (int) dataset.size(); i++){
 		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance);
 		vector<int> neighbors_indices = get<0>(neighbors);
-		vector<double> neighbors_distances = get<1>(neighbors);
 
 		if ((int) neighbors_indices.size() < k) {
 			// cout << "LSH query returned " << get<0>(neighbors).size() << " neighbors instead of " << k << endl; // debug.
 
 			// Merge vectors into a set of pairs.
 			for(int j = 0; j < (int) neighbors_indices.size(); j++){
-				pair<int, double> *p = new pair(neighbors_indices[j], neighbors_distances[j]);
+				pair<int, double> *p = new pair(neighbors_indices[j], euclidean_distance(dataset[i], dataset[neighbors_indices[j]]));
 				neighbors_set.insert(p);
 			}
 
@@ -64,10 +63,8 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 			vector<pair<int, double>*> neighbors_set_vec(neighbors_set.begin(), neighbors_set.end());
 			sort(neighbors_set_vec.begin(), neighbors_set_vec.end(), set_cmp);
 			neighbors_indices.clear();
-			neighbors_distances.clear();
 			for(int j = 0; j < (int) neighbors_set_vec.size(); j++){
 				neighbors_indices.push_back(neighbors_set_vec[j]->first);
-				neighbors_distances.push_back(neighbors_set_vec[j]->second);
 			}
 
 			// Clean set and pairs.
@@ -79,10 +76,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 
 			// cout << "Gathered " << neighbors_indices.size() << " neighbours" << endl; // debug.
 		}
-		for(int j = 0; j < (int) neighbors_indices.size(); j++){
-			G->add_edge(i, neighbors_indices[j], neighbors_distances[j]);
-		}
-		// cout << "LSH query " << i << endl;
+		G->add_edge(i, neighbors_indices);
 	}
 
 	clock_t end = clock();
@@ -102,7 +96,7 @@ void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, d
 	double distance;
 
 	if((int) pred.size() > 0){
-		vector<int> pred_successors = get<0>(G->get_successors(pred[0]));
+		vector<int> pred_successors = G->get_successors(pred[0]);
 		
 		for(int i = 0; i < (int) pred_successors.size(); i++){
 			int ps_index = pred_successors[i];
@@ -149,7 +143,7 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
 		y0_dist = distance(q, dataset[y0]);
 		visited.insert(y0);
 		while (true) {
-			vector<int> neighbors = get<0>(G->get_successors(y0, E));
+			vector<int> neighbors = G->get_successors(y0, E);
 			y1 = neighbors[0];
 			y1_dist = distance(q, dataset[y1]);
 			// check if y1 is in S
