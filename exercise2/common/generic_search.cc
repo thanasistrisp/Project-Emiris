@@ -1,6 +1,7 @@
 #include <vector>
 #include <tuple>
 #include <unordered_set>
+#include <set>
 
 #include "generic_search.hpp"
 #include "directed_graph.hpp"
@@ -13,7 +14,7 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(DirectedGraph &graph,
                                                            double (*distance)(const vector<double>&, const vector<double>&))
 {
     // Candidate set R = \emptyset.
-    unordered_set<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)> candidates(8, &set_hash, &set_equal);
+    multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)> candidates(&set_hash, &set_equal);
     unordered_set<int> checked_nodes;
     vector<int> neighbors;
 
@@ -40,7 +41,7 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(DirectedGraph &graph,
         // Sort R in ascending order of the distance to q.
         neighbors = graph.get_successors(p->first);
         for(int i = 0; i < (int) neighbors.size(); i++){
-            p = new pair(neighbors[i], 0.0);
+            p = new pair(neighbors[i], distance(dataset[neighbors[i]], query));
             if(candidates.find(p) != candidates.end()){
                 delete p;
                 continue;
