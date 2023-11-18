@@ -9,12 +9,12 @@
 
 using namespace std;
 
-tuple<vector<int>, vector<double>> generic_search_on_graph(DirectedGraph &graph, vector<vector<double>>& dataset,
-                                                           int start_node, vector<double>& query, int total_candidates, unsigned int k,
+tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &graph, const vector<vector<double>>& dataset,
+                                                           int start_node, const vector<double>& query, int total_candidates, unsigned int k,
                                                            double (*distance)(const vector<double>&, const vector<double>&))
 {
     // Candidate set R = \emptyset.
-    multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)> candidates(&set_hash, &set_equal);
+    multiset<pair<int, double>*, decltype(&set_cmp)> candidates(&set_cmp);
     unordered_set<int> checked_nodes;
     vector<int> neighbors;
 
