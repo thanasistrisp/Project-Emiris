@@ -1,4 +1,5 @@
 #include <vector>
+#include <tuple>
 #include <algorithm>
 
 #include "directed_graph.hpp"
@@ -53,23 +54,40 @@ void DirectedGraph::add_edge(int origin, const vector<int>& destinations, const 
     }
 }
 
-vector<Vertex*> DirectedGraph::get_successors(int index) const
+tuple<vector<int>, vector<double>> DirectedGraph::get_successors(int index) const
 {
     if(index < 0 || index >= (int) adjacency_lists.size()){
-        return vector<Vertex*>();
+        return make_tuple(vector<int>(), vector<double>());
     }
-    return adjacency_lists[index];
+    vector<int> indices;
+    vector<double> distances;
+    for(int i = 0; i < (int) adjacency_lists[index].size(); i++){
+        Vertex *v = adjacency_lists[index][i];
+        indices.push_back(v->get_index());
+        distances.push_back(v->get_distance());
+    }
+    return make_tuple(indices, distances);
 }
 
-vector<Vertex*> DirectedGraph::get_successors(int index, int number_succ) const
+tuple<vector<int>, vector<double>> DirectedGraph::get_successors(int index, int number_succ) const
 {
     if(number_succ <= 0 || index < 0 || index >= (int) adjacency_lists.size()){
-        return vector<Vertex*>();
+        return make_tuple(vector<int>(), vector<double>());
     }
     if(number_succ == (int) adjacency_lists[index].size()){
         return get_successors(index);
     }
-    return vector<Vertex*>(adjacency_lists[index].begin(), adjacency_lists[index].begin() + number_succ);
+    vector<int> indices;
+    vector<double> distances;
+    for(auto iter = adjacency_lists[index].begin(); ; iter++){
+        if(iter == adjacency_lists[index].end() || indices.size() == number_succ){
+            break;
+        }
+        Vertex *v = *iter;
+        indices.push_back(v->get_index());
+        distances.push_back(v->get_distance());
+    }
+    return make_tuple(indices, distances);
 }
 
 vector<int> DirectedGraph::get_predecessors(int index) const
