@@ -41,11 +41,12 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(DirectedGraph &graph,
         // Sort R in ascending order of the distance to q.
         neighbors = graph.get_successors(p->first);
         for(int i = 0; i < (int) neighbors.size(); i++){
-            p = new pair(neighbors[i], distance(dataset[neighbors[i]], query));
+            p = new pair(neighbors[i], 0.0);
             if(candidates.find(p) != candidates.end()){
                 delete p;
                 continue;
             }
+            p->second = distance(dataset[neighbors[i]], query);
             candidates.insert(p);
         }
     }
