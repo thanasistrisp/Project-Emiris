@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
 	string input_file;
 	string query_file;
 	string output_file;
+	string save_graph_file;
+	string load_graph_file;
 	int k = 50;
 	int E = 30;
 	int R = 1;
@@ -68,6 +70,14 @@ int main(int argc, char *argv[]) {
 			output_file = argv[i + 1];
 			i++;
 		}
+		else if (strcmp(argv[i], "-save") == 0) {
+			save_graph_file = argv[i + 1];
+			i++;
+		}
+		else if (strcmp(argv[i], "-load") == 0) {
+			load_graph_file = argv[i + 1];
+			i++;
+		}
 		else if (strcmp(argv[i], "-help") == 0) {
 			cout << "Usage: ./graph_search –d <input file> –q <query file> –k <int> -E <int> -R <int> -N <int> -l <int, only for Search-on-Graph> "\
 				    "-m <1 for GNNS, 2 for MRNG> -ο <output file>" << endl;
@@ -95,10 +105,16 @@ int main(int argc, char *argv[]) {
 		cin >> output_file;
 	}
 
-	if (!file_exists(input_file)) {
-		cout << "File " << input_file << " does not exist" << endl;
-		exit(1);
+	if (!file_exists(input_file) || !file_exists(query_file)) {
+		cout << "File cannot be found" << endl;
+		return 1;
 	}
+
+	if (!load_graph_file.empty() && !file_exists(load_graph_file)) {
+		cout << "File cannot be found" << endl;
+		return 1;
+	}
+
 	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_file);
 
@@ -109,19 +125,48 @@ int main(int argc, char *argv[]) {
 
 	void *structure;
 	vector<int> params = {E, R, l, N, m};
-	switch (m) {
-		case 1:
-			structure = new GNN(dataset, k);
-			break;
-		case 2:
-			structure = new MRNG(dataset);
-			break;
-		default:
-			cout << "Wrong m value. Run with -help for more info" << endl;
-			exit(1);
+
+	// load file if string not empty
+	if (!load_graph_file.empty()) {
+		ifstream graph_file(load_graph_file, ios::binary);
+		DirectedGraph *G = new DirectedGraph();
+		G->load(graph_file);
+		graph_file.close();
+		// add graph to structure
+		switch (m) {
+			case 1:
+				structure = new GNN(dataset, G);
+				break;
+			case 2:
+				structure = new MRNG(dataset, G);
+				break;
+			default:
+				cout << "Wrong m value. Run with -help for more info" << endl;
+				exit(1);
+		}
+	}
+	else {
+		switch (m) {
+			case 1:
+				structure = new GNN(dataset, k);
+				break;
+			case 2:
+				structure = new MRNG(dataset);
+				break;
+			default:
+				cout << "Wrong m value. Run with -help for more info" << endl;
+				exit(1);
+		}
 	}
 
 	time(&end1);
+
+	// save Graph to binary file
+	if (!save_graph_file.empty()) {
+		ofstream graph_file(save_graph_file, ios::binary);
+		((DirectedGraph*) ((m == 1) ? ((GNN*) structure)->get_graph() : ((MRNG*) structure)->get_graph()))->save(graph_file);
+		graph_file.close();
+	}
 
 
 	cout << "Structure created in " << difftime(end1, start1) << " seconds" << endl;

@@ -1,6 +1,7 @@
 #include <vector>
 #include <tuple>
 #include <algorithm>
+#include <fstream>
 
 #include "directed_graph.hpp"
 
@@ -101,4 +102,32 @@ vector<int> DirectedGraph::get_predecessors(int index, int number_pred) const
         }
     }
     return predecessors;
+}
+
+void DirectedGraph::save(ofstream& file) const
+{
+    int size = adjacency_lists.size();
+    file.write((char*) &size, sizeof(int));
+    for(int i = 0; i < size; i++){
+        int list_size = adjacency_lists[i].size();
+        file.write((char*) &list_size, sizeof(int));
+        for(int j = 0; j < list_size; j++){
+            file.write((char*) &adjacency_lists[i][j], sizeof(int));
+        }
+    }
+}
+
+void DirectedGraph::load(ifstream& file)
+{
+    int size;
+    file.read((char*) &size, sizeof(int));
+    adjacency_lists.resize(size);
+    for(int i = 0; i < size; i++){
+        int list_size;
+        file.read((char*) &list_size, sizeof(int));
+        adjacency_lists[i].resize(list_size);
+        for(int j = 0; j < list_size; j++){
+            file.read((char*) &adjacency_lists[i][j], sizeof(int));
+        }
+    }
 }

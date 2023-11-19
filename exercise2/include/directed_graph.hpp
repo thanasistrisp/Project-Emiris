@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <fstream>
 
 class DirectedGraph
 {
@@ -21,4 +22,7 @@ class DirectedGraph
 
         std::vector<int> get_predecessors(int) const;
         std::vector<int> get_predecessors(int, int) const;
+
+        void save(std::ofstream&) const;
+        void load(std::ifstream&);
 };
