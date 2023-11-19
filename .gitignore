@@ -12,6 +12,7 @@
 !*.mk
 !*.yml
 !*.tex
+!*.bin
 
 # vscode directory
 !launch.json
