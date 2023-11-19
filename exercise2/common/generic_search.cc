@@ -60,5 +60,10 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &
             break;
         }
     }
+
+    for(auto iter = candidates.begin(); iter != candidates.end(); iter++){
+        delete *iter;
+    }
+
     return make_tuple(indices, distances);
 }
