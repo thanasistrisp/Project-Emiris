@@ -24,9 +24,12 @@ int main(int argc, char *argv[]) {
 	string input_file;
 	string query_file;
 	string output_file;
+	int k = 50;
+	int E = 30;
 	int R = 1;
-	int N = 1;
 	int l = 20;
+	int N = 1;
+	int m = 0;
 
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-d") == 0) {
@@ -37,8 +40,12 @@ int main(int argc, char *argv[]) {
 			query_file = argv[i + 1];
 			i++;
 		}
-		else if (strcmp(argv[i], "-N") == 0) {
-			N = atoi(argv[i + 1]);
+		else if (strcmp(argv[i], "-k") == 0) {
+			k = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-E") == 0) {
+			E = atoi(argv[i + 1]);
 			i++;
 		}
 		else if (strcmp(argv[i], "-R") == 0) {
@@ -49,12 +56,21 @@ int main(int argc, char *argv[]) {
 			l = atoi(argv[i + 1]);
 			i++;
 		}
+		else if (strcmp(argv[i], "-N") == 0) {
+			N = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-m") == 0) {
+			m = atoi(argv[i + 1]);
+			i++;
+		}
 		else if (strcmp(argv[i], "-o") == 0) {
 			output_file = argv[i + 1];
 			i++;
 		}
 		else if (strcmp(argv[i], "-help") == 0) {
-			cout << "Usage: ./lsh -d <input file> -q <query file> -k <int> -M <int> -probes <int> -o <output file> -N <int> -R <double>" << endl;
+			cout << "Usage: ./graph_search –d <input file> –q <query file> –k <int> -E <int> -R <int> -N <int> -l <int, only for Search-on-Graph> "\
+				    "-m <1 for GNNS, 2 for MRNG> -ο <output file>" << endl;
 			return 0;
 		}
 		else {
@@ -83,21 +99,32 @@ int main(int argc, char *argv[]) {
 		cout << "File " << input_file << " does not exist" << endl;
 		exit(1);
 	}
+	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_file);
 
-	cout << "Read MNIST data" << endl;
-
-	cout << "Creating GNN" << endl;
+	cout << "Creating structure" << endl;
 
 	time_t start1, end1;
 	time(&start1);
 
-	MRNG mrng(dataset);
+	void *structure;
+	vector<int> params = {E, R, l, N, m};
+	switch (m) {
+		case 1:
+			structure = new GNN(dataset, k);
+			break;
+		case 2:
+			structure = new MRNG(dataset);
+			break;
+		default:
+			cout << "Wrong m value. Run with -help for more info" << endl;
+			exit(1);
+	}
 
 	time(&end1);
 
 
-	cout << "GNN created in " << difftime(end1, start1) << " seconds" << endl;
+	cout << "Structure created in " << difftime(end1, start1) << " seconds" << endl;
 
 	ofstream output(output_file);
 
@@ -119,7 +146,7 @@ int main(int argc, char *argv[]) {
 		queries = read_mnist_data(query_file);
 		queries.resize(10);
 
-		handle_ouput(mrng, dataset, queries, N, l, output);
+		handle_ouput(structure, dataset, queries, output, params);
 
 		end = clock();
 		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;
@@ -127,6 +154,15 @@ int main(int argc, char *argv[]) {
 		cont:
 			cout << "Enter query file: ";
 			cin >> query_file;
+	}
+
+	switch (m) {
+		case 1:
+			delete (GNN*) structure;
+			break;
+		case 2:
+			delete (MRNG*) structure;
+			break;
 	}
 
 	cout << "Done in " << elapsed_secs << " seconds" << endl;

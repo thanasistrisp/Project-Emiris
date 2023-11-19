@@ -94,7 +94,9 @@
 				"${config:c_project.arg13}",
 				"${config:c_project.arg14}",
 				"${config:c_project.arg15}",
-                "${config:c_project.arg16}"
+                "${config:c_project.arg16}",
+                "${config:c_project.arg17}",
+				"${config:c_project.arg18}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -123,7 +125,9 @@
 				"${config:c_project.arg13}",
 				"${config:c_project.arg14}",
 				"${config:c_project.arg15}",
-                "${config:c_project.arg16}"
+                "${config:c_project.arg16}",
+                "${config:c_project.arg17}",
+				"${config:c_project.arg18}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -160,7 +164,9 @@
 				"${config:c_project.arg13}",
 				"${config:c_project.arg14}",
 				"${config:c_project.arg15}",
-                "${config:c_project.arg16}"
+                "${config:c_project.arg16}",
+                "${config:c_project.arg17}",
+				"${config:c_project.arg18}"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/${config:c_project.dir}"
@@ -196,7 +202,9 @@
 				"${config:c_project.arg13}",
 				"${config:c_project.arg14}",
 				"${config:c_project.arg15}",
-                "${config:c_project.arg16}"
+                "${config:c_project.arg16}",
+                "${config:c_project.arg17}",
+				"${config:c_project.arg18}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -229,7 +237,9 @@
 				"${config:c_project.arg13}",
 				"${config:c_project.arg14}",
 				"${config:c_project.arg15}",
-                "${config:c_project.arg16}"
+                "${config:c_project.arg16}",
+                "${config:c_project.arg17}",
+				"${config:c_project.arg18}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
@@ -262,7 +272,9 @@
 				"${config:c_project.arg13}",
 				"${config:c_project.arg14}",
 				"${config:c_project.arg15}",
-                "${config:c_project.arg16}"
+                "${config:c_project.arg16}",
+                "${config:c_project.arg17}",
+				"${config:c_project.arg18}"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/${config:c_project.dir}"

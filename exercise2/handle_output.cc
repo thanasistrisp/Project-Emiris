@@ -13,22 +13,36 @@
 
 using namespace std;
 
-using std::vector;
-using std::tuple;
-using std::get;
-using std::make_tuple;
-using std::set;
-
 #define distance euclidean_distance
 
 // Writes the results of the queries to output file in the required format.
-void handle_ouput(MRNG &mrng, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, int N, int l, ofstream &output)
+void handle_ouput(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, ofstream &output, vector<int> &params)
 {
+	// initialize parameters
+	int E = params[0];
+	int R = params[1];
+	int l = params[2];
+	int N = params[3];
+	int m = params[4];
+	if (m == 1) {
+		cout << "Algorithm: GNN" << endl;
+		output << "GNNS Results" << endl;
+	}
+	else {
+		cout << "Algorithm: MRNG" << endl;
+		output << "MRNG Results" << endl;
+	}
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
 		output << "Query: " << q << endl;
+		tuple<vector<int>, vector<double>> ann;
 		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = mrng.query(queries[q], N, l, distance);
+		if (m == 1) {
+			ann = ((GNN*) structure)->query(queries[q], N, E, R, distance);
+		}
+		else {
+			ann = ((MRNG*) structure)->query(queries[q], N, l, distance);
+		}
 		clock_t end_ANN = clock();
 		double elapsed_secs_ANN = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 

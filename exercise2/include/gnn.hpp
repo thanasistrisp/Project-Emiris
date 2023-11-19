@@ -19,7 +19,7 @@ class GNN
 		void add_neighbors_random(int, std::unordered_multiset<std::pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>&, std::unordered_set<int>&, int);
 
 	public:
-		GNN(int k, const std::vector<std::vector<double>> &dataset);
+		GNN(const std::vector<std::vector<double>> &dataset, int k);
 		~GNN();
 		std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int E, unsigned int R,
 																double (*distance)(const std::vector<double>&, const std::vector<double>&));
