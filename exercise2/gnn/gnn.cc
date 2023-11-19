@@ -136,7 +136,7 @@ tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned 
 
 	unordered_set<int> unique_indices;
 
-	for (int i = 0; i < R; i++) {
+	for (uint i = 0; i < R; i++) {
 		int y0, y1, y0_dist, y1_dist;
 		unordered_set<int> visited;
 		y0 = rand() % dataset.size();

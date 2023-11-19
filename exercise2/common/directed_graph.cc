@@ -44,7 +44,7 @@ void DirectedGraph::add_edge(int origin, const vector<int>& destinations)
         adjacency_lists[origin] = destinations;
         return;
     }
-    for(int i; i < (int) destinations.size(); i++){
+    for(int i = 0; i < (int) destinations.size(); i++){
         adjacency_lists[origin].push_back(destinations[i]);
     }
 }

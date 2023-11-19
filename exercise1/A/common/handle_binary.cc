@@ -60,28 +60,28 @@ bool file_exists(const string &filename) {
 	return file.good();
 }
 
-// Unused, used for debugging.
-void export_image(const vector<double> &image, string filename) {
-	// Check if path exists else create folders.
-	string path = filename.substr(0, filename.find_last_of("/"));
-	if (!file_exists(path)) {
-		system(("mkdir -p " + path).c_str());
-	}
-	// Export image to file.
-	ofstream file(filename, ios::binary);
+// // Unused, used for debugging.
+// void export_image(const vector<double> &image, string filename) {
+// 	// Check if path exists else create folders.
+// 	string path = filename.substr(0, filename.find_last_of("/"));
+// 	if (!file_exists(path)) {
+// 		system(("mkdir -p " + path).c_str());
+// 	}
+// 	// Export image to file.
+// 	ofstream file(filename, ios::binary);
 
-	// Write header.
-	file << "P6" << endl;
-	file << 28 << " " << 28 << endl;
-	file << 255 << endl;
+// 	// Write header.
+// 	file << "P6" << endl;
+// 	file << 28 << " " << 28 << endl;
+// 	file << 255 << endl;
 
-	// Write data.
-	for (int i = 0; i < (int) image.size(); i++) {
-		unsigned char temp = (unsigned char) image[i];
-		file.write((char*)&temp, sizeof(unsigned char));
-		file.write((char*)&temp, sizeof(unsigned char));
-		file.write((char*)&temp, sizeof(unsigned char));
-	}
+// 	// Write data.
+// 	for (int i = 0; i < (int) image.size(); i++) {
+// 		unsigned char temp = (unsigned char) image[i];
+// 		file.write((char*)&temp, sizeof(unsigned char));
+// 		file.write((char*)&temp, sizeof(unsigned char));
+// 		file.write((char*)&temp, sizeof(unsigned char));
+// 	}
 
-	file.close();
-}
+// 	file.close();
+// }
