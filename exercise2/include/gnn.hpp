@@ -22,8 +22,7 @@ class GNN
 		GNN(const std::vector<std::vector<double>> &dataset, int k);
 		GNN(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), G(G) {}
 		~GNN();
-		std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int E, unsigned int R,
-																double (*distance)(const std::vector<double>&, const std::vector<double>&));
+		std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int E, unsigned int R);
 		static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;
 		DirectedGraph *get_graph() const { return G; }
 };

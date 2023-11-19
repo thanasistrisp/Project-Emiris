@@ -22,8 +22,7 @@ public:
 	MRNG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), G(G) {}
 	~MRNG();
 
-	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int L,
-                                                            double (*distance)(const std::vector<double>&, const std::vector<double>&));
+	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int L);
 	static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;
 	DirectedGraph *get_graph() const { return G; }
 };

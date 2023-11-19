@@ -128,8 +128,7 @@ void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*,
 	}
 }
 
-tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N, unsigned int E, unsigned int R,
-                                              double (*distance)(const vector<double>&, const vector<double>&))
+tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N, unsigned int E, unsigned int R)
 {
 	auto cmp = [](pair<double, int> left, pair<double, int> right) { return left.first < right.first; };
 	multiset<pair<double, int>, decltype(cmp)> S(cmp);

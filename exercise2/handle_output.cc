@@ -14,8 +14,6 @@
 
 using namespace std;
 
-#define distance euclidean_distance
-
 // Writes the results of the queries to output file in the required format.
 void handle_ouput(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, ofstream &output, vector<int> &params)
 {
@@ -44,16 +42,16 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 		tuple<vector<int>, vector<double>> ann;
 		clock_t start_ANN = clock();
 		if (m == 1) {
-			ann = ((GNN*) structure)->query(queries[q], N, E, R, distance);
+			ann = ((GNN*) structure)->query(queries[q], N, E, R);
 		}
 		else {
-			ann = ((MRNG*) structure)->query(queries[q], N, l, distance);
+			ann = ((MRNG*) structure)->query(queries[q], N, l);
 		}
 		clock_t end_ANN = clock();
 		elapsed_secs_ANN += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
 		clock_t start_TNN = clock();
-		tuple<vector<int>, vector<double>> tnn = brute_force(dataset, queries[q], N, distance);
+		tuple<vector<int>, vector<double>> tnn = brute_force(dataset, queries[q], N);
 		clock_t end_TNN = clock();
 		elapsed_secs_TNN += double(end_TNN - start_TNN) / CLOCKS_PER_SEC;
 		

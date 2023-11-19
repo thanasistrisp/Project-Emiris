@@ -101,8 +101,7 @@ void MRNG::set_navigating_node()
     navigating_node = indices[0];
 }
 
-tuple<vector<int>, vector<double>> MRNG::query(const vector<double>& q, unsigned int N, unsigned int l,
-                                              double (*distance)(const vector<double>&, const vector<double>&))
+tuple<vector<int>, vector<double>> MRNG::query(const vector<double>& q, unsigned int N, unsigned int l)
 {
     return generic_search_on_graph(*G, dataset, navigating_node, q, l, N, distance);
 }
