@@ -4,4 +4,4 @@
 #include "mrng.hpp"
 
 void handle_ouput(MRNG &mrng, const std::vector<std::vector<double>> &dataset,
-                  const std::vector<std::vector<double>> &queries, int N, std::ofstream &output);
+                  const std::vector<std::vector<double>> &queries, int N, int l, std::ofstream &output);

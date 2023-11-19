@@ -13,17 +13,15 @@ private:
 	LSH *lsh;
 	const std::vector<std::vector<double>> &dataset;
 	int navigating_node;
-	int R;
-	int E;
 
 	void find_neighbors_with_min_distance(int, std::unordered_set<int>*);
 	void set_navigating_node();
 
 public:
-	MRNG(int k, const std::vector<std::vector<double>> &dataset, int R, int E);
+	MRNG(const std::vector<std::vector<double>> &dataset);
 	~MRNG();
 
-	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int k,
+	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int L,
                                                             double (*distance)(const std::vector<double>&, const std::vector<double>&));
 	static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;
 };

@@ -24,11 +24,9 @@ int main(int argc, char *argv[]) {
 	string input_file;
 	string query_file;
 	string output_file;
-	int k = 50;
-	int E = 30;
 	int R = 1;
 	int N = 1;
-	// int l = 20;
+	int l = 20;
 
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-d") == 0) {
@@ -39,14 +37,6 @@ int main(int argc, char *argv[]) {
 			query_file = argv[i + 1];
 			i++;
 		}
-		else if (strcmp(argv[i], "-k") == 0) {
-			k = atoi(argv[i + 1]);
-			i++;
-		}
-		else if (strcmp(argv[i], "-E") == 0) {
-			E = atoi(argv[i + 1]);
-			i++;
-		}
 		else if (strcmp(argv[i], "-N") == 0) {
 			N = atoi(argv[i + 1]);
 			i++;
@@ -55,10 +45,10 @@ int main(int argc, char *argv[]) {
 			R = atoi(argv[i + 1]);
 			i++;
 		}
-		// else if (strcmp(argv[i], "-l") == 0) {
-		// 	l = atoi(argv[i + 1]);
-		// 	i++;
-		// }
+		else if (strcmp(argv[i], "-l") == 0) {
+			l = atoi(argv[i + 1]);
+			i++;
+		}
 		else if (strcmp(argv[i], "-o") == 0) {
 			output_file = argv[i + 1];
 			i++;
@@ -102,7 +92,7 @@ int main(int argc, char *argv[]) {
 	time_t start1, end1;
 	time(&start1);
 
-	MRNG mrng(k, dataset, R, E);
+	MRNG mrng(dataset);
 
 	time(&end1);
 
@@ -129,7 +119,7 @@ int main(int argc, char *argv[]) {
 		queries = read_mnist_data(query_file);
 		queries.resize(10);
 
-		handle_ouput(mrng, dataset, queries, N, output);
+		handle_ouput(mrng, dataset, queries, N, l, output);
 
 		end = clock();
 		elapsed_secs += double(end - start) / CLOCKS_PER_SEC;

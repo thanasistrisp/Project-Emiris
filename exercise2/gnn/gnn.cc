@@ -13,7 +13,7 @@
 
 using namespace std;
 
-GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
+GNN::GNN(int k, const vector<vector<double>> &dataset): dataset(dataset)
 {
 	unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)> neighbors_set(8, &set_hash, &set_equal);
 
@@ -35,7 +35,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 		G->add_vertex(i);
 	}
 	for(int i = 0; i < (int) dataset.size(); i++){
-		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, euclidean_distance);
+		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, distance);
 		vector<int> neighbors_indices = get<0>(neighbors);
 
 		if ((int) neighbors_indices.size() < k) {
@@ -43,7 +43,7 @@ GNN::GNN(int k, const vector<vector<double>> &dataset, int R, int E): dataset(da
 
 			// Merge vectors into a set of pairs.
 			for(int j = 0; j < (int) neighbors_indices.size(); j++){
-				pair<int, double> *p = new pair(neighbors_indices[j], euclidean_distance(dataset[i], dataset[neighbors_indices[j]]));
+				pair<int, double> *p = new pair(neighbors_indices[j], distance(dataset[i], dataset[neighbors_indices[j]]));
 				neighbors_set.insert(p);
 			}
 
@@ -93,15 +93,15 @@ GNN::~GNN()
 void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
-	double distance;
+	double dist;
 
 	if((int) pred.size() > 0){
 		vector<int> pred_successors = G->get_successors(pred[0]);
 		
 		for(int i = 0; i < (int) pred_successors.size(); i++){
 			int ps_index = pred_successors[i];
-			distance = euclidean_distance(dataset[index], dataset[ps_index]);
-			pair<int, double>* p = new pair(ps_index, distance);
+			dist = distance(dataset[index], dataset[ps_index]);
+			pair<int, double>* p = new pair(ps_index, dist);
 			neighbors.insert(p);
 
 			if((int) neighbors.size() == k){
@@ -113,7 +113,7 @@ void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, d
 
 void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
-	double distance;
+	double dist;
 
 	while((int) neighbors.size() < k){
 		int r_index = rand() % dataset.size();
@@ -122,13 +122,13 @@ void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*,
 		}
 		unique_indices.insert(r_index);
 
-		distance = euclidean_distance(dataset[index], dataset[r_index]);
-		pair<int, double>* p = new pair(r_index, distance);
+		dist = distance(dataset[index], dataset[r_index]);
+		pair<int, double>* p = new pair(r_index, dist);
 		neighbors.insert(p);
 	}
 }
 
-tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N,
+tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N, unsigned int E, unsigned int R,
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
 	auto cmp = [](pair<double, int> left, pair<double, int> right) { return left.first < right.first; };

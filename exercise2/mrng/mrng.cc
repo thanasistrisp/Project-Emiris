@@ -16,9 +16,8 @@
 
 using namespace std;
 
-MRNG::MRNG(int k, const vector<vector<double>> &dataset, int R, int E): dataset(dataset), R(R), E(E)
+MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	k++;
 	int k_lsh = 5;
 	int L = 5;
 	lsh = new LSH(k_lsh, L, dataset.size()/4, w, dataset);
@@ -73,8 +72,6 @@ MRNG::MRNG(int k, const vector<vector<double>> &dataset, int R, int E): dataset(
 	}
 	delete Rp;
 	delete Lp;
-    R++;
-    E++;
     set_navigating_node();
 }
 
@@ -96,15 +93,14 @@ void MRNG::set_navigating_node()
     // Treat it as a query, find its nearest neighbor by brute force.
     vector<int> indices;
     vector<double> distances;
-    tie(indices, distances) = brute_force(dataset, dataset_centroid, 1, euclidean_distance);
+    tie(indices, distances) = brute_force(dataset, dataset_centroid, 1, distance);
     navigating_node = indices[0];
 }
 
-tuple<vector<int>, vector<double>> MRNG::query(const vector<double>& q, unsigned int N,
+tuple<vector<int>, vector<double>> MRNG::query(const vector<double>& q, unsigned int N, unsigned int l,
                                               double (*distance)(const vector<double>&, const vector<double>&))
 {
-    int l = 20;
-    return generic_search_on_graph(*G, dataset, navigating_node, q, l, N, euclidean_distance);
+    return generic_search_on_graph(*G, dataset, navigating_node, q, l, N, distance);
 }
 
 void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
