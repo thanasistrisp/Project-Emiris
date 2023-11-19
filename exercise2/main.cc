@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 	int E = 30;
 	int R = 1;
 	int N = 1;
-	int l = 20;
+	// int l = 20;
 
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-d") == 0) {
@@ -55,10 +55,10 @@ int main(int argc, char *argv[]) {
 			R = atoi(argv[i + 1]);
 			i++;
 		}
-		else if (strcmp(argv[i], "-l") == 0) {
-			l = atoi(argv[i + 1]);
-			i++;
-		}
+		// else if (strcmp(argv[i], "-l") == 0) {
+		// 	l = atoi(argv[i + 1]);
+		// 	i++;
+		// }
 		else if (strcmp(argv[i], "-o") == 0) {
 			output_file = argv[i + 1];
 			i++;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 		cout << "File " << input_file << " does not exist" << endl;
 		exit(1);
 	}
-	vector <vector<double>> dataset = read_mnist_data(input_file, 100);
+	vector <vector<double>> dataset = read_mnist_data(input_file);
 
 	cout << "Read MNIST data" << endl;
 
