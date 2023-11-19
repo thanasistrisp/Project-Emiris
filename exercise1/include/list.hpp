@@ -146,7 +146,7 @@ template <typename T> void List<T>::insert_last(T data)
     }
     ListNode<T> *new_last_node = new ListNode<T>(data);
     ListNode<T> *node = head;
-    ListNode<T> *previous_node;
+    ListNode<T> *previous_node = head;
     while(node != NULL){
         previous_node = node;
         node = node->get_next_node();
