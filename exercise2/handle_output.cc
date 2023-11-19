@@ -4,6 +4,7 @@
 #include <iterator>
 #include <tuple>
 #include <set>
+#include <limits>
 // iterator is used for std::back_insert_iterator, std::advance().
 
 #include "gnn.hpp"
@@ -32,6 +33,11 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 		cout << "Algorithm: MRNG" << endl;
 		output << "MRNG Results" << endl;
 	}
+
+	double elapsed_secs_ANN = 0;
+	double elapsed_secs_TNN = 0;
+	double maf = 0;
+
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
 		output << "Query: " << q << endl;
@@ -44,24 +50,39 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 			ann = ((MRNG*) structure)->query(queries[q], N, l, distance);
 		}
 		clock_t end_ANN = clock();
-		double elapsed_secs_ANN = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+		elapsed_secs_ANN += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
 		clock_t start_TNN = clock();
 		tuple<vector<int>, vector<double>> tnn = brute_force(dataset, queries[q], N, distance);
 		clock_t end_TNN = clock();
-		double elapsed_secs_TNN = double(end_TNN - start_TNN) / CLOCKS_PER_SEC;
+		elapsed_secs_TNN += double(end_TNN - start_TNN) / CLOCKS_PER_SEC;
 		
         vector<int> indices_ann = get<0>(ann);
         vector<double> distances_ann = get<1>(ann);
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
+
+		// take the minimum approximate factor over all nearest neighbors
+		double temp_min = numeric_limits<double>::max();
         for(int i = 0; (unsigned int) i < indices_ann.size(); i++){
 			output << "Nearest neighbor-" << i+1 << ": " << indices_ann[i] << endl;
 			output << "distanceApproximate: " << distances_ann[i] << endl;
 			output << "distanceTrue: " << distances_tnn[i] << endl;
+			double temp = distances_ann[i] / distances_tnn[i];
+			if (temp < temp_min) {
+				temp_min = temp;
+			}
 		}
-		output << "tApproximate: " << elapsed_secs_ANN << endl;
-		output << "tTrue: " << elapsed_secs_TNN << endl;
+
+		// maf is maximum approximate factor over all queries
+		if (temp_min > maf) {
+			maf = temp_min;
+		}
 	}
+
+	output << "tAverageApproximate: " << elapsed_secs_ANN / queries.size() << endl;
+	output << "tAverageTrue: " << elapsed_secs_TNN / queries.size() << endl;
+	output << "MAF: " << maf << endl;
+	
 	output.close();
 }
