@@ -79,6 +79,12 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
     set_navigating_node();
 }
 
+MRNG::MRNG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G)
+: dataset(dataset), G(G)
+{
+	set_navigating_node();
+}
+
 MRNG::~MRNG()
 {
 	delete G;

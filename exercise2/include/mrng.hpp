@@ -19,7 +19,7 @@ private:
 
 public:
 	MRNG(const std::vector<std::vector<double>> &dataset);
-	MRNG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), G(G) {}
+	MRNG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G);
 	~MRNG();
 
 	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int L);
