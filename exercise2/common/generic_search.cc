@@ -7,6 +7,8 @@
 #include "directed_graph.hpp"
 #include "set_utils.hpp"
 
+#include <iostream>
+
 using namespace std;
 
 tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &graph, const vector<vector<double>>& dataset,
@@ -15,11 +17,11 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &
 {
     // Candidate set R = \emptyset.
     multiset<pair<int, double>*, decltype(&set_cmp)> candidates(&set_cmp);
+    unordered_set<int> unique_indices;
     unordered_set<int> checked_nodes;
     vector<int> neighbors;
 
     // R.add(p), i = 1.
-    // int p = start_node;
     pair<int, double>* p = new pair(start_node, distance(dataset[start_node], query));
     candidates.insert(p);
 
@@ -41,13 +43,12 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &
         // Sort R in ascending order of the distance to q.
         neighbors = graph.get_successors(p->first);
         for(int i = 0; i < (int) neighbors.size(); i++){
-            p = new pair(neighbors[i], 0.0);
-            if(candidates.find(p) != candidates.end()){
-                delete p;
+            if(unique_indices.find(neighbors[i]) != unique_indices.end()){
                 continue;
             }
-            p->second = distance(dataset[neighbors[i]], query);
+            p = new pair(neighbors[i], distance(dataset[neighbors[i]], query));
             candidates.insert(p);
+            unique_indices.insert(neighbors[i]);
         }
     }
     vector<int> indices;

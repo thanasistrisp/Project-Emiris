@@ -16,9 +16,7 @@ using namespace std;
 GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
 {
 	unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)> neighbors_set(8, &set_hash, &set_equal);
-
 	unordered_set<int> unique_indices;
-
 
 	G = new DirectedGraph();
 	int k_lsh = 5;
