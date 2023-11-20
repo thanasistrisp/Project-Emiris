@@ -188,8 +188,7 @@ int main(int argc, char *argv[]) {
 			end = clock();
 			goto cont;
 		}
-		queries = read_mnist_data(query_file);
-		queries.resize(10);
+		queries = read_mnist_data(query_file, 10);
 
 		handle_ouput(structure, dataset, queries, output, params);
 

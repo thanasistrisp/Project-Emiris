@@ -28,9 +28,11 @@
 
 # Paths
 MY_PATH := $(dir $(lastword $(MAKEFILE_LIST)))
-MODULES := $(MY_PATH)modules
+MODULES := $(MY_PATH)
+TESTING := $(MY_PATH)testing
 INCLUDE := $(MY_PATH)include
 INCLUDE1 := $(MY_PATH)../exercise1/include
+LIB := $(MY_PATH)lib
 
 # Compiler options
 #   -g         Δημιουργεί εκτελέσιμο κατάλληλο για debugging
@@ -43,7 +45,7 @@ INCLUDE1 := $(MY_PATH)../exercise1/include
 #
 # Το override επιτρέπει την προσθήκη επιπλέον παραμέτρων από τη γραμμή εντολών: make CFLAGS=...
 #
-override CXXFLAGS += -O3 -Wall -Wextra -MMD -I$(INCLUDE) -I$(INCLUDE1) -I. -std=c++17
+override CXXFLAGS += -O3 -Wall -Wextra -MMD -I$(INCLUDE) -I$(INCLUDE1) -I. -std=c++17 -fPIC
 
 # Linker options
 #   -lm        Link με τη math library
@@ -63,8 +65,8 @@ CC = g++
 
 # Λίστα με όλα τα εκτελέσιμα & βιβλιοθήκες <foo> για τα οποία υπάρχει μια μεταβλητή <foo>_OBJS
 WITH_OBJS := $(subst _OBJS,,$(filter %_OBJS,$(.VARIABLES)))
-PROGS := $(filter-out %.a,$(WITH_OBJS))
-LIBS := $(filter %.a,$(WITH_OBJS))
+PROGS := $(filter-out %.so,$(WITH_OBJS))
+LIBS := $(filter %.so,$(WITH_OBJS))
 
 # Μαζεύουμε όλα τα objects σε μία μεταβλητή
 OBJS := $(foreach target, $(WITH_OBJS), $($(target)_OBJS))
@@ -108,9 +110,8 @@ $(PROGS): $$($$@_OBJS)
 
 # Για κάθε βιβλιοθήκη <lib>, δημιουργούμε έναν κανόνα που δηλώνει τα περιεχόμενα του
 # <lib>_OBJS ως depedencies του <lib>.
-#
 $(LIBS): $$($$@_OBJS)
-	ar -rcs $@ $^
+	$(CC) -shared $^ -o $@ $(LDFLAGS)
 
 # Κάνουμε include τα .d αρχεία που παράγει ο g++ (το "-" αγνοεί την εντολή αν αποτύχει)
 # Ενα αρχείο foo.d περιέχει όλα τα αρχεία (.cpp και .h) που χρειάστηκε o g++ για να κάνει compile
