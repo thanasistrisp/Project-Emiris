@@ -31,8 +31,13 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &
         for(auto iter = candidates.begin(); iter != candidates.end(); iter++){
             p = *iter;
             if(checked_nodes.find(p->first) == checked_nodes.end()){
-                break;;
+                break;
             }
+        }
+        // Check if we have gone through all candidates
+        // (avoid infinite loop when L candidates can't be found).
+        if(checked_nodes.find(p->first) != checked_nodes.end()){
+            break;
         }
         // Mark p as checked.
         checked_nodes.insert(p->first);
@@ -42,6 +47,7 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &
         //  i++
         // Sort R in ascending order of the distance to q.
         neighbors = graph.get_successors(p->first);
+
         for(int i = 0; i < (int) neighbors.size(); i++){
             if(unique_indices.find(neighbors[i]) != unique_indices.end()){
                 continue;
