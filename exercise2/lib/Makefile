@@ -5,6 +5,10 @@ graphsearch.so_OBJS = \
 					 $(MODULES)/common/generic_search.o \
 					 $(MODULES)/handle_output.o \
 					 $(MODULES)/../exercise1/A/LSH/lsh.o \
+					 $(MODULES)/../exercise1/A/RandomProjection/hypercube.o \
+					 $(MODULES)/../exercise1/A/common/handle_binary.o \
+					 $(MODULES)/../exercise1/A/RandomProjection/binary_string.o \
+					 $(MODULES)/../exercise1/A/RandomProjection/helper_cube.o \
 					 $(MODULES)/../exercise1/A/common/lp_metric.o \
 					 $(MODULES)/../exercise1/A/common/hash_function.o \
 					 $(MODULES)/../exercise1/A/common/brute_force.o \

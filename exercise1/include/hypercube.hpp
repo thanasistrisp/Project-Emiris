@@ -43,7 +43,7 @@ public:
 	~hypercube();
 
 	// Returns the indices of the N nearest neighbours of q and their distances to q.
-	std::tuple<std::vector<int>, std::vector<double>> query_n_nearest_neighbors(const std::vector<double> &q, const std::vector<int> &q_proj, int N);
+	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double> &q, const std::vector<int> &q_proj, int N);
 	
 	// Returns the indices of the neighbours of q that lie within radius R and their distances to q.
 	std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double> &q, const std::vector<int> &q_proj, double R);

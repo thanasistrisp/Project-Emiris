@@ -22,7 +22,7 @@ void handle_ouput(hypercube &cube, ofstream &output, const vector<vector<double>
 		clock_t start_ANN = clock();
 		vector<int> n_nearest_neighbors;
 		vector<double> dist_ann;
-		tie(n_nearest_neighbors, dist_ann) = cube.query_n_nearest_neighbors(queries[q], q_proj, N);
+		tie(n_nearest_neighbors, dist_ann) = cube.query(queries[q], q_proj, N);
 		clock_t end_ANN = clock();
 		double elapsed_secs_ANN = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 

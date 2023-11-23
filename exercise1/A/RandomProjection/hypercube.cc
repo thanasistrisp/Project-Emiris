@@ -69,7 +69,7 @@ hypercube::~hypercube() {
 	delete remaining_vertices;
 }
 
-tuple<vector<int>, vector<double>> hypercube::query_n_nearest_neighbors(const vector<double> &q, const vector<int> &q_proj, int N) {
+tuple<vector<int>, vector<double>> hypercube::query(const vector<double> &q, const vector<int> &q_proj, int N) {
 	int num_points = 0;
 	int num_vertices = 0;
 	

@@ -15,6 +15,8 @@
 #include "mrng.hpp"
 #include "defines.hpp"
 #include "handling.hpp"
+#include "lsh.hpp"
+#include "hypercube.hpp"
 
 #include "brute_force.hpp"
 
@@ -32,8 +34,14 @@ vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset
 	if (m == 1) {
 		cout << "Algorithm: GNN" << endl;
 	}
-	else {
+	else if (m == 2) {
 		cout << "Algorithm: MRNG" << endl;
+	}
+	else if (m == 3) {
+		cout << "Algorithm: LSH" << endl;
+	}
+	else {
+		cout << "Algorithm: Cube" << endl;
 	}
 
 	double elapsed_secs_ANN = 0;
@@ -47,8 +55,15 @@ vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset
 		if (m == 1) {
 			ann = ((GNN*) structure)->query(queries[q], N, E, R);
 		}
-		else {
+		else if (m == 2) {
 			ann = ((MRNG*) structure)->query(queries[q], N, l);
+		}
+		else if (m == 3) {
+			ann = ((LSH*) structure)->query(queries[q], N);
+		}
+		else {
+			vector<int> q_proj = ((hypercube*) structure)->calculate_q_proj(queries[q]);
+			ann = ((hypercube*) structure)->query(queries[q], q_proj, N);
 		}
 		clock_t end_ANN = clock();
 		elapsed_secs_ANN += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
@@ -151,4 +166,49 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	*maf = results[2];
 
 	delete mrng;
+}
+
+
+extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
+										  int k, int L, int table_size, int window, int N,
+										  double *approximate_time, double *true_time, double *maf) {
+	string input_str(input);
+	string query_str(query);
+
+	cout << "Read MNIST data" << endl;
+	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	LSH *lsh = new LSH(k, L, table_size, window, dataset);
+	cout << "Done" << endl;
+
+	// return time, maf
+	vector<int> params = {0, 0, 0, N, 3};
+	vector<double> results = helper_arg(lsh, dataset, queries, params);
+	*approximate_time = results[0];
+	*true_time = results[1];
+	*maf = results[2];
+
+	delete lsh;
+}
+
+extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
+										  int k, int probes, int M, int N,
+										  double *approximate_time, double *true_time, double *maf) {
+	string input_str(input);
+	string query_str(query);
+
+	cout << "Read MNIST data" << endl;
+	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	hypercube *cube = new hypercube(dataset, k, M, probes);
+	cout << "Done" << endl;
+
+	// return time, maf
+	vector<int> params = {0, 0, 0, N, 4};
+	vector<double> results = helper_arg(cube, dataset, queries, params);
+	*approximate_time = results[0];
+	*true_time = results[1];
+	*maf = results[2];
+
+	delete cube;
 }
