@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <limits>
+#include <variant>
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
@@ -17,13 +19,16 @@
 #include "handling.hpp"
 #include "lsh.hpp"
 #include "hypercube.hpp"
+#include "lp_metric.hpp"
 
 #include "brute_force.hpp"
 
 using namespace std;
 using std::cout;
 
-vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<int> &params)
+// vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<int> &params)
+// vector with types double, double, double, int
+vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<int> &params)
 {
 	// initialize parameters
 	int E = params[0];
@@ -47,6 +52,7 @@ vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset
 	double elapsed_secs_ANN = 0;
 	double elapsed_secs_TNN = 0;
 	double maf = 0;
+	int min_neighbors = numeric_limits<int>::max();
 
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
@@ -59,12 +65,26 @@ vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset
 			ann = ((MRNG*) structure)->query(queries[q], N, l);
 		}
 		else if (m == 3) {
-			ann = ((LSH*) structure)->query(queries[q], N);
+			bool query_trick = params[5];
+			ann = ((LSH*) structure)->query(queries[q], N, euclidean_distance, query_trick);
 		}
 		else {
 			vector<int> q_proj = ((hypercube*) structure)->calculate_q_proj(queries[q]);
 			ann = ((hypercube*) structure)->query(queries[q], q_proj, N);
 		}
+
+		if (q == 0) {
+			int temp = get<0>(ann).size();
+			min_neighbors = temp;
+		}
+		else {
+			int temp = get<0>(ann).size();
+			if (temp < min_neighbors) {
+				min_neighbors = temp;
+			}
+		}
+
+
 		clock_t end_ANN = clock();
 		elapsed_secs_ANN += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
@@ -93,7 +113,7 @@ vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset
 		}
 	}
 	
-	return {elapsed_secs_ANN / queries.size(), elapsed_secs_TNN / queries.size(), maf};
+	return {elapsed_secs_ANN / queries.size(), elapsed_secs_TNN / queries.size(), maf, min_neighbors};
 }
 
 extern "C" void get_gnn_results(const char *input, const char *query, int queries_num,
@@ -124,10 +144,10 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 
 	// return time, maf
 	vector<int> params = {E, R, 0, N, 1};
-	vector<double> results = helper_arg(gnn, dataset, queries, params);
-	*approximate_time = results[0];
-	*true_time = results[1];
-	*maf = results[2];
+	vector<variant<double, int>> results = helper_arg(gnn, dataset, queries, params);
+	*approximate_time = get<double>(results[0]);
+	*true_time = get<double>(results[1]);
+	*maf = get<double>(results[2]);
 
 	delete gnn;
 }
@@ -160,18 +180,18 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 
 	// return time, maf
 	vector<int> params = {0, 0, l, N, 2};
-	vector<double> results = helper_arg(mrng, dataset, queries, params);
-	*approximate_time = results[0];
-	*true_time = results[1];
-	*maf = results[2];
+	vector<variant<double, int>> results = helper_arg(mrng, dataset, queries, params);
+	*approximate_time = get<double>(results[0]);
+	*true_time = get<double>(results[1]);
+	*maf = get<double>(results[2]);
 
 	delete mrng;
 }
 
 
 extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
-										  int k, int L, int table_size, int window, int N,
-										  double *approximate_time, double *true_time, double *maf) {
+										  int k, int L, int table_size, int window, bool query_trick, int N,
+										  double *approximate_time, double *true_time, double *maf, int *min_neighbors) {
 	string input_str(input);
 	string query_str(query);
 
@@ -182,11 +202,12 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 	cout << "Done" << endl;
 
 	// return time, maf
-	vector<int> params = {0, 0, 0, N, 3};
-	vector<double> results = helper_arg(lsh, dataset, queries, params);
-	*approximate_time = results[0];
-	*true_time = results[1];
-	*maf = results[2];
+	vector<int> params = {0, 0, 0, N, 3, query_trick};
+	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
+	*approximate_time = get<double>(results[0]);
+	*true_time = get<double>(results[1]);
+	*maf = get<double>(results[2]);
+	*min_neighbors = get<int>(results[3]);
 
 	delete lsh;
 }
@@ -205,10 +226,10 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 
 	// return time, maf
 	vector<int> params = {0, 0, 0, N, 4};
-	vector<double> results = helper_arg(cube, dataset, queries, params);
-	*approximate_time = results[0];
-	*true_time = results[1];
-	*maf = results[2];
+	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
+	*approximate_time = get<double>(results[0]);
+	*true_time = get<double>(results[1]);
+	*maf = get<double>(results[2]);
 
 	delete cube;
 }
