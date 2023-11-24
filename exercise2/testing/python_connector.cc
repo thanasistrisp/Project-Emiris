@@ -28,14 +28,14 @@ using std::cout;
 
 // vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<int> &params)
 // vector with types double, double, double, int
-vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<int> &params)
+vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<variant<int,bool>> &params)
 {
 	// initialize parameters
-	int E = params[0];
-	int R = params[1];
-	int l = params[2];
-	int N = params[3];
-	int m = params[4];
+	int E = get<int>(params[0]);
+	int R = get<int>(params[1]);
+	int l = get<int>(params[2]);
+	int N = get<int>(params[3]);
+	int m = get<int>(params[4]);
 	if (m == 1) {
 		cout << "Algorithm: GNN" << endl;
 	}
@@ -65,7 +65,7 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 			ann = ((MRNG*) structure)->query(queries[q], N, l);
 		}
 		else if (m == 3) {
-			bool query_trick = params[5];
+			bool query_trick = get<bool>(params[5]);
 			ann = ((LSH*) structure)->query(queries[q], N, euclidean_distance, query_trick);
 		}
 		else {
@@ -143,7 +143,7 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 	cout << "Done" << endl;
 
 	// return time, maf
-	vector<int> params = {E, R, 0, N, 1};
+	vector<variant<int,bool>> params = {E, R, 0, N, 1};
 	vector<variant<double, int>> results = helper_arg(gnn, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*true_time = get<double>(results[1]);
@@ -179,7 +179,7 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	cout << "Done" << endl;
 
 	// return time, maf
-	vector<int> params = {0, 0, l, N, 2};
+	vector<variant<int,bool>> params = {0, 0, l, N, 2};
 	vector<variant<double, int>> results = helper_arg(mrng, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*true_time = get<double>(results[1]);
@@ -202,7 +202,7 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 	cout << "Done" << endl;
 
 	// return time, maf
-	vector<int> params = {0, 0, 0, N, 3, query_trick};
+	vector<variant<int,bool>> params = {0, 0, 0, N, 3, query_trick};
 	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*true_time = get<double>(results[1]);
@@ -225,7 +225,7 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	cout << "Done" << endl;
 
 	// return time, maf
-	vector<int> params = {0, 0, 0, N, 4};
+	vector<variant<int,bool>> params = {0, 0, 0, N, 4};
 	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*true_time = get<double>(results[1]);
