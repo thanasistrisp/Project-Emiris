@@ -122,6 +122,7 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     multiset<tuple<int, double>, decltype(compare)> s(compare);
+    unordered_set<int> unique_indices;
 
     double dist;
     int p_index;
@@ -137,7 +138,10 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
             vector<double> p = dataset.at(p_index);
             dist = distance(p, q);
             if(dist < r){
-                s.insert(make_tuple(p_index, dist));
+                if(unique_indices.find(p_index) == unique_indices.end()){
+                    s.insert(make_tuple(p_index, dist));
+                    unique_indices.insert(p_index);
+                }
             }
             // if(s.size() > (unsigned int) 20 * number_of_hash_tables){ // Optional.
             //     break;
