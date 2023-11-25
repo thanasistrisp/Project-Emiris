@@ -118,7 +118,7 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 
 extern "C" void get_gnn_results(const char *input, const char *query, int queries_num,
 										  int k, int E, int R, int N, const char *load_file,
-										  double *approximate_time, double *true_time, double *maf) {
+										  double *approximate_time, double *maf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -146,7 +146,6 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 	vector<variant<int,bool>> params = {E, R, 0, N, 1};
 	vector<variant<double, int>> results = helper_arg(gnn, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*true_time = get<double>(results[1]);
 	*maf = get<double>(results[2]);
 
 	delete gnn;
@@ -154,7 +153,7 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 
 extern "C" void get_mrng_results(const char *input, const char *query, int queries_num,
 										  int l, int N, const char *load_file,
-										  double *approximate_time, double *true_time, double *maf) {
+										  double *approximate_time, double *maf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -182,7 +181,6 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	vector<variant<int,bool>> params = {0, 0, l, N, 2};
 	vector<variant<double, int>> results = helper_arg(mrng, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*true_time = get<double>(results[1]);
 	*maf = get<double>(results[2]);
 
 	delete mrng;
@@ -191,7 +189,7 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 
 extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
 										  int k, int L, int table_size, int window, bool query_trick, int N,
-										  double *approximate_time, double *true_time, double *maf, int *min_neighbors) {
+										  double *approximate_time, double *maf, int *min_neighbors) {
 	string input_str(input);
 	string query_str(query);
 
@@ -205,7 +203,6 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 	vector<variant<int,bool>> params = {0, 0, 0, N, 3, query_trick};
 	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*true_time = get<double>(results[1]);
 	*maf = get<double>(results[2]);
 	*min_neighbors = get<int>(results[3]);
 
@@ -214,7 +211,7 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 
 extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
 										  int k, int probes, int M, int N,
-										  double *approximate_time, double *true_time, double *maf) {
+										  double *approximate_time, double *maf) {
 	string input_str(input);
 	string query_str(query);
 
@@ -228,7 +225,6 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	vector<variant<int,bool>> params = {0, 0, 0, N, 4};
 	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*true_time = get<double>(results[1]);
 	*maf = get<double>(results[2]);
 
 	delete cube;
