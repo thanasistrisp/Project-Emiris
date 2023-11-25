@@ -106,7 +106,7 @@ where:
 + `m`: 1 for GNNS, 2 for MRNG
 + `output file`: file for output
 
-If any of the numeric arguments aren't specified except for `m`, the following values will be used:
+If any of the numeric arguments aren't specified except of `m`, the following values will be used:
 
 | Argument | Default value |
 |:------:|:------:|
@@ -147,19 +147,21 @@ pip install matplotlib
 pip install botorch
 ```
 
-Then, you can open the `optimization.ipynb` jupyter notebook in <code>testing</code> directory and run the cells. The notebook contains the hyperparameter tuning for the following algorithms:
+Then, you can open the `optimization.ipynb` jupyter notebook in <code>testing</code> directory and run the cells.
+
+To bridge c++ and python, we used `ctypes` [[2]](#references) and we created the `params.py` file which contains the functions for handling the ctypes for each algorithm. The `python_connector.cc` file exposes the C++ functions to python by returning primitive C types (c_int, c_char_p, c_POINTER, etc)
+using `extern "C"`, a linkage specification.
+
+### 3.2.2. Analysis
+
+Analysis is done in the corresponding jupyter notebook. The notebook contains the hyperparameter tuning for the following algorithms:
 
 + GNNS
 + MRNG
 + LSH
 + Cube
 
-The results are already ran and saved in the above notebook.
-
-To bridge c++ and python, we used `ctypes` [[2]](#references) and we created the `params.py` file which contains the functions for handling the ctypes for each algorithm. The `python_connector.cc` file exposes the C++ functions to python by returning primitive C types (c_int, c_char_p, c_POINTER, etc)
-using `extern "C"`, a linkage specification.
-
-### 3.2.2. Analysis
+The results are already run and saved inside the notebook.
 
 
 # 4. Documentation
