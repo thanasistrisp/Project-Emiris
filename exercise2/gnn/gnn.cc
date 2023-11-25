@@ -19,10 +19,12 @@ GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
 	unordered_set<int> unique_indices;
 
 	G = new DirectedGraph();
-	int k_lsh = 5;
+	int k_lsh = 10;
 	int L = 5;
+	int table_size = 3750;
+	int window_size = 3141;
 	clock_t start = clock();
-	lsh = new LSH(k_lsh, L, dataset.size()/4, w, dataset);
+	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();
 	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
