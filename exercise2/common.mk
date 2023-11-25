@@ -28,7 +28,8 @@
 
 # Paths
 MY_PATH := $(dir $(lastword $(MAKEFILE_LIST)))
-MODULES := $(MY_PATH)
+EXERCISE1 := $(MY_PATH)../exercise1
+MODULES := $(MY_PATH)source_code
 TESTING := $(MY_PATH)testing
 INCLUDE := $(MY_PATH)include
 INCLUDE1 := $(MY_PATH)../exercise1/include
