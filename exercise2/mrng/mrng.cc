@@ -47,23 +47,23 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 		find_neighbors_with_min_distance(p, Lp);
 		bool condition = true;
 		// for r in Rp and r not in Lp
-		for (int t : *Lp) {
-			double pt = distance(dataset[p], dataset[t]);
-			for (int r : *Rp) {
-				if (Lp->find(r) == Lp->end()) {
+		for (int r : *Rp) {
+			if (Lp->find(r) == Lp->end()) {
+				double pr = distance(dataset[p], dataset[r]);
+				for (int t : *Lp) {
 					// if pr longest edge in triangle prt
-					double pr = distance(dataset[p], dataset[r]);
+					double pt = distance(dataset[p], dataset[t]);
+					double rt = distance(dataset[r], dataset[t]);
 					
-					if (pr > pt && pr > distance(dataset[r], dataset[t])) {
+					if (pr > pt && pr > rt) {
 						condition = false;
-						goto exit_for;
+						break;
 					}
 				}
 				if (condition)
 					Lp->insert(r);
 			}
 		}
-		exit_for:
         // for each Lp add edge (p, l)
         for (int l : *Lp)
             G->add_edge(p, l);
