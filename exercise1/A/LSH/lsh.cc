@@ -91,15 +91,12 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
 
             // Keep k items only to save space.
             dist = distance(p, q);
-            if(s.size() == k){
-                if(dist >= get<1>(*s.rbegin())){
-                    continue;
-                }
-                s.erase(std::prev(s.end()));
-            }
             if(unique_indices.find(p_index) == unique_indices.end()){
                 s.insert(make_tuple(p_index, dist));
                 unique_indices.insert(p_index);
+            }
+            if(s.size() > k){
+                s.erase(std::prev(s.end(), 1));
             }
         }
     }
