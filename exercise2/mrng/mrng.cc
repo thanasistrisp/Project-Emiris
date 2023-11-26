@@ -18,10 +18,10 @@ using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	int k_lsh = 8;
-	int L = 4;
-	int table_size = 3750;
-	int window_size = 2641;
+	int k_lsh = 10;
+	int L = 5;
+	int table_size = 7500;
+	int window_size = 3276;
 	clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();
@@ -47,9 +47,9 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 			}
 		}
 		find_neighbors_with_min_distance(p, Lp);
-		bool condition = true;
 		// for r in Rp and r not in Lp
 		for (int r : *Rp) {
+			bool condition = true;
 			if (Lp->find(r) == Lp->end()) {
 				double pr = distance(dataset[p], dataset[r]);
 				for (int t : *Lp) {

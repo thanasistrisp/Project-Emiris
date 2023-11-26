@@ -24,6 +24,7 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &
     // R.add(p), i = 1.
     pair<int, double>* p = new pair(start_node, distance(dataset[start_node], query));
     candidates.insert(p);
+    unique_indices.insert(start_node);
 
     // While i < L.
     while((int) candidates.size() < total_candidates){
