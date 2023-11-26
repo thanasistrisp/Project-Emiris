@@ -19,10 +19,10 @@ GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
 	unordered_set<int> unique_indices;
 
 	G = new DirectedGraph();
-	int k_lsh = 10;
-	int L = 5;
+	int k_lsh = 6;
+	int L = 2;
 	int table_size = 3750;
-	int window_size = 3141;
+	int window_size = 2900;
 	clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();
@@ -35,7 +35,7 @@ GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
 		G->add_vertex(i);
 	}
 	for(int i = 0; i < (int) dataset.size(); i++){
-		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, distance);
+		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, distance, true);
 		vector<int> neighbors_indices = get<0>(neighbors);
 
 		if ((int) neighbors_indices.size() < k) {

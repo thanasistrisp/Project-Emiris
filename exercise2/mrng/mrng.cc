@@ -18,10 +18,10 @@ using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	int k_lsh = 10;
-	int L = 5;
+	int k_lsh = 6;
+	int L = 2;
 	int table_size = 3750;
-	int window_size = 3141;
+	int window_size = 2900;
 	clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();
@@ -116,12 +116,12 @@ void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 	int k = 5;
 	vector<int> neighbors_indices;
 	vector<double> neighbors_distances;
-	tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[p], k, distance, false);
+	tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[p], k, distance, true);
 	neighbors_indices = get<0>(neighbors);
 	neighbors_distances = get<1>(neighbors);
 	while (neighbors_distances[0] == (int) neighbors_distances[neighbors_distances.size() - 1]) {
 		k += 5;
-		neighbors = lsh->query(dataset[p], k, distance);
+		neighbors = lsh->query(dataset[p], k, distance, true);
 		neighbors_indices = get<0>(neighbors);
 		neighbors_distances = get<1>(neighbors);
 	}
