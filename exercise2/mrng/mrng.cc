@@ -18,10 +18,10 @@ using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	int k_lsh = 6;
-	int L = 2;
+	int k_lsh = 8;
+	int L = 4;
 	int table_size = 3750;
-	int window_size = 2900;
+	int window_size = 2641;
 	clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();
