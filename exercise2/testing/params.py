@@ -21,7 +21,8 @@ def hypercube_test(input, query, queries_num, k, M, probes, N):
 
 def gnn_test(input, query, queries_num, k, E, R, N):
     lib.get_gnn_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
-    load_file = b'../graph_files/gnn_graph.bin'
+    # load_file = b'../graph_files/gnns21.bin'
+    load_file = b''
     average_time = ctypes.c_double()
     maf = ctypes.c_double()
     lib.get_gnn_results(input, query, queries_num, k, E, R, N, load_file, ctypes.byref(average_time), ctypes.byref(maf))
