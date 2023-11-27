@@ -11,9 +11,9 @@
 
 using namespace std;
 
-tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &graph, const vector<vector<double>>& dataset,
-                                                           int start_node, const vector<double>& query, int total_candidates, unsigned int k,
-                                                           double (*distance)(const vector<double>&, const vector<double>&))
+tuple<tuple<vector<int>, vector<double>>, vector<int>> generic_search_on_graph(const DirectedGraph &graph, const vector<vector<double>>& dataset,
+                                                                int start_node, const vector<double>& query, int total_candidates, unsigned int k,
+                                                                double (*distance)(const vector<double>&, const vector<double>&))
 {
     // Candidate set R = \emptyset.
     multiset<pair<int, double>*, decltype(&set_cmp)> candidates(&set_cmp);
@@ -73,5 +73,10 @@ tuple<vector<int>, vector<double>> generic_search_on_graph(const DirectedGraph &
         delete *iter;
     }
 
-    return make_tuple(indices, distances);
+    // Convert set of checked nodes to vector.
+    vector<int> checked_nodes_vector;
+    for(auto& it : checked_nodes){
+        checked_nodes_vector.push_back(it);
+    }
+    return make_tuple(make_tuple(indices, distances), checked_nodes_vector);
 }
