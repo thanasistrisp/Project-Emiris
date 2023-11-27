@@ -250,7 +250,7 @@ an ordered set.
 
 LSH is used to construct the directed graph, using we the following parameters derived from the hyperparameter tuning using the constraints:
 
-neighbors returned $\geq 50$ abd average query time $\leq 0.01$ sec while optimizing $\min$ {MAF}, $\min$ {average query time}:
+neighbors returned $\geq 50$ and average query time $\leq 0.01$ sec while optimizing $\min$ {MAF}, $\min$ {average query time}:
 
 | LSH |
 |:------:|
@@ -278,7 +278,7 @@ This algorithm has been implemented in a different file, because it may be appli
 
 For the implementation of the algorithms with sets in most cases, we used the following data structures:
 
-+ `std::[unordered_]multiset<pair<double,int>>` for storing the distances and the indices of the points (multisets are
++ `std::[unordered_]multiset<pair<double,int>>` for storing the distances and the indices of the points (multisets are used because we could have duplicates in the distance key for different points).
 
     For ordered sets, we have defined a comparator function.
     
