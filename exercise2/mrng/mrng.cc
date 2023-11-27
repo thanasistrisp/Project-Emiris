@@ -119,11 +119,26 @@ void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 	tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[p], k, distance, true);
 	neighbors_indices = get<0>(neighbors);
 	neighbors_distances = get<1>(neighbors);
-	while (neighbors_distances[0] == (int) neighbors_distances[neighbors_distances.size() - 1]) {
-		k += 5;
-		neighbors = lsh->query(dataset[p], k, distance, true);
-		neighbors_indices = get<0>(neighbors);
-		neighbors_distances = get<1>(neighbors);
+	
+	// In case LSH returns no neighbors, add a random one.
+	if((int) neighbors_indices.size() == 0){
+
+		cout << "LSH returned no neighbors, adding a random neighbor instead" << endl;
+
+		int r_index = rand() % dataset.size();
+		while(r_index != p){
+			r_index = rand() % dataset.size();
+		}
+		neighbors_indices.push_back(r_index);
+		neighbors_distances.push_back(distance(dataset[p], dataset[r_index]));
+	}
+	else{
+		while (neighbors_distances[0] == (int) neighbors_distances[neighbors_distances.size() - 1]) {
+			k += 5;
+			neighbors = lsh->query(dataset[p], k, distance, true);
+			neighbors_indices = get<0>(neighbors);
+			neighbors_distances = get<1>(neighbors);
+		}
 	}
 	// add neighbors with same distance to Lp
 	for (int i = 0; i < (int) neighbors_indices.size(); i++) {
