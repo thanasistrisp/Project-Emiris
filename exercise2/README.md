@@ -38,8 +38,8 @@ exercise2/
 │   │   ├── generic_search.cc	    # implementation of the generic search on graph (used for mrng)
 │   │   └── handle_output.cc	    # helper function for processing the output
 │   │
-│   ├── gnn						# directory for source files for GNNS (construction, query) implementation
-│   │   └── gnn.cc
+│   ├── approximate_knn_graph						# directory for source files for GNNS (construction, query) implementation
+│   │   └── ApproximateKNNGraph.cc
 │   │
 │   ├── mrng					# directory for source files for MRNG (construction) implementation
 │   │   └── mrng.cc
@@ -49,7 +49,7 @@ exercise2/
 ├── include						# directory for header files
 │   ├── directed_graph.hpp
 │   ├── generic_search.hpp
-│   ├── gnn.hpp
+│   ├── ApproximateKNNGraph.hpp
 │   ├── handling.hpp
 │   ├── mrng.hpp
 │   └── set_utils.hpp			    # overloading of the set operators for using set of pairs

@@ -7,7 +7,7 @@
 #include <limits>
 // iterator is used for std::back_insert_iterator, std::advance().
 
-#include "gnn.hpp"
+#include "ApproximateKNNGraph.hpp"
 #include "mrng.hpp"
 #include "lp_metric.hpp"
 #include "brute_force.hpp"
@@ -42,7 +42,7 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 		tuple<vector<int>, vector<double>> ann;
 		clock_t start_ANN = clock();
 		if (m == 1) {
-			ann = ((GNN*) structure)->query(queries[q], N, E, R);
+			ann = ((ApproximateKNNGraph*) structure)->query(queries[q], N, E, R);
 		}
 		else {
 			ann = ((MRNG*) structure)->query(queries[q], N, l);

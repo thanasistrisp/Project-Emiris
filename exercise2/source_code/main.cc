@@ -10,8 +10,9 @@
 // ctime is used for time().
 
 #include "helper.hpp"
-#include "gnn.hpp"
+#include "ApproximateKNNGraph.hpp"
 #include "mrng.hpp"
+#include "nsg.hpp"
 #include "defines.hpp"
 #include "handling.hpp"
 
@@ -135,10 +136,13 @@ int main(int argc, char *argv[]) {
 		// add graph to structure
 		switch (m) {
 			case 1:
-				structure = new GNN(dataset, G);
+				structure = new ApproximateKNNGraph(dataset, G);
 				break;
 			case 2:
 				structure = new MRNG(dataset, G);
+				break;
+			case 3:
+				structure = new NSG(dataset, G);
 				break;
 			default:
 				cout << "Wrong m value. Run with -help for more info" << endl;
@@ -148,10 +152,13 @@ int main(int argc, char *argv[]) {
 	else {
 		switch (m) {
 			case 1:
-				structure = new GNN(dataset, k);
+				structure = new ApproximateKNNGraph(dataset, k);
 				break;
 			case 2:
 				structure = new MRNG(dataset);
+				break;
+			case 3:
+				structure = new NSG(dataset);
 				break;
 			default:
 				cout << "Wrong m value. Run with -help for more info" << endl;
@@ -164,7 +171,17 @@ int main(int argc, char *argv[]) {
 	// save Graph to binary file
 	if (!save_graph_file.empty()) {
 		ofstream graph_file(save_graph_file, ios::binary);
-		((DirectedGraph*) ((m == 1) ? ((GNN*) structure)->get_graph() : ((MRNG*) structure)->get_graph()))->save(graph_file);
+		// ((DirectedGraph*) ((m == 1) ? ((GNN*) structure)->get_graph() : ((MRNG*) structure)->get_graph()))->save(graph_file);
+		// with if else
+		if (m == 1) {
+			((ApproximateKNNGraph*) structure)->get_graph()->save(graph_file);
+		}
+		else if (m == 2) {
+			((MRNG*) structure)->get_graph()->save(graph_file);
+		}
+		else {
+			((NSG*) structure)->get_graph()->save(graph_file);
+		}
 		graph_file.close();
 	}
 
@@ -202,10 +219,13 @@ int main(int argc, char *argv[]) {
 
 	switch (m) {
 		case 1:
-			delete (GNN*) structure;
+			delete (ApproximateKNNGraph*) structure;
 			break;
 		case 2:
 			delete (MRNG*) structure;
+			break;
+		case 3:
+			delete (NSG*) structure;
 			break;
 	}
 

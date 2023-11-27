@@ -2,7 +2,7 @@
 
 #include <tuple>
 
-#include "gnn.hpp"
+#include "ApproximateKNNGraph.hpp"
 #include "mrng.hpp"
 
 void handle_ouput(void *structure, const std::vector<std::vector<double>> &dataset,

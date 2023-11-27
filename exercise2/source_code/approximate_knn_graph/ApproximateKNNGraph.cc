@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <set>
 
-#include "gnn.hpp"
+#include "ApproximateKNNGraph.hpp"
 #include "lsh.hpp"
 #include "defines.hpp"
 #include "lp_metric.hpp"
@@ -13,7 +13,7 @@
 
 using namespace std;
 
-GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
+ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, int k): dataset(dataset)
 {
 	unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)> neighbors_set(8, &set_hash, &set_equal);
 	unordered_set<int> unique_indices;
@@ -81,16 +81,16 @@ GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
 
 	clock_t end = clock();
 	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-	cout << "GNN initialization time: " << elapsed_secs << endl;
+	cout << "ApproximateKNNGraph initialization time: " << elapsed_secs << endl;
 }
 
-GNN::~GNN()
+ApproximateKNNGraph::~ApproximateKNNGraph()
 {
 	delete G;
 	delete lsh;
 }
 
-void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, int k)
+void ApproximateKNNGraph::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double dist;
@@ -111,7 +111,7 @@ void GNN::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, d
 	}
 }
 
-void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, unordered_set<int>& unique_indices, int k)
+void ApproximateKNNGraph::add_neighbors_random(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	double dist;
 
@@ -128,7 +128,7 @@ void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*,
 	}
 }
 
-tuple<vector<int>, vector<double>> GNN::query(const vector<double>& q, unsigned int N, unsigned int E, unsigned int R)
+tuple<vector<int>, vector<double>> ApproximateKNNGraph::query(const vector<double>& q, unsigned int N, unsigned int E, unsigned int R)
 {
 	auto cmp = [](pair<double, int> left, pair<double, int> right) { return left.first < right.first; };
 	multiset<pair<double, int>, decltype(cmp)> S(cmp);

@@ -13,7 +13,7 @@
 // ctime is used for time().
 
 #include "helper.hpp"
-#include "gnn.hpp"
+#include "ApproximateKNNGraph.hpp"
 #include "mrng.hpp"
 #include "defines.hpp"
 #include "handling.hpp"
@@ -58,7 +58,7 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 		tuple<vector<int>, vector<double>> ann;
 		clock_t start_ANN = clock();
 		if (m == 1) {
-			ann = ((GNN*) structure)->query(queries[q], N, E, R);
+			ann = ((ApproximateKNNGraph*) structure)->query(queries[q], N, E, R);
 		}
 		else if (m == 2) {
 			ann = ((MRNG*) structure)->query(queries[q], N, l);
@@ -122,7 +122,7 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
-	GNN *gnn;
+	ApproximateKNNGraph *approximate_knn_graph;
 	if (!load_file_str.empty()) {
 		cout << "Loading graph from file: " << load_file_str << endl;
 		DirectedGraph *G = new DirectedGraph();
@@ -130,21 +130,21 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 		graph_file.open(load_file);
 		G->load(graph_file);
 		graph_file.close();
-		gnn = new GNN(dataset, G);
+		approximate_knn_graph = new ApproximateKNNGraph(dataset, G);
 	}
 	else {
 		cout << "Building graph..." << endl;
-		gnn = new GNN(dataset, k);
+		approximate_knn_graph = new ApproximateKNNGraph(dataset, k);
 	}
 	cout << "Done" << endl;
 
 	// return time, maf
 	vector<variant<int,bool>> params = {E, R, 0, N, 1};
-	vector<variant<double, int>> results = helper_arg(gnn, dataset, queries, params);
+	vector<variant<double, int>> results = helper_arg(approximate_knn_graph, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*maf = get<double>(results[1]);
 
-	delete gnn;
+	delete approximate_knn_graph;
 }
 
 extern "C" void get_mrng_results(const char *input, const char *query, int queries_num,
