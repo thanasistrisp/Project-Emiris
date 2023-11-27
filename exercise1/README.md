@@ -6,6 +6,29 @@ Eleftheria Vrachoriti - 1115202000026
 
 Athanasios Trispiotis - 1115202000194
 
+# Table of Contents
+- [1. Project structure](#1-project-structure)
+- [2. Compilation](#2-compilation)
+  - [2.1. `lsh`](#21-lsh)
+  - [2.2. `cube`](#22-cube)
+  - [2.3. `cluster`](#23-cluster)
+  - [2.4. `clean`](#24-clean)
+- [3. Execution](#3-execution)
+  - [3.1. `lsh`](#31-lsh)
+  - [3.2. `cube`](#32-cube)
+  - [3.3. `cluster`](#33-cluster)
+- [4. Documentation](#4-documentation)
+  - [4.1. `lsh`](#41-lsh)
+  - [4.2. `cube`](#42-cube)
+  - [4.3. `cluster`](#43-cluster)
+  - [4.4. Parameters](#44-parameters)
+    - [4.4.1. `lsh`](#441-lsh)
+    - [4.4.2. `cube`](#442-cube)
+    - [4.4.3. `cluster`](#443-cluster)
+  - [4.5. Results](#45-results)
+    - [4.5.1. `cluster`](#451-kmeans)
+- [References](#references)
+
 # 1. Project structure
 
 ```txt
@@ -329,7 +352,7 @@ For the given dataset, `k` should be $10$, as there are $10$ different handwritt
 
 ## 4.5 Results
 
-### 4.5.1. `kmeans`
+### 4.5.1. `cluster`
 
 For the parameters given in `cluster.conf` file, the following results were yielded:
 
