@@ -11,14 +11,16 @@
 
 using namespace std;
 
-tuple<tuple<vector<int>, vector<double>>, vector<int>> generic_search_on_graph(const DirectedGraph &graph, const vector<vector<double>>& dataset,
-                                                                int start_node, const vector<double>& query, int total_candidates, unsigned int k,
-                                                                double (*distance)(const vector<double>&, const vector<double>&))
+tuple<tuple<vector<int>, vector<double>>,
+      tuple<vector<int>, vector<double>>> generic_search_on_graph(const DirectedGraph &graph, const vector<vector<double>>& dataset,
+                                                                  int start_node, const vector<double>& query, int total_candidates, unsigned int k,
+                                                                  double (*distance)(const vector<double>&, const vector<double>&))
 {
     // Candidate set R = \emptyset.
     multiset<pair<int, double>*, decltype(&set_cmp)> candidates(&set_cmp);
     unordered_set<int> unique_indices;
-    unordered_set<int> checked_nodes;
+    unordered_set<int> checked_indices;
+    vector<double> checked_distances;
     vector<int> neighbors;
 
     // R.add(p), i = 1.
@@ -31,17 +33,18 @@ tuple<tuple<vector<int>, vector<double>>, vector<int>> generic_search_on_graph(c
         // p = the first unchecked node in R.
         for(auto iter = candidates.begin(); iter != candidates.end(); iter++){
             p = *iter;
-            if(checked_nodes.find(p->first) == checked_nodes.end()){
+            if(checked_indices.find(p->first) == checked_indices.end()){
                 break;
             }
         }
         // Check if we have gone through all candidates
         // (avoid infinite loop when L candidates can't be found).
-        if(checked_nodes.find(p->first) != checked_nodes.end()){
+        if(checked_indices.find(p->first) != checked_indices.end()){
             break;
         }
         // Mark p as checked.
-        checked_nodes.insert(p->first);
+        checked_indices.insert(p->first);
+        checked_distances.push_back(p->second);
         
         // For every neighbor N of p \in G : N \not \in R
         //  R.add(N)
@@ -74,9 +77,9 @@ tuple<tuple<vector<int>, vector<double>>, vector<int>> generic_search_on_graph(c
     }
 
     // Convert set of checked nodes to vector.
-    vector<int> checked_nodes_vector;
-    for(auto& it : checked_nodes){
-        checked_nodes_vector.push_back(it);
+    vector<int> checked_indices_vector;
+    for(auto& it : checked_indices){
+        checked_indices_vector.push_back(it);
     }
-    return make_tuple(make_tuple(indices, distances), checked_nodes_vector);
+    return make_tuple(make_tuple(indices, distances), make_tuple(checked_indices_vector, checked_distances));
 }
