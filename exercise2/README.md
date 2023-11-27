@@ -23,6 +23,8 @@ Athanasios Trispiotis - 1115202000194
     - [4.2.1. Construction](#421-construction)
     - [4.2.2. GNNS Query Search Algorithm](#422-gnns-query-search-algorithm)
   - [4.3. Monotonic Relative Neighborhood Graph](#43-monotonic-relative-neighborhood-graph)
+    - [4.3.1. Construction](#431-construction)
+    - [4.3.2. GNNS Query Search Algorithm](#432-mrng-query-search-algorithm)
   - [4.4 General Implementation Details](#44-general-implementation-details)
 - [References](#references)
 
@@ -30,42 +32,53 @@ Athanasios Trispiotis - 1115202000194
 # 1. Project structure
 ```bash
 exercise2/
-├── source_code					# directory containing the source code for the main program
+├── source_code				    # directory for source code of the main program
 │   ├── common
-│   │   ├── directed_graph.cc		# implementation of the directed graph
-│   │   ├── generic_search.cc		# implementation of the generic search on graph (used for mrng)
-│   │   └── handle_output.cc		# helper function for processing the output
-│   ├── gnn						# implementation of the graph nearest neighbor search (construction, query)
+│   │   ├── directed_graph.cc	    # implementation of the directed graph
+│   │   ├── generic_search.cc	    # implementation of the generic search on graph (used for mrng)
+│   │   └── handle_output.cc	    # helper function for processing the output
+│   │
+│   ├── gnn						# directory for source files for GNNS (construction, query) implementation
 │   │   └── gnn.cc
-│   ├── mrng					# implementation of the monotonic relative neighborhood graph (construction)
+│   │
+│   ├── mrng					# directory for source files for MRNG (construction) implementation
 │   │   └── mrng.cc
+│   │
 │   └── main.cc
-├── include						# directory containing the header files
+│
+├── include						# directory for header files
 │   ├── directed_graph.hpp
 │   ├── generic_search.hpp
 │   ├── gnn.hpp
 │   ├── handling.hpp
 │   ├── mrng.hpp
-│   └── set_utils.hpp				# overloading of the set operators for using set of pairs
-├── testing						# directory containing the testing files (hyperparameter tuning)
-│   ├── optimization.ipynb			# jupyter notebook for hyperparameter tuning including plots
-│   ├── params.py					# functions for handling ctypes (lsh, cube, gnn, mrng)
-│   └── python_connector.cc			# exposing the C++ functions to python
-├── lib							# directory containing the shared library
-│   ├── Makefile				# makefile for building only the shared library
+│   └── set_utils.hpp			    # overloading of the set operators for using set of pairs
+│
+├── testing						# directory for testing files (hyperparameter tuning)
+│   ├── optimization.ipynb	        # jupyter notebook for hyperparameter tuning including plots
+│   ├── params.py			        # functions for handling ctypes (lsh, cube, gnn, mrng)
+│   └── python_connector.cc	        # exposing the C++ functions to python
+│
+├── lib							# directory for shared library
+│   ├── Makefile				    # makefile for building only the shared library
 │   └── graphsearch.so
-├── MNIST					# directory for input and query data files
+│
+├── MNIST					    # directory for input and query data files
 │   ├── input.dat
 │   └── query.dat
-├── graph_files				# directory for the saved graphs
+│
+├── graph_files				    # directory for saved graph files
 │   ├── gnn_graph.bin
 │   └── mrng_graph.bin
-├── output					# directory for the result file
+│
+├── output					    # directory for result files
 │   └── output.txt
-├── common.mk				# main makefile
-├── Makefile				# makefile for building the main program (including the shared library)
-└── README.md				# this documentation file
-├── ../exercise1/			# directory containing the source code for the first project
+│
+├── common.mk				    # main makefile
+├── Makefile				    # makefile for building the main program (including the shared library)
+├── README.md				    # this documentation file
+│
+├── ../exercise1/			    # directory for source code of the first project
 │   └── ...
 ```
 
@@ -73,7 +86,7 @@ exercise2/
 
 ## 2.1. Main program `graphsearch`
 
-Remain in the root directory of the <code>exercise2/</code> and then run the following command:
+Stay in the root directory <code>exercise2/</code> and then run the following command:
 
 ```bash
 make
@@ -83,7 +96,7 @@ This will build the main program <code>graphsearch</code> and the shared library
 
 ## 2.2. Shared library `graphsearch.so`
 
-Remain in the root directory of the <code>exercise2/</code> and then run the following command:
+Stay in the root directory of the <code>exercise2/</code> and then run the following command:
 
 ```bash
 cd lib
@@ -109,7 +122,7 @@ at any of the two following directories:
 
 ## 3.1. Main program `graphsearch`
 
-After running the commands in [2.1.](#21-main-program-graphsearch), run the following at the root directory of the <code>exercise2/</code>:
+After running the commands in [2.1.](#21-main-program-graphsearch), run the following command at the root directory of the <code>exercise2/</code>:
 
 ```bash
 ./graphsearch -d <input file> -q <query file> -k <int> -E <int> -R <int> -N <int> -l <int, only for Search-on-Graph> -m <1 for GNNS, 2 for MRNG> -o <output file> -save <save graph file> -load <load graph file>
@@ -169,7 +182,7 @@ conda env create -f environment.yml # environment.yml exists in testing director
 
 You can open now the `optimization.ipynb` jupyter notebook in <code>testing</code> directory and run the cells.
 
-To bridge c++ and python, we used `ctypes` [[2]](#references) and we created the `params.py` file which contains the functions for handling the ctypes for each algorithm. The `python_connector.cc` file exposes the C++ functions to python by returning primitive C types (c_int, c_char_p, c_POINTER, etc)
+To bridge c++ and python, we used `ctypes` [[4]](#references) and we created the `params.py` file which contains the functions for handling the ctypes for each algorithm. The `python_connector.cc` file exposes the C++ functions to python by returning primitive C types (c_int, c_char_p, c_POINTER, etc)
 using `extern "C"`, a linkage specification.
 
 ### 3.2.2. Analysis
@@ -183,18 +196,27 @@ Analysis is done in the corresponding jupyter notebook. The notebook contains th
 
 The results are already run and saved inside the notebook.
 
-
 # 4. Documentation
 
 Note: All times and parameters referenced below are optimized for the full MNIST dataset of 60000 images.
 
 ## 4.1. Directed Graph
 
-## 4.2. Graph Nearest Neighbor Search
+Basic directed graph module used for the implementation of the GNNS and MRNG algorithms.
+
+The graph is implemented using adjacency lists. More specifically, a vector of vectors is used `std::vector<std::vector<int>>`. The indices of the first vector are the indices of the graph's nodes and each sub-vector acts as an adjacency list that stores the indices of each node's successors.
+
+The module provides all basic functions to add nodes and successors and to retrieve a node's successors, as well as predecessors.
+
+In addition to that, a set of save/load functions have been implemented to save/load the graph into a `.bin` file. Two examples can be found in the `graph_files/` directory. This feature has been really useful for debugging the MRNG query process, because the MRNG construction is too time-consuming to be used from scatch every time.
+
+## 4.2. Graph Nearest Neighbor Search (GNNS)
 
 ### 4.2.1. Construction
 
-LSH is used to construct the graph. For each point $p$ in the dataset, we find its $k$ nearest neighbors and we add an edge between $p$ and each of its neighbors. For LSH we use the following parameters derived from the hyperparameter tuning using the constraints: neighbors returned $\geq 50$, time $\leq 0.01$ second, $\min$ {maf}, $\min$ {time}:
+LSH is used to construct the directed graph, using the following parameters derived from the hyperparameter tuning using the constraints:
+
+neighbors returned $\geq 50$ and average query time $\leq 0.01$ sec while optimizing $\min$ {MAF}, $\min$ {average query time}:
 
 | LSH |
 |:------:|
@@ -204,33 +226,76 @@ LSH is used to construct the graph. For each point $p$ in the dataset, we find i
 | $w = 1815$ |
 | $query = false$ |
 
-Even though most of the times, the lsh algorithm returns at least $k=50$ neighbors, as the algorithm is probabilistic, we have no guarantee that it will always return such a number of neighbors. (WORKAROUND)
+For each point $p$ in the dataset, we retrieve its $k$-nearest neighbors by using the LSH algorithm and we add an edge between $p$ and each of its neighbors.
+
+**NOTE**:
+
+Even though most of the times, the LSH algorithm returns at least $k=50$ neighbors, as the algorithm is probabilistic, we have no guarantee that it will always return such a number of neighbors. 
+
+For that reason, we have employed two simple techniques that guarantee the existence of at least $k$ neighbors; first we try to use the successors of the node's predecessor as neighbors, trying to avoid the large distances that random neighbors would have. However, the problem might persist, so eventually, random neighbors will have to be added as well.
 
 Average construction time: 50-70 seconds.
 
 ### 4.2.2. GNNS Query Search Algorithm
 
-In comparison with the pseudo-code given, no greedy moves $T$ are used, it is checked if a node reached is better than its new neighbors (local optima).
-We also stop the search if we return to a node that we have already visited (cycle). There is no need to sort distances at the end, as we use
+The GNNS Algorithm Query Search Algorithm is the best-first search algorithm presented in the course slides.
+
+In comparison to the pseudo-code given, no greedy moves $T$ are used, but it is checked if a node reached is better than its new neighbors (local optima).
+We also stop the search if we return to a node that we have already visited (i.e. cyclic path in graph). There is no need to sort distances at the end, as we use
 an ordered set.
 
 ## 4.3. Monotonic Relative Neighborhood Graph
+
+### 4.3.1. Construction
+
+LSH is used to construct the directed graph, using we the following parameters derived from the hyperparameter tuning using the constraints:
+
+neighbors returned $\geq 50$ abd average query time $\leq 0.01$ sec while optimizing $\min$ {MAF}, $\min$ {average query time}:
+
+| LSH |
+|:------:|
+| $k = 7$ |
+| $L = 4$ |
+| $table\_size = 15000$ |
+| $w = 1815$ |
+| $query = false$ |
+
+The construction algorithm follows the steps described in [[3]](#references). For each point $p$ in the dataset, we construct a set $R_p$ containing all points except for $p$. The next step is to find all neighbors that share the same minimum distance from $p$ and add them to a new set, $L_p$. 
+
+**NOTE**:
+
+Even though the LSH algorithm almost always succeeds at finding one neighbor for each query, there are still cases in which it may fail, because the algorithm is probabilistic. For that reason, we have employed an naive technique that guarantees the existence of at least one neighbor for each point; the addition of a random neighbor.
+
+Average construction time: 8 hours.
+
+### 4.3.2. MRNG Query Search Algorithm
+
+The algorithm used for querying the MRNG graph is the Search-on-Graph (Generic Search) algorithm proposed presented in the course slides.
+
+This algorithm has been implemented in a different file, because it may be applied to other types of graphs as well, and not just to MRNG graphs.
 
 ## 4.4 General Implementation Details
 
 For the implementation of the algorithms with sets in most cases, we used the following data structures:
 
-+ `std::[unordered_]multiset<pair<double,int>>` for storing the distances and the ids of the points (multiset because we can have duplicates in distance key). If the set is ordered we need extra a comparator function and if it is unordered we need extra a hash and an equal function (all are defined in `set_utils.hpp`).
-+ `std::unordered_set<int>` for storing the ids of the points as multiset does not check for duplicate pairs or for checking if a point has been visited before.
++ `std::[unordered_]multiset<pair<double,int>>` for storing the distances and the indices of the points (multisets are
 
+    For ordered sets, we have defined a comparator function.
+    
+    For unordered sets, we have defined a hash and an equality function in `set_utils.hpp`.
++ `std::unordered_set<int>` for storing the indices of the points as the multiset data structure does not check for duplicate pairs or if a point has been visited before.
 
 # References
 
 [1] LeCun, Y., Cortes, C., & Burges, C.. THE MNIST DATABASE
 of handwritten digits. https://yann.lecun.com/exdb/mnist/
 
-[2] ctypes — A foreign function library for Python
+[2] Hajebi, K., Abbasi-Yadkori, Y., Shahbazi, H. & Zhang, H. (2011). Fast Approximate Nearest-Neighbor Search with k-Nearest Neighbor Graph. 1312-1317. https://doi.org/10.5591/978-1-57735-516-8/IJCAI11-222
+
+[3] Fu, C., Xiang, C., Wang, C., & Cai, D. (2019). Fast approximate nearest neighbor search with the navigating spreading-out graph. Proceedings of the VLDB Endowment, 12(5), 461–474. https://doi.org/10.14778/3303753.3303754 
+
+[4] ctypes — A foreign function library for Python
 https://docs.python.org/3/library/ctypes.html
 
-[3] Optuna - A hyperparameter optimization framework
+[5] Optuna - A hyperparameter optimization framework
 https://optuna.org/
