@@ -19,10 +19,12 @@ GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
 	unordered_set<int> unique_indices;
 
 	G = new DirectedGraph();
-	int k_lsh = 5;
-	int L = 5;
+	int k_lsh = 7;
+	int L = 4;
+	int table_size = 15000;
+	int window_size = 1815;
 	clock_t start = clock();
-	lsh = new LSH(k_lsh, L, dataset.size()/4, w, dataset);
+	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();
 	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
@@ -33,7 +35,7 @@ GNN::GNN(const vector<vector<double>> &dataset, int k): dataset(dataset)
 		G->add_vertex(i);
 	}
 	for(int i = 0; i < (int) dataset.size(); i++){
-		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, distance);
+		tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[i], k, distance, false);
 		vector<int> neighbors_indices = get<0>(neighbors);
 
 		if ((int) neighbors_indices.size() < k) {
@@ -115,7 +117,7 @@ void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*,
 
 	while((int) neighbors.size() < k){
 		int r_index = rand() % dataset.size();
-		if(unique_indices.find(r_index) != unique_indices.end()){
+		if(r_index == index || unique_indices.find(r_index) != unique_indices.end()){
 			continue;
 		}
 		unique_indices.insert(r_index);

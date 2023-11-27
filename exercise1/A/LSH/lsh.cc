@@ -2,6 +2,7 @@
 #include <iterator>
 #include <tuple>
 #include <set>
+#include <unordered_set>
 // iterator is used for std::const_iterator, std::advance().
 
 #include "lsh.hpp"
@@ -57,6 +58,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     multiset<tuple<int, double>, decltype(compare)> s(compare);
+    unordered_set<int> unique_indices;
 
     double dist;
     int p_index;
@@ -89,13 +91,13 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
 
             // Keep k items only to save space.
             dist = distance(p, q);
-            if(s.size() == k){
-                if(dist >= get<1>(*s.rbegin())){
-                    continue;
-                }
-                s.erase(std::prev(s.end()));
+            if(unique_indices.find(p_index) == unique_indices.end()){
+                s.insert(make_tuple(p_index, dist));
+                unique_indices.insert(p_index);
             }
-            s.insert(make_tuple(p_index, dist));
+            if(s.size() > k){
+                s.erase(std::prev(s.end(), 1));
+            }
         }
     }
 
@@ -117,6 +119,7 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     multiset<tuple<int, double>, decltype(compare)> s(compare);
+    unordered_set<int> unique_indices;
 
     double dist;
     int p_index;
@@ -132,7 +135,10 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
             vector<double> p = dataset.at(p_index);
             dist = distance(p, q);
             if(dist < r){
-                s.insert(make_tuple(p_index, dist));
+                if(unique_indices.find(p_index) == unique_indices.end()){
+                    s.insert(make_tuple(p_index, dist));
+                    unique_indices.insert(p_index);
+                }
             }
             // if(s.size() > (unsigned int) 20 * number_of_hash_tables){ // Optional.
             //     break;

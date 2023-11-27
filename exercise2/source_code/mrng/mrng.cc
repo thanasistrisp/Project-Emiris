@@ -18,10 +18,12 @@ using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	int k_lsh = 5;
+	int k_lsh = 10;
 	int L = 5;
+	int table_size = 7500;
+	int window_size = 3276;
 	clock_t start = clock();
-	lsh = new LSH(k_lsh, L, dataset.size()/4, w, dataset);
+	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();
 	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
@@ -45,25 +47,25 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 			}
 		}
 		find_neighbors_with_min_distance(p, Lp);
-		bool condition = true;
 		// for r in Rp and r not in Lp
-		for (int t : *Lp) {
-			double pt = distance(dataset[p], dataset[t]);
-			for (int r : *Rp) {
-				if (Lp->find(r) == Lp->end()) {
+		for (int r : *Rp) {
+			bool condition = true;
+			if (Lp->find(r) == Lp->end()) {
+				double pr = distance(dataset[p], dataset[r]);
+				for (int t : *Lp) {
 					// if pr longest edge in triangle prt
-					double pr = distance(dataset[p], dataset[r]);
+					double pt = distance(dataset[p], dataset[t]);
+					double rt = distance(dataset[r], dataset[t]);
 					
-					if (pr > pt && pr > distance(dataset[r], dataset[t])) {
+					if (pr > pt && pr > rt) {
 						condition = false;
-						goto exit_for;
+						break;
 					}
 				}
 				if (condition)
 					Lp->insert(r);
 			}
 		}
-		exit_for:
         // for each Lp add edge (p, l)
         for (int l : *Lp)
             G->add_edge(p, l);
@@ -114,14 +116,29 @@ void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 	int k = 5;
 	vector<int> neighbors_indices;
 	vector<double> neighbors_distances;
-	tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[p], k, distance, false);
+	tuple<vector<int>, vector<double>> neighbors = lsh->query(dataset[p], k, distance, true);
 	neighbors_indices = get<0>(neighbors);
 	neighbors_distances = get<1>(neighbors);
-	while (neighbors_distances[0] == (int) neighbors_distances[neighbors_distances.size() - 1]) {
-		k += 5;
-		neighbors = lsh->query(dataset[p], k, distance);
-		neighbors_indices = get<0>(neighbors);
-		neighbors_distances = get<1>(neighbors);
+	
+	// In case LSH returns no neighbors, add a random one.
+	if((int) neighbors_indices.size() == 0){
+
+		cout << "LSH returned no neighbors, adding a random neighbor instead" << endl;
+
+		int r_index = rand() % dataset.size();
+		while(r_index != p){
+			r_index = rand() % dataset.size();
+		}
+		neighbors_indices.push_back(r_index);
+		neighbors_distances.push_back(distance(dataset[p], dataset[r_index]));
+	}
+	else{
+		while (neighbors_distances[0] == (int) neighbors_distances[neighbors_distances.size() - 1]) {
+			k += 5;
+			neighbors = lsh->query(dataset[p], k, distance, true);
+			neighbors_indices = get<0>(neighbors);
+			neighbors_distances = get<1>(neighbors);
+		}
 	}
 	// add neighbors with same distance to Lp
 	for (int i = 0; i < (int) neighbors_indices.size(); i++) {
