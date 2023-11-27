@@ -117,7 +117,7 @@ void GNN::add_neighbors_random(int index, unordered_multiset<pair<int, double>*,
 
 	while((int) neighbors.size() < k){
 		int r_index = rand() % dataset.size();
-		if(unique_indices.find(r_index) != unique_indices.end()){
+		if(r_index == index || unique_indices.find(r_index) != unique_indices.end()){
 			continue;
 		}
 		unique_indices.insert(r_index);
