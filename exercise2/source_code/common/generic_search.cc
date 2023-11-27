@@ -20,7 +20,7 @@ tuple<tuple<vector<int>, vector<double>>,
     multiset<pair<int, double>*, decltype(&set_cmp)> candidates(&set_cmp);
     unordered_set<int> unique_indices;
     unordered_set<int> checked_indices;
-    vector<double> checked_distances;
+    vector<pair<int, double>*> checked_pairs;
     vector<int> neighbors;
 
     // R.add(p), i = 1.
@@ -44,7 +44,7 @@ tuple<tuple<vector<int>, vector<double>>,
         }
         // Mark p as checked.
         checked_indices.insert(p->first);
-        checked_distances.push_back(p->second);
+        checked_pairs.push_back(p);
         
         // For every neighbor N of p \in G : N \not \in R
         //  R.add(N)
@@ -72,14 +72,17 @@ tuple<tuple<vector<int>, vector<double>>,
         }
     }
 
+    // Convert set of checked pairs to two vectors.
+    vector<int> checked_indices_vector;
+    vector<double> checked_distances;
+    for(auto& it : checked_pairs){
+        checked_indices_vector.push_back(it->first);
+        checked_distances.push_back(it->second);
+    }
+
     for(auto iter = candidates.begin(); iter != candidates.end(); iter++){
         delete *iter;
     }
 
-    // Convert set of checked nodes to vector.
-    vector<int> checked_indices_vector;
-    for(auto& it : checked_indices){
-        checked_indices_vector.push_back(it);
-    }
     return make_tuple(make_tuple(indices, distances), make_tuple(checked_indices_vector, checked_distances));
 }
