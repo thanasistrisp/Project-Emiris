@@ -7,7 +7,7 @@
 #include <limits>
 // iterator is used for std::back_insert_iterator, std::advance().
 
-#include "ApproximateKNNGraph.hpp"
+#include "approximate_knn_graph.hpp"
 #include "mrng.hpp"
 #include "lp_metric.hpp"
 #include "brute_force.hpp"

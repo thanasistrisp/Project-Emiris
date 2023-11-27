@@ -10,7 +10,7 @@
 // ctime is used for time().
 
 #include "helper.hpp"
-#include "ApproximateKNNGraph.hpp"
+#include "approximate_knn_graph.hpp"
 #include "mrng.hpp"
 #include "nsg.hpp"
 #include "defines.hpp"

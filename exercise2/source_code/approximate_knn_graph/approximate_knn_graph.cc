@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <set>
 
-#include "ApproximateKNNGraph.hpp"
+#include "approximate_knn_graph.hpp"
 #include "lsh.hpp"
 #include "defines.hpp"
 #include "lp_metric.hpp"

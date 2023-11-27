@@ -49,7 +49,7 @@ exercise2/
 ├── include						# directory for header files
 │   ├── directed_graph.hpp
 │   ├── generic_search.hpp
-│   ├── ApproximateKNNGraph.hpp
+│   ├── approximate_knn_graph.hpp
 │   ├── handling.hpp
 │   ├── mrng.hpp
 │   └── set_utils.hpp			    # overloading of the set operators for using set of pairs

@@ -2,7 +2,7 @@
 
 #include <tuple>
 
-#include "ApproximateKNNGraph.hpp"
+#include "approximate_knn_graph.hpp"
 #include "mrng.hpp"
 
 void handle_ouput(void *structure, const std::vector<std::vector<double>> &dataset,

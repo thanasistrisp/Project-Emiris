@@ -1,5 +1,5 @@
 graphsearch.so_OBJS = \
-					 $(MODULES)/approximate_knn_graph/ApproximateKNNGraph.o \
+					 $(MODULES)/approximate_knn_graph/approximate_knn_graph.o \
 					 $(MODULES)/mrng/mrng.o \
 					 $(MODULES)/nsg/nsg.o \
 					 $(MODULES)/common/directed_graph.o \
