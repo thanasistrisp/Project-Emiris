@@ -6,7 +6,7 @@
 
 using namespace std;
 
-DirectedGraph* depth_first_search(const DirectedGraph &graph, int start_node)
+tuple<DirectedGraph*, unordered_set<int>> depth_first_search(const DirectedGraph &graph, int start_node)
 {
     unordered_set<int> checked;
     vector<int> neighbors;
@@ -44,5 +44,5 @@ DirectedGraph* depth_first_search(const DirectedGraph &graph, int start_node)
             }
         }
     }
-    return spanning_tree;
+    return make_tuple(spanning_tree, checked);
 }

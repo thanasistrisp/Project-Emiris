@@ -1,7 +1,8 @@
 #pragma once
 
+#include <tuple>
 #include <unordered_set>
 
 #include "directed_graph.hpp"
 
-DirectedGraph* depth_first_search(const DirectedGraph &, int);
+std::tuple<DirectedGraph*, std::unordered_set<int>> depth_first_search(const DirectedGraph &, int);

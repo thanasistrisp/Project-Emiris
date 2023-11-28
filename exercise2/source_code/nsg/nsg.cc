@@ -65,11 +65,13 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 			NSG_graph->add_edge(v, r);
 	}
 
+	DirectedGraph *dfs_spanning_tree;
+	unordered_set<int> dfs_checked;
 	while(true){
 		// Build a tree with edges in NSG from root n with DFS.
-		DirectedGraph *dfs_spanning_tree = depth_first_search(*NSG_graph, n);
+		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*NSG_graph, n);
 
-		if(dfs_spanning_tree->get_number_of_nodes() == dataset.size()){
+		if(dfs_checked.size() == dataset.size()){
 			break;
 		}
 
@@ -88,6 +90,8 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		int closest_neighbor = get<0>(neighbors)[0];
 		
 		NSG_graph->add_edge(closest_neighbor, i);
+
+		delete dfs_spanning_tree;
 	}
 
 	set_navigating_node();
