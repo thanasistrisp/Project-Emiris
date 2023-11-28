@@ -15,6 +15,7 @@
 !*.tex
 !*.bin
 !*.ipynb
+!*.sh
 
 # vscode directory
 !launch.json

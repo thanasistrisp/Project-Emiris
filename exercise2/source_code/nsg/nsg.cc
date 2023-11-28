@@ -41,6 +41,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		int p0 = E.front().first;
 		// add p0 to R
 		R.insert(p0);
+		E.pop_front();
 		while (!E.empty() && (int) R.size() < m) {
 			// take first node from E and pop it
 			int p = E.front().first;
@@ -61,15 +62,22 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 			if (condition)
 				R.insert(p);
 		}
-		for (int r : R)
-			NSG_graph->add_edge(v, r);
+		for (int r : R) {
+			if (r != v) {
+				NSG_graph->add_edge(v, r);
+			}
+		}
 	}
 
 	DirectedGraph *dfs_spanning_tree;
 	unordered_set<int> dfs_checked;
+	int counter = 0;
 	while(true){
 		// Build a tree with edges in NSG from root n with DFS.
 		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*NSG_graph, n);
+		if (counter++ == 0) {
+			cout << "DFS size: " << dfs_checked.size() << endl;
+		}
 
 		if(dfs_checked.size() == dataset.size()){
 			break;
@@ -88,6 +96,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, n, dataset[i], total_candidates, 1, euclidean_distance);
 		int closest_neighbor = get<0>(neighbors)[0];
 
+		NSG_graph->add_edge(i, closest_neighbor);
 		NSG_graph->add_edge(closest_neighbor, i);
 
 		delete dfs_spanning_tree;
