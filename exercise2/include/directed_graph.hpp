@@ -17,6 +17,8 @@ class DirectedGraph
         void add_edge(int, int);
         void add_edge(int, const std::vector<int>&);
 
+        unsigned int get_number_of_nodes() const;
+
         std::vector<int> get_successors(int) const;
         std::vector<int> get_successors(int, int) const;
 

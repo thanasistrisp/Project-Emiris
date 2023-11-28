@@ -4,4 +4,4 @@
 
 #include "directed_graph.hpp"
 
-std::unordered_set<int> depth_first_search(const DirectedGraph &, int);
+DirectedGraph* depth_first_search(const DirectedGraph &, int);
