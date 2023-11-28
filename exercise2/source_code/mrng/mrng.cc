@@ -107,7 +107,7 @@ void MRNG::set_navigating_node()
 
 tuple<vector<int>, vector<double>> MRNG::query(const vector<double>& q, unsigned int N, unsigned int l)
 {
-    return get<0>(generic_search_on_graph(*G, dataset, navigating_node, q, l, N, distance));
+    return generic_search_on_graph(*G, dataset, navigating_node, q, l, N, distance);
 }
 
 void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
