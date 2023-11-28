@@ -7,7 +7,7 @@ private:
 	const std::vector<std::vector<double>> &dataset;
 	DirectedGraph *G;
 public:
-	NSG(const std::vector<std::vector<double>> &dataset);
+	NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m);
 	NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G);
 	~NSG();
 	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int L);

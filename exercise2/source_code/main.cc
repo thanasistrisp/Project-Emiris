@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
 	int R = 1;
 	int l = 20;
 	int N = 1;
+	int outgoing_edges = 10;
 	int m = 0;
 
 	for (int i = 1; i < argc; i++) {
@@ -61,6 +62,10 @@ int main(int argc, char *argv[]) {
 		}
 		else if (strcmp(argv[i], "-N") == 0) {
 			N = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-out") == 0) {
+			outgoing_edges = atoi(argv[i + 1]);
 			i++;
 		}
 		else if (strcmp(argv[i], "-m") == 0) {
@@ -158,7 +163,7 @@ int main(int argc, char *argv[]) {
 				structure = new MRNG(dataset);
 				break;
 			case 3:
-				structure = new NSG(dataset);
+				structure = new NSG(dataset, l, outgoing_edges);
 				break;
 			default:
 				cout << "Wrong m value. Run with -help for more info" << endl;

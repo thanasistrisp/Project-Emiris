@@ -4,6 +4,7 @@ graphsearch.so_OBJS = \
 					 $(MODULES)/nsg/nsg.o \
 					 $(MODULES)/common/directed_graph.o \
 					 $(MODULES)/common/generic_search.o \
+					 $(MODULES)/common/depth_first_search.o \
 					 $(MODULES)/common/handle_output.o \
 					 $(EXERCISE1)/A/LSH/lsh.o \
 					 $(EXERCISE1)/A/RandomProjection/hypercube.o \
