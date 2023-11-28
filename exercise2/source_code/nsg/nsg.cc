@@ -1,7 +1,8 @@
 #include "nsg.hpp"
 #include "vector_utils.hpp"
-#include "generic_search.hpp"
 #include "approximate_knn_graph.hpp"
+#include "generic_search.hpp"
+#include "depth_first_search.hpp"
 
 using namespace std;
 
@@ -61,6 +62,31 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		}
 		for (int r : R)
 			NSG_graph->add_edge(v, r);
+	}
+
+	while(true){
+		// Build a tree with edges in NSG from root n with DFS.
+		DirectedGraph *dfs_spanning_tree = depth_first_search(*NSG_graph, n);
+
+		if(dfs_spanning_tree->get_number_of_nodes() == dataset.size()){
+			break;
+		}
+
+		// If not all nodes linked to the tree then.
+		int i;
+		for(i = 0; i < (int) dataset.size(); i++){	
+			vector<int> predecessors = dfs_spanning_tree->get_predecessors(i);
+			if(predecessors.size() == 0){
+				break;
+			}
+		}
+
+		// Add an edge between one of the out-of-tree nodes and
+		// its closest in-tree neighbor.
+		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, n, dataset[i], total_candidates, 1, euclidean_distance);
+		int closest_neighbor = get<0>(neighbors)[0];
+		
+		NSG_graph->add_edge(closest_neighbor, i);
 	}
 }
 

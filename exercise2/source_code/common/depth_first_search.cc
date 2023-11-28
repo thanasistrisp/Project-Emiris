@@ -6,10 +6,6 @@
 
 using namespace std;
 
-// tha exoume thema me ta labeling
-
-// 
-
 DirectedGraph* depth_first_search(const DirectedGraph &graph, int start_node)
 {
     unordered_set<int> checked;
