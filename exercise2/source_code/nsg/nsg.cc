@@ -78,8 +78,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		// If not all nodes linked to the tree then.
 		int i;
 		for(i = 0; i < (int) dataset.size(); i++){	
-			vector<int> predecessors = dfs_spanning_tree->get_predecessors(i);
-			if(predecessors.size() == 0){
+			if(dfs_checked.find(i) == dfs_checked.end()){
 				break;
 			}
 		}
@@ -88,7 +87,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		// its closest in-tree neighbor.
 		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, n, dataset[i], total_candidates, 1, euclidean_distance);
 		int closest_neighbor = get<0>(neighbors)[0];
-		
+
 		NSG_graph->add_edge(closest_neighbor, i);
 
 		delete dfs_spanning_tree;
