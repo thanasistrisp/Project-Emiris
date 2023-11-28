@@ -3,6 +3,7 @@
 #include "approximate_knn_graph.hpp"
 #include "generic_search.hpp"
 #include "depth_first_search.hpp"
+#include "brute_force.hpp"
 
 using namespace std;
 
@@ -11,7 +12,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 	// create knn graph
 	ApproximateKNNGraph *knn_graph = new ApproximateKNNGraph(dataset, total_candidates);
 	DirectedGraph *G = knn_graph->get_graph();
-	DirectedGraph *NSG_graph = new DirectedGraph();
+	NSG_graph = new DirectedGraph();
 	for (int i = 0; i < (int) dataset.size(); i++) {
 		NSG_graph->add_vertex(i);
 	}
@@ -88,10 +89,33 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		
 		NSG_graph->add_edge(closest_neighbor, i);
 	}
+
+	set_navigating_node();
+}
+
+void NSG::set_navigating_node()
+{
+	// Calculate the centroid of the dataset.
+    vector<double> dataset_centroid = vector<double>(dataset[0].size(), 0.0);
+    for(int i = 0; i < (int) dataset.size(); i++){
+        dataset_centroid = vector_addition(dataset_centroid, dataset[i]);
+    }
+    dataset_centroid = vector_scalar_mult(dataset_centroid, 1 / dataset.size());
+
+    // Treat it as a query, find its nearest neighbor by brute force.
+    vector<int> indices;
+    vector<double> distances;
+    tie(indices, distances) = brute_force(dataset, dataset_centroid, 1, distance);
+    navigating_node = indices[0];
+}
+
+tuple<vector<int>, vector<double>> NSG::query(const vector<double>& q, unsigned int N, unsigned int L)
+{
+	return generic_search_on_graph(*NSG_graph, dataset, navigating_node, q, L, N, distance);
 }
 
 
-NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), G(G)
+NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), NSG_graph(G)
 {
 
 }

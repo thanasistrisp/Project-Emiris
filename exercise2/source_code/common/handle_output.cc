@@ -9,6 +9,7 @@
 
 #include "approximate_knn_graph.hpp"
 #include "mrng.hpp"
+#include "nsg.hpp"
 #include "lp_metric.hpp"
 #include "brute_force.hpp"
 
@@ -27,9 +28,13 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 		cout << "Algorithm: GNN" << endl;
 		output << "GNNS Results" << endl;
 	}
-	else {
+	else if (m == 2) {
 		cout << "Algorithm: MRNG" << endl;
 		output << "MRNG Results" << endl;
+	}
+	else {
+		cout << "Algorithm: NSG" << endl;
+		output << "NSG Results" << endl;
 	}
 
 	double elapsed_secs_ANN = 0;
@@ -44,8 +49,11 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 		if (m == 1) {
 			ann = ((ApproximateKNNGraph*) structure)->query(queries[q], N, E, R);
 		}
-		else {
+		else if (m == 2) {
 			ann = ((MRNG*) structure)->query(queries[q], N, l);
+		}
+		else {
+			ann = ((NSG*) structure)->query(queries[q], N, l);
 		}
 		clock_t end_ANN = clock();
 		elapsed_secs_ANN += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
