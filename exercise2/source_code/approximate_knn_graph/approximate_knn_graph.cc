@@ -97,6 +97,11 @@ void ApproximateKNNGraph::add_neighbors_pred(int index, unordered_multiset<pair<
 		
 		for(int i = 0; i < (int) pred_successors.size(); i++){
 			int ps_index = pred_successors[i];
+
+			if(ps_index == index){ // Skip self.
+				continue;
+			}
+
 			dist = distance(dataset[index], dataset[ps_index]);
 			pair<int, double>* p = new pair(ps_index, dist);
 			neighbors.insert(p);
