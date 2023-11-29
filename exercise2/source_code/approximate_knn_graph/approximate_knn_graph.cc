@@ -19,6 +19,7 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 	unordered_set<int> unique_indices;
 
 	G = new DirectedGraph();
+	// Optimal hyperparameters for LSH yielded by fine tuning.
 	int k_lsh = 7;
 	int L = 4;
 	int table_size = 15000;
@@ -30,7 +31,7 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
 	start = clock();
 	
-	// initialize G
+	// Initialize G.
 	for (int i = 0; i < (int) dataset.size(); i++) {
 		G->add_vertex(i);
 	}
@@ -39,8 +40,6 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 		vector<int> neighbors_indices = get<0>(neighbors);
 
 		if ((int) neighbors_indices.size() < k) {
-			// cout << "LSH query returned " << get<0>(neighbors).size() << " neighbors instead of " << k << endl; // debug.
-
 			// Merge vectors into a set of pairs.
 			for(int j = 0; j < (int) neighbors_indices.size(); j++){
 				pair<int, double> *p = new pair(neighbors_indices[j], distance(dataset[i], dataset[neighbors_indices[j]]));
@@ -73,8 +72,6 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 			}
 			neighbors_set.clear();
 			unique_indices.clear();
-
-			// cout << "Gathered " << neighbors_indices.size() << " neighbours" << endl; // debug.
 		}
 		G->add_edge(i, neighbors_indices);
 	}
@@ -128,6 +125,7 @@ void ApproximateKNNGraph::add_neighbors_random(int index, unordered_multiset<pai
 	}
 }
 
+// GNNS algorithm.
 tuple<vector<int>, vector<double>> ApproximateKNNGraph::query(const vector<double>& q, unsigned int N, unsigned int E, unsigned int R)
 {
 	auto cmp = [](pair<double, int> left, pair<double, int> right) { return left.first < right.first; };
@@ -138,22 +136,26 @@ tuple<vector<int>, vector<double>> ApproximateKNNGraph::query(const vector<doubl
 	for (uint i = 0; i < R; i++) {
 		int y0, y1, y0_dist, y1_dist;
 		unordered_set<int> visited;
+
+		// Y_0: a random point (uniformly) over D.
 		y0 = rand() % dataset.size();
 		y0_dist = distance(q, dataset[y0]);
 		visited.insert(y0);
 		while (true) {
+			// Y_t = argmin_{Y \in N(Y_{t-1}, E, G)} \delta (Y, Q).
 			vector<int> neighbors = G->get_successors(y0, E);
 			y1 = neighbors[0];
 			y1_dist = distance(q, dataset[y1]);
-			// check if y1 is in S
+			// Check if y1 is in S.
 			if (unique_indices.find(y1) == unique_indices.end()) {
 				S.insert(make_pair(y1_dist, y1));
 				unique_indices.insert(y1);
 			}
+			// S = S U N(Y_{t-1}, E, G).
 			for (int j = 1; j < (int) neighbors.size(); j++) {
 				int temp = neighbors[j];
 				double temp_dist = distance(q, dataset[temp]);
-				// check if temp is in S
+				// Check if temp is in S.
 				if (unique_indices.find(temp) == unique_indices.end()) {
 					S.insert(make_pair(temp_dist, temp));
 					unique_indices.insert(temp);
@@ -164,6 +166,7 @@ tuple<vector<int>, vector<double>> ApproximateKNNGraph::query(const vector<doubl
 				}
 			}
 
+			// If node is better than its new neighbors, end search (local optimal).
 			if (y0_dist <= y1_dist) {
 				break;
 			}
@@ -179,6 +182,7 @@ tuple<vector<int>, vector<double>> ApproximateKNNGraph::query(const vector<doubl
 			}
 		}
 	}
+	// Return N points in S with smallest distances.
 	vector<int> S_N;
 	vector<double> S_N_dist;
 	uint i = 0;
