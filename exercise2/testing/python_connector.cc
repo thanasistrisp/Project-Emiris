@@ -241,7 +241,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	string load_file_str(load_file);
 	
 	cout << "Read MNIST data" << endl;
-	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector <vector<double>> dataset = read_mnist_data(input_str, 1000);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
 	NSG *nsg;
 	if (!load_file_str.empty()) {
