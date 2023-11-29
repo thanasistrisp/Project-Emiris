@@ -73,6 +73,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*G, n);
 
 		if(dfs_checked.size() == dataset.size()){
+			delete dfs_spanning_tree;
 			break;
 		}
 
@@ -94,6 +95,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 
 		delete dfs_spanning_tree;
 	}
+	delete knn;
 
 	set_navigating_node();
 }
@@ -127,5 +129,5 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : da
 
 NSG::~NSG()
 {
-	
+	delete G;
 }
