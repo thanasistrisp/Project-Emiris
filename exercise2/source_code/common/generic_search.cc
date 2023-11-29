@@ -130,8 +130,13 @@ deque<pair<int,double>> generic_search_on_graph_checked(const DirectedGraph &gra
     }
     
     // Return union of checked_candidates and candidates.
-    multiset<pair<int, double>*, decltype(&set_cmp)> union_candidates(&set_cmp);
-    std::set_union(candidates.begin(), candidates.end(), checked_candidates.begin(), checked_candidates.end(), std::inserter(union_candidates, union_candidates.begin()));
+    multiset<pair<int, double>*, decltype(&set_cmp)> union_candidates(candidates);
+    for(auto iter = checked_candidates.begin(); iter != checked_candidates.end(); iter++){
+        p = *iter;
+        if(union_candidates.find(p) == union_candidates.end()){
+            union_candidates.insert(p);
+        }
+    }
     
     // Convert union_candidates to deque.
     deque<pair<int, double>> result;
