@@ -18,6 +18,7 @@ using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
+	// Optimal hyperparameters for LSH yielded by fine tuning.
 	int k_lsh = 10;
 	int L = 5;
 	int table_size = 7500;
@@ -27,7 +28,7 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 	clock_t end_lsh = clock();
 	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
-	// initialize graph
+	// Initialize graph.
 	G = new DirectedGraph();
 	unordered_set<int> S;
 	for (int i = 0; i < (int) dataset.size(); i++) {
@@ -40,20 +41,20 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 	for (int p: S) {
 		i++;
 		cout << i << endl;
-		// Rp is S - {p}
+		// Rp is S - {p}.
 		for (int r : S) {
 			if (r != p) {
 				Rp->insert(r);
 			}
 		}
 		find_neighbors_with_min_distance(p, Lp);
-		// for r in Rp and r not in Lp
+		// For r in Rp and r not in Lp.
 		for (int r : *Rp) {
 			bool condition = true;
 			if (Lp->find(r) == Lp->end()) {
 				double pr = distance(dataset[p], dataset[r]);
 				for (int t : *Lp) {
-					// if pr longest edge in triangle prt
+					// If pr longest edge in triangle prt.
 					double pt = distance(dataset[p], dataset[t]);
 					double rt = distance(dataset[r], dataset[t]);
 					
@@ -62,11 +63,12 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 						break;
 					}
 				}
+				// If pr longest edge in triange prt \forall t.
 				if (condition)
 					Lp->insert(r);
 			}
 		}
-        // for each Lp add edge (p, l)
+        // For each Lp add edge (p, l).
         for (int l : *Lp)
             G->add_edge(p, l);
 		Lp->clear();
@@ -112,7 +114,7 @@ tuple<vector<int>, vector<double>> MRNG::query(const vector<double>& q, unsigned
 
 void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 {
-	// by using lsh, start with k=5 and increase k by 5 till we find neighbors with different distances
+	// Use lsh, start with k = 5 and increase k by 5 till we find neighbors with different distances.
 	int k = 5;
 	vector<int> neighbors_indices;
 	vector<double> neighbors_distances;
@@ -120,7 +122,7 @@ void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 	neighbors_indices = get<0>(neighbors);
 	neighbors_distances = get<1>(neighbors);
 	
-	// In case LSH returns no neighbors, add a random one.
+	// In case LSH returns no neighbors, pick a random one.
 	if((int) neighbors_indices.size() == 0){
 
 		cout << "LSH returned no neighbors, adding a random neighbor instead" << endl;
@@ -140,7 +142,7 @@ void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 			neighbors_distances = get<1>(neighbors);
 		}
 	}
-	// add neighbors with same distance to Lp
+	// Add neighbors with same distance to Lp.
 	for (int i = 0; i < (int) neighbors_indices.size(); i++) {
 		if (neighbors_distances[i] == neighbors_distances[0]) {
 			Lp->insert(neighbors_indices[i]);

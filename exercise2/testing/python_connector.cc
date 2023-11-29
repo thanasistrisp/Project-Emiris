@@ -27,11 +27,9 @@
 using namespace std;
 using std::cout;
 
-// vector<double> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<int> &params)
-// vector with types double, double, double, int
 vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<variant<int,bool>> &params)
 {
-	// initialize parameters
+	// Initialize parameters.
 	int E = get<int>(params[0]);
 	int R = get<int>(params[1]);
 	int l = get<int>(params[2]);
@@ -106,10 +104,10 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
 
-		// take the minimum approximate factor from all neighbors
+		// Take the minimum approximate factor from all neighbors.
 		int distance_min = distances_ann[0];
 
-		// maf is maximum approximate factor over all queries
+		// MAF is maximum approximate factor over all queries.
 		double approximate_factor = (double) distance_min / distances_tnn[0];
 		if (approximate_factor > maf) {
 			maf = approximate_factor;
@@ -145,7 +143,7 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 	}
 	cout << "Done" << endl;
 
-	// return time, maf
+	// Return time, MAF.
 	vector<variant<int,bool>> params = {E, R, 0, N, 1};
 	vector<variant<double, int>> results = helper_arg(approximate_knn_graph, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
@@ -180,7 +178,7 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	}
 	cout << "Done" << endl;
 
-	// return time, maf
+	// Return time, MAF.
 	vector<variant<int,bool>> params = {0, 0, l, N, 2};
 	vector<variant<double, int>> results = helper_arg(mrng, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
@@ -202,7 +200,7 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 	LSH *lsh = new LSH(k, L, table_size, window, dataset);
 	cout << "Done" << endl;
 
-	// return time, maf
+	// Return time, MAF.
 	vector<variant<int,bool>> params = {0, 0, 0, N, 3, query_trick};
 	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
@@ -224,7 +222,7 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	hypercube *cube = new hypercube(dataset, k, M, probes);
 	cout << "Done" << endl;
 
-	// return time, maf
+	// Return time, MAF.
 	vector<variant<int,bool>> params = {0, 0, 0, N, 4};
 	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
@@ -259,7 +257,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	}
 	cout << "Done" << endl;
 
-	// return time, maf
+	// Return time, MAF.
 	vector<variant<int,bool>> params = {0, 0, l, N, 5, lq};
 	vector<variant<double, int>> results = helper_arg(nsg, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);

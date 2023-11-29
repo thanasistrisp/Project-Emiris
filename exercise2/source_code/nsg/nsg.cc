@@ -9,7 +9,7 @@ using namespace std;
 
 NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m, int k) : dataset(dataset)
 {
-	// create knn graph
+	// Create Approximate kNN graph.
 	ApproximateKNNGraph *knn = new ApproximateKNNGraph(dataset, k);
 	DirectedGraph *knn_graph = knn->get_graph();
 	G = new DirectedGraph();
@@ -24,32 +24,32 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
     }
     dataset_centroid = vector_scalar_mult(dataset_centroid, 1 / dataset.size());
 
-	// r is a random node
+	// R is a random node.
 	int r = rand() % dataset.size();
 
-	// n is navigating node from generic search
+	// n is navigating node from generic search.
 	tuple<vector<int>, vector<double>> neighbors = generic_search_on_graph(*knn_graph, dataset, r, dataset_centroid, total_candidates, 1, distance);
 	int n = get<0>(neighbors)[0];
 
-	// for all node v in G
+	// For all node v in G.
 	for(int v = 0; v < (int) dataset.size(); v++){
 		vector<double> v_query = dataset[v];
 		deque<pair<int, double>> E = generic_search_on_graph_checked(*knn_graph, dataset, n, v_query, total_candidates, distance);
 		
 		unordered_set<int> R;
-		// p0 is the closest node to v in E
+		// p0 is the closest node to v in E.
 		int p0 = E.front().first;
-		// add p0 to R
+		// Add p0 to R.
 		R.insert(p0);
 		while (!E.empty() && (int) R.size() < m) {
-			// take first node from E and pop it
+			// Take first node from E and pop it.
 			int p = E.front().first;
 			E.pop_front();
-			// for all nodes in R
+			// For all nodes in R.
 			double pv = distance(dataset[p], dataset[v]);
 			bool condition = true;
 			for (int r : R) {
-				// if edge pv conflicts with edge pr break
+				// If edge pv conflicts with edge pr, break.
 				double rv = distance(dataset[r], dataset[v]);
 				double pr = distance(dataset[p], dataset[r]);
 				if (pv > pr && pv > rv) {
@@ -57,7 +57,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 					break;
 				}
 			}
-			// if no conflict add p to R
+			// If no conflict occurse, add p to R.
 			if (condition)
 				R.insert(p);
 		}

@@ -15,10 +15,9 @@
 
 using namespace std;
 
-// Writes the results of the queries to output file in the required format.
 void handle_ouput(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, ofstream &output, vector<int> &params)
 {
-	// initialize parameters
+	// Initialize parameters.
 	int E = params[0];
 	int R = params[1];
 	int l = params[2];
@@ -69,7 +68,7 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
 
-		// take the minimum approximate factor from all neighbors
+		// Take the minimum approximate factor from all neighbors.
 		int distance_min = distances_ann[0];
         for(int i = 0; (unsigned int) i < indices_ann.size(); i++){
 			output << "Nearest neighbor-" << i+1 << ": " << indices_ann[i] << endl;
@@ -77,7 +76,7 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 			output << "distanceTrue: " << distances_tnn[i] << endl;
 		}
 
-		// maf is maximum approximate factor over all queries
+		// MAF is maximum approximate factor over all queries.
 		double approximate_factor = (double) distance_min / distances_tnn[0];
 		if (approximate_factor > maf) {
 			maf = approximate_factor;
