@@ -23,7 +23,8 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 	int R = params[1];
 	int l = params[2];
 	int N = params[3];
-	int m = params[4];
+	int lq = params[4];
+	int m = params[5];
 	if (m == 1) {
 		cout << "Algorithm: GNN" << endl;
 		output << "GNNS Results" << endl;
@@ -53,7 +54,7 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 			ann = ((MRNG*) structure)->query(queries[q], N, l);
 		}
 		else {
-			ann = ((NSG*) structure)->query(queries[q], N, l);
+			ann = ((NSG*) structure)->query(queries[q], N, lq);
 		}
 		clock_t end_ANN = clock();
 		elapsed_secs_ANN += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;

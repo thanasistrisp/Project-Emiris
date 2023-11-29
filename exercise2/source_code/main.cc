@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
 	int E = 30;
 	int R = 1;
 	int l = 20;
+	int lq = 20;
 	int N = 1;
 	int max_out_degree = 10;
 	int m = 0;
@@ -58,6 +59,10 @@ int main(int argc, char *argv[]) {
 		}
 		else if (strcmp(argv[i], "-l") == 0) {
 			l = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-lq") == 0) {
+			lq = atoi(argv[i + 1]);
 			i++;
 		}
 		else if (strcmp(argv[i], "-N") == 0) {
@@ -130,7 +135,7 @@ int main(int argc, char *argv[]) {
 	time(&start1);
 
 	void *structure;
-	vector<int> params = {E, R, l, N, m};
+	vector<int> params = {E, R, l, N, lq, m};
 
 	// load file if string not empty
 	if (!load_graph_file.empty()) {

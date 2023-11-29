@@ -80,7 +80,8 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 			ann = ((hypercube*) structure)->query(queries[q], q_proj, N);
 		}
 		else {
-			ann = ((NSG*) structure)->query(queries[q], N, l);
+			int lq = get<int>(params[5]);
+			ann = ((NSG*) structure)->query(queries[q], N, lq);
 		}
 
 		if (q == 0) {
@@ -233,7 +234,7 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 }
 
 extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
-										  int m, int l, int N, const char *load_file,
+										  int m, int l, int lq, int N, const char *load_file,
 										  double *approximate_time, double *maf) {
 	string input_str(input);
 	string query_str(query);
@@ -259,7 +260,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	cout << "Done" << endl;
 
 	// return time, maf
-	vector<variant<int,bool>> params = {0, 0, l, N, 5};
+	vector<variant<int,bool>> params = {0, 0, l, N, 5, lq};
 	vector<variant<double, int>> results = helper_arg(nsg, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*maf = get<double>(results[1]);
