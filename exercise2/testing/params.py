@@ -37,7 +37,7 @@ def mrng_test(input, query, queries_num, l, N):
     return average_time, maf
 
 def nsg_test(input, query, queries_num, m, l, N):
-    lib.get_nsg_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+    lib.get_nsg_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     load_file = b''
     average_time = ctypes.c_double()
     maf = ctypes.c_double()
