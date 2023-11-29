@@ -68,21 +68,18 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
 
-		// take the minimum approximate factor over all nearest neighbors
-		double temp_min = numeric_limits<double>::max();
+		// take the minimum approximate factor from all neighbors
+		int distance_min = distances_ann[0];
         for(int i = 0; (unsigned int) i < indices_ann.size(); i++){
 			output << "Nearest neighbor-" << i+1 << ": " << indices_ann[i] << endl;
 			output << "distanceApproximate: " << distances_ann[i] << endl;
 			output << "distanceTrue: " << distances_tnn[i] << endl;
-			double temp = distances_ann[i] / distances_tnn[i];
-			if (temp < temp_min) {
-				temp_min = temp;
-			}
 		}
 
 		// maf is maximum approximate factor over all queries
-		if (temp_min > maf) {
-			maf = temp_min;
+		double approximate_factor = (double) distance_min / distances_tnn[0];
+		if (approximate_factor > maf) {
+			maf = approximate_factor;
 		}
 	}
 
