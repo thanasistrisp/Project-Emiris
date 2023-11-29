@@ -7,10 +7,10 @@
 
 using namespace std;
 
-NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m) : dataset(dataset)
+NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m, int k) : dataset(dataset)
 {
 	// create knn graph
-	ApproximateKNNGraph *knn = new ApproximateKNNGraph(dataset, total_candidates);
+	ApproximateKNNGraph *knn = new ApproximateKNNGraph(dataset, k);
 	DirectedGraph *knn_graph = knn->get_graph();
 	G = new DirectedGraph();
 	for (int i = 0; i < (int) dataset.size(); i++) {

@@ -36,10 +36,10 @@ def mrng_test(input, query, queries_num, l, N):
     lib.get_mrng_results(input, query, queries_num, l, N, load_file, ctypes.byref(average_time), ctypes.byref(maf))
     return average_time, maf
 
-def nsg_test(input, query, queries_num, m, l, lq, N):
-    lib.get_nsg_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def nsg_test(input, query, queries_num, m, l, lq, k, N):
+    lib.get_nsg_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     load_file = b''
     average_time = ctypes.c_double()
     maf = ctypes.c_double()
-    lib.get_nsg_results(input, query, queries_num, m, l, lq, N, load_file, ctypes.byref(average_time), ctypes.byref(maf))
+    lib.get_nsg_results(input, query, queries_num, m, l, lq, k, N, load_file, ctypes.byref(average_time), ctypes.byref(maf))
     return average_time, maf

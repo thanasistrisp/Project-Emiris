@@ -10,7 +10,7 @@ private:
 
 	void set_navigating_node();
 public:
-	NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m);
+	NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m, int k);
 	NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G);
 	~NSG();
 

@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
 				structure = new MRNG(dataset);
 				break;
 			case 3:
-				structure = new NSG(dataset, l, max_out_degree);
+				structure = new NSG(dataset, l, max_out_degree, k);
 				break;
 			default:
 				cout << "Wrong m value. Run with -help for more info" << endl;

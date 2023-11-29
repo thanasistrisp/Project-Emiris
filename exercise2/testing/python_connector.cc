@@ -234,7 +234,7 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 }
 
 extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
-										  int m, int l, int lq, int N, const char *load_file,
+										  int m, int l, int lq, int k, int N, const char *load_file,
 										  double *approximate_time, double *maf) {
 	string input_str(input);
 	string query_str(query);
@@ -255,7 +255,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	}
 	else {
 		cout << "Building graph..." << endl;
-		nsg = new NSG(dataset, N, m);
+		nsg = new NSG(dataset, N, m, k);
 	}
 	cout << "Done" << endl;
 
