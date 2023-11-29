@@ -14,6 +14,7 @@
 
 #include "helper.hpp"
 #include "approximate_knn_graph.hpp"
+#include "nsg.hpp"
 #include "mrng.hpp"
 #include "defines.hpp"
 #include "handling.hpp"
@@ -45,8 +46,15 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 	else if (m == 3) {
 		cout << "Algorithm: LSH" << endl;
 	}
-	else {
+	else if (m == 4) {
 		cout << "Algorithm: Cube" << endl;
+	}
+	else if (m == 5) {
+		cout << "Algorithm: NSG" << endl;
+	}
+	else {
+		cout << "Algorithm: Unknown" << endl;
+		exit(1);
 	}
 
 	double elapsed_secs_ANN = 0;
@@ -67,9 +75,12 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 			bool query_trick = get<bool>(params[5]);
 			ann = ((LSH*) structure)->query(queries[q], N, euclidean_distance, query_trick);
 		}
-		else {
+		else if (m == 4) {
 			vector<int> q_proj = ((hypercube*) structure)->calculate_q_proj(queries[q]);
 			ann = ((hypercube*) structure)->query(queries[q], q_proj, N);
+		}
+		else {
+			ann = ((NSG*) structure)->query(queries[q], N, l);
 		}
 
 		if (q == 0) {
@@ -94,18 +105,13 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
 
-		// take the minimum approximate factor over all nearest neighbors
-		double temp_min = numeric_limits<double>::max();
-        for(int i = 0; (unsigned int) i < indices_ann.size(); i++){
-			double temp = distances_ann[i] / distances_tnn[i];
-			if (temp < temp_min) {
-				temp_min = temp;
-			}
-		}
+		// take the minimum approximate factor from all neighbors
+		int distance_min = distances_ann[0];
 
 		// maf is maximum approximate factor over all queries
-		if (temp_min > maf) {
-			maf = temp_min;
+		double approximate_factor = (double) distance_min / distances_tnn[0];
+		if (approximate_factor > maf) {
+			maf = approximate_factor;
 		}
 	}
 	
@@ -224,4 +230,39 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	*maf = get<double>(results[1]);
 
 	delete cube;
+}
+
+extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
+										  int m, int l, int N, const char *load_file,
+										  double *approximate_time, double *maf) {
+	string input_str(input);
+	string query_str(query);
+	string load_file_str(load_file);
+	
+	cout << "Read MNIST data" << endl;
+	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	NSG *nsg;
+	if (!load_file_str.empty()) {
+		cout << "Loading graph from file: " << load_file_str << endl;
+		DirectedGraph *G = new DirectedGraph();
+		ifstream graph_file;
+		graph_file.open(load_file);
+		G->load(graph_file);
+		graph_file.close();
+		nsg = new NSG(dataset, G);
+	}
+	else {
+		cout << "Building graph..." << endl;
+		nsg = new NSG(dataset, N, m);
+	}
+	cout << "Done" << endl;
+
+	// return time, maf
+	vector<variant<int,bool>> params = {0, 0, l, N, 5};
+	vector<variant<double, int>> results = helper_arg(nsg, dataset, queries, params);
+	*approximate_time = get<double>(results[0]);
+	*maf = get<double>(results[1]);
+
+	delete nsg;
 }

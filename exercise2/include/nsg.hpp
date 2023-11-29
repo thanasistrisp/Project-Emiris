@@ -5,7 +5,7 @@ class NSG
 {
 private:
 	const std::vector<std::vector<double>> &dataset;
-	DirectedGraph *NSG_graph;
+	DirectedGraph *G;
 	int navigating_node;
 
 	void set_navigating_node();
@@ -17,5 +17,5 @@ public:
 	std::tuple<std::vector<int>, std::vector<double>> query(const std::vector<double>&, unsigned int N, unsigned int L);
 
 	static constexpr double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance;
-	DirectedGraph *get_graph() const { return NSG_graph; }
+	DirectedGraph *get_graph() const { return G; }
 };

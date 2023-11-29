@@ -10,11 +10,11 @@ using namespace std;
 NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m) : dataset(dataset)
 {
 	// create knn graph
-	ApproximateKNNGraph *knn_graph = new ApproximateKNNGraph(dataset, total_candidates);
-	DirectedGraph *G = knn_graph->get_graph();
-	NSG_graph = new DirectedGraph();
+	ApproximateKNNGraph *knn = new ApproximateKNNGraph(dataset, total_candidates);
+	DirectedGraph *knn_graph = knn->get_graph();
+	G = new DirectedGraph();
 	for (int i = 0; i < (int) dataset.size(); i++) {
-		NSG_graph->add_vertex(i);
+		G->add_vertex(i);
 	}
 
 	// Calculate the centroid of the dataset.
@@ -28,13 +28,13 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 	int r = rand() % dataset.size();
 
 	// n is navigating node from generic search
-	tuple<vector<int>, vector<double>> neighbors = generic_search_on_graph(*G, dataset, r, dataset_centroid, total_candidates, 1, distance);
+	tuple<vector<int>, vector<double>> neighbors = generic_search_on_graph(*knn_graph, dataset, r, dataset_centroid, total_candidates, 1, distance);
 	int n = get<0>(neighbors)[0];
 
 	// for all node v in G
 	for(int v = 0; v < (int) dataset.size(); v++){
 		vector<double> v_query = dataset[v];
-		deque<pair<int, double>> E = generic_search_on_graph_checked(*G, dataset, n, v_query, total_candidates, distance);
+		deque<pair<int, double>> E = generic_search_on_graph_checked(*knn_graph, dataset, n, v_query, total_candidates, distance);
 		
 		unordered_set<int> R;
 		// p0 is the closest node to v in E
@@ -62,14 +62,15 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 				R.insert(p);
 		}
 		for (int r : R)
-			NSG_graph->add_edge(v, r);
+			if (r != v)
+				G->add_edge(v, r);
 	}
 
 	DirectedGraph *dfs_spanning_tree;
 	unordered_set<int> dfs_checked;
 	while(true){
 		// Build a tree with edges in NSG from root n with DFS.
-		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*NSG_graph, n);
+		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*G, n);
 
 		if(dfs_checked.size() == dataset.size()){
 			break;
@@ -88,7 +89,8 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, n, dataset[i], total_candidates, 1, euclidean_distance);
 		int closest_neighbor = get<0>(neighbors)[0];
 
-		NSG_graph->add_edge(closest_neighbor, i);
+		G->add_edge(closest_neighbor, i);
+		G->add_edge(i, closest_neighbor);
 
 		delete dfs_spanning_tree;
 	}
@@ -114,11 +116,11 @@ void NSG::set_navigating_node()
 
 tuple<vector<int>, vector<double>> NSG::query(const vector<double>& q, unsigned int N, unsigned int L)
 {
-	return generic_search_on_graph(*NSG_graph, dataset, navigating_node, q, L, N, distance);
+	return generic_search_on_graph(*G, dataset, navigating_node, q, L, N, distance);
 }
 
 
-NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), NSG_graph(G)
+NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), G(G)
 {
 
 }
