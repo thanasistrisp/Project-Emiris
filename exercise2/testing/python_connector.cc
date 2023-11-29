@@ -58,7 +58,7 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 	}
 
 	double elapsed_secs_ANN = 0;
-	double maf = 0;
+	double maf = 1;
 	int min_neighbors = numeric_limits<int>::max();
 
 	for (int q = 0; q < (int) queries.size(); q++) {

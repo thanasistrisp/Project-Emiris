@@ -39,7 +39,7 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 
 	double elapsed_secs_ANN = 0;
 	double elapsed_secs_TNN = 0;
-	double maf = 0;
+	double maf = 1;
 
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
