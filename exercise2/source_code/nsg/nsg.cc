@@ -50,9 +50,8 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 			bool condition = true;
 			for (int r : R) {
 				// If edge pv conflicts with edge pr, break.
-				double rv = distance(dataset[r], dataset[v]);
 				double pr = distance(dataset[p], dataset[r]);
-				if (pv > pr && pv > rv) {
+				if (pv > pr) {
 					condition = false;
 					break;
 				}
