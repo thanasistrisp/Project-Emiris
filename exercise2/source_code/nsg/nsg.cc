@@ -29,12 +29,12 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 
 	// n is navigating node from generic search.
 	tuple<vector<int>, vector<double>> neighbors = generic_search_on_graph(*knn_graph, dataset, r, dataset_centroid, total_candidates, 1, distance);
-	int n = get<0>(neighbors)[0];
+	navigating_node = get<0>(neighbors)[0];
 
 	// For all node v in G.
 	for(int v = 0; v < (int) dataset.size(); v++){
 		vector<double> v_query = dataset[v];
-		deque<pair<int, double>> E = generic_search_on_graph_checked(*knn_graph, dataset, n, v_query, total_candidates, distance);
+		deque<pair<int, double>> E = generic_search_on_graph_checked(*knn_graph, dataset, navigating_node, v_query, total_candidates, distance);
 		
 		unordered_set<int> R;
 		// p0 is the closest node to v in E.
@@ -70,7 +70,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 	unordered_set<int> dfs_checked;
 	while(true){
 		// Build a tree with edges in NSG from root n with DFS.
-		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*G, n);
+		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*G, navigating_node);
 
 		if(dfs_checked.size() == dataset.size()){
 			delete dfs_spanning_tree;
@@ -87,7 +87,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 
 		// Add an edge between one of the out-of-tree nodes and
 		// its closest in-tree neighbor.
-		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, n, dataset[i], total_candidates, 1, euclidean_distance);
+		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, navigating_node, dataset[i], total_candidates, 1, euclidean_distance);
 		int closest_neighbor = get<0>(neighbors)[0];
 
 		G->add_edge(closest_neighbor, i);
@@ -96,24 +96,6 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		delete dfs_spanning_tree;
 	}
 	delete knn;
-
-	set_navigating_node();
-}
-
-void NSG::set_navigating_node()
-{
-	// Calculate the centroid of the dataset.
-    vector<double> dataset_centroid = vector<double>(dataset[0].size(), 0.0);
-    for(int i = 0; i < (int) dataset.size(); i++){
-        dataset_centroid = vector_addition(dataset_centroid, dataset[i]);
-    }
-    dataset_centroid = vector_scalar_mult(dataset_centroid, 1 / dataset.size());
-
-    // Treat it as a query, find its nearest neighbor by brute force.
-    vector<int> indices;
-    vector<double> distances;
-    tie(indices, distances) = brute_force(dataset, dataset_centroid, 1, distance);
-    navigating_node = indices[0];
 }
 
 tuple<vector<int>, vector<double>> NSG::query(const vector<double>& q, unsigned int N, unsigned int L)

@@ -8,9 +8,6 @@ class NSG
 		DirectedGraph *G;
 		int navigating_node;
 
-		// Sets the navigating node for the graph that is used during search.
-		void set_navigating_node();
-
 	public:
 		NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m, int k);
 		NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G);
