@@ -253,7 +253,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	}
 	else {
 		cout << "Building graph..." << endl;
-		nsg = new NSG(dataset, N, m, k);
+		nsg = new NSG(dataset, l, m, k);
 	}
 	cout << "Done" << endl;
 
