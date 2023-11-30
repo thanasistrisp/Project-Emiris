@@ -17,7 +17,7 @@ class ApproximateKNNGraph
 
 		// Adds some of the predecessors successors as successors of the given node.
 		// Used when LSH fails to ensure the existence of at least k neighbors.
-		void add_neighbors_pred(int, std::unordered_multiset<std::pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>&, int);
+		void add_neighbors_pred(int, std::unordered_multiset<std::pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>&, std::unordered_set<int>&, int);
 		
 		// Adds some random nodes as successors of the given node.
 		// Used when LSH fails to ensure the existence of at least k neighbors

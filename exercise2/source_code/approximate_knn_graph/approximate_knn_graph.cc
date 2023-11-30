@@ -44,17 +44,14 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 			for(int j = 0; j < (int) neighbors_indices.size(); j++){
 				pair<int, double> *p = new pair(neighbors_indices[j], distance(dataset[i], dataset[neighbors_indices[j]]));
 				neighbors_set.insert(p);
+				unique_indices.insert(p->first);
 			}
 
 			// Add successors of the same predecessor as neighbors.
-			add_neighbors_pred(i, neighbors_set, k);
+			add_neighbors_pred(i, neighbors_set, unique_indices, k);
 
 			// If problem persists, add random vertices as neighbors.
-			if((int) neighbors_indices.size() < k){
-				
-				for(int j = 0; j < (int) neighbors_indices.size(); j++){
-					unique_indices.insert(neighbors_indices[j]);
-				}
+			if((int) neighbors_set.size() < k){
 				add_neighbors_random(i, neighbors_set, unique_indices, k);
 			}
 
@@ -87,7 +84,7 @@ ApproximateKNNGraph::~ApproximateKNNGraph()
 	delete lsh;
 }
 
-void ApproximateKNNGraph::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, int k)
+void ApproximateKNNGraph::add_neighbors_pred(int index, unordered_multiset<pair<int, double>*, decltype(&set_hash), decltype(&set_equal)>& neighbors, unordered_set<int>& unique_indices, int k)
 {
 	vector<int> pred = G->get_predecessors(index, 1);
 	double dist;
@@ -98,9 +95,10 @@ void ApproximateKNNGraph::add_neighbors_pred(int index, unordered_multiset<pair<
 		for(int i = 0; i < (int) pred_successors.size(); i++){
 			int ps_index = pred_successors[i];
 
-			if(ps_index == index){ // Skip self.
+			if(ps_index == index || unique_indices.find(ps_index) != unique_indices.end()){
 				continue;
 			}
+			unique_indices.insert(ps_index);
 
 			dist = distance(dataset[index], dataset[ps_index]);
 			pair<int, double>* p = new pair(ps_index, dist);
