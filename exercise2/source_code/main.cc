@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	cout << "Read MNIST data" << endl;
-	vector <vector<double>> dataset = read_mnist_data(input_file, 1000);
+	vector <vector<double>> dataset = read_mnist_data(input_file);
 
 	cout << "Creating structure" << endl;
 

@@ -39,6 +39,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 		unordered_set<int> R;
 		// p0 is the closest node to v in E.
 		int p0 = E.front().first;
+		E.pop_front();
 		// Add p0 to R.
 		R.insert(p0);
 		while (!E.empty() && (int) R.size() < m) {
@@ -46,18 +47,17 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 			int p = E.front().first;
 			E.pop_front();
 			// For all nodes in R.
-			double pv = distance(dataset[p], dataset[v]);
 			bool condition = true;
 			for (int r : R) {
 				// If edge pv conflicts with edge pr, break.
-				double rv = distance(dataset[r], dataset[v]);
-				double pr = distance(dataset[p], dataset[r]);
-				if (pv > pr && pv > rv) {
+				if (p == r || p == v || r == v) 
+					continue;
+				if (G->is_edge(p, v) && G->is_edge(p, r)) {
 					condition = false;
 					break;
 				}
 			}
-			// If no conflict occurse, add p to R.
+			// If no conflict occurs, add p to R.
 			if (condition)
 				R.insert(p);
 		}
@@ -68,9 +68,15 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 
 	DirectedGraph *dfs_spanning_tree;
 	unordered_set<int> dfs_checked;
+	bool first = true;
 	while(true){
 		// Build a tree with edges in NSG from root n with DFS.
 		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*G, navigating_node);
+
+		if (first) {
+			first = false;
+			cout << "Initial tree size: " << dfs_checked.size() << endl;
+		}
 
 		if(dfs_checked.size() == dataset.size()){
 			delete dfs_spanning_tree;

@@ -109,6 +109,19 @@ vector<int> DirectedGraph::get_predecessors(int index, int number_pred) const
     return predecessors;
 }
 
+bool DirectedGraph::is_edge(int origin, int destination) const
+{
+    if(origin < 0 || origin >= (int) adjacency_lists.size()){
+        return false;
+    }
+    for(int i = 0; i < (int) adjacency_lists[origin].size(); i++){
+        if(adjacency_lists[origin][i] == destination){
+            return true;
+        }
+    }
+    return false;
+}
+
 void DirectedGraph::save(ofstream& file) const
 {
     int size = adjacency_lists.size();

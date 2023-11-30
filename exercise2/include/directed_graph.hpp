@@ -31,6 +31,8 @@ class DirectedGraph
         std::vector<int> get_predecessors(int) const;
         std::vector<int> get_predecessors(int, int) const;
 
+        bool is_edge(int, int) const;
+
         // Saves/loads the graph to/from a .bin file.
         void save(std::ofstream&) const;
         void load(std::ifstream&);
