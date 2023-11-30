@@ -63,7 +63,7 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 						break;
 					}
 				}
-				// If pr longest edge in triange prt \forall t.
+				// If pr not the longest edge in triange prt \forall t.
 				if (condition)
 					Lp->insert(r);
 			}

@@ -57,7 +57,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 					break;
 				}
 			}
-			// If no conflict occurse, add p to R.
+			// If no conflict occurs, add p to R.
 			if (condition)
 				R.insert(p);
 		}
