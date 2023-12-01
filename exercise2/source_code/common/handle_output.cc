@@ -7,34 +7,39 @@
 #include <limits>
 // iterator is used for std::back_insert_iterator, std::advance().
 
-#include "ApproximateKNNGraph.hpp"
+#include "approximate_knn_graph.hpp"
 #include "mrng.hpp"
+#include "nsg.hpp"
 #include "lp_metric.hpp"
 #include "brute_force.hpp"
 
 using namespace std;
 
-// Writes the results of the queries to output file in the required format.
 void handle_ouput(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, ofstream &output, vector<int> &params)
 {
-	// initialize parameters
+	// Initialize parameters.
 	int E = params[0];
 	int R = params[1];
 	int l = params[2];
 	int N = params[3];
-	int m = params[4];
+	int lq = params[4];
+	int m = params[5];
 	if (m == 1) {
 		cout << "Algorithm: GNN" << endl;
 		output << "GNNS Results" << endl;
 	}
-	else {
+	else if (m == 2) {
 		cout << "Algorithm: MRNG" << endl;
 		output << "MRNG Results" << endl;
+	}
+	else {
+		cout << "Algorithm: NSG" << endl;
+		output << "NSG Results" << endl;
 	}
 
 	double elapsed_secs_ANN = 0;
 	double elapsed_secs_TNN = 0;
-	double maf = 0;
+	double maf = 1;
 
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
@@ -44,8 +49,11 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 		if (m == 1) {
 			ann = ((ApproximateKNNGraph*) structure)->query(queries[q], N, E, R);
 		}
-		else {
+		else if (m == 2) {
 			ann = ((MRNG*) structure)->query(queries[q], N, l);
+		}
+		else {
+			ann = ((NSG*) structure)->query(queries[q], N, lq);
 		}
 		clock_t end_ANN = clock();
 		elapsed_secs_ANN += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
@@ -60,21 +68,18 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
 
-		// take the minimum approximate factor over all nearest neighbors
-		double temp_min = numeric_limits<double>::max();
+		// Take the minimum approximate factor from all neighbors.
+		int distance_min = distances_ann[0];
         for(int i = 0; (unsigned int) i < indices_ann.size(); i++){
 			output << "Nearest neighbor-" << i+1 << ": " << indices_ann[i] << endl;
 			output << "distanceApproximate: " << distances_ann[i] << endl;
 			output << "distanceTrue: " << distances_tnn[i] << endl;
-			double temp = distances_ann[i] / distances_tnn[i];
-			if (temp < temp_min) {
-				temp_min = temp;
-			}
 		}
 
-		// maf is maximum approximate factor over all queries
-		if (temp_min > maf) {
-			maf = temp_min;
+		// MAF is maximum approximate factor over all queries.
+		double approximate_factor = (double) distance_min / distances_tnn[0];
+		if (approximate_factor > maf) {
+			maf = approximate_factor;
 		}
 	}
 

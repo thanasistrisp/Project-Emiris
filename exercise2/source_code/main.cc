@@ -10,7 +10,7 @@
 // ctime is used for time().
 
 #include "helper.hpp"
-#include "ApproximateKNNGraph.hpp"
+#include "approximate_knn_graph.hpp"
 #include "mrng.hpp"
 #include "nsg.hpp"
 #include "defines.hpp"
@@ -31,7 +31,9 @@ int main(int argc, char *argv[]) {
 	int E = 30;
 	int R = 1;
 	int l = 20;
+	int lq = 20;
 	int N = 1;
+	int max_out_degree = 10;
 	int m = 0;
 
 	for (int i = 1; i < argc; i++) {
@@ -59,8 +61,16 @@ int main(int argc, char *argv[]) {
 			l = atoi(argv[i + 1]);
 			i++;
 		}
+		else if (strcmp(argv[i], "-lq") == 0) {
+			lq = atoi(argv[i + 1]);
+			i++;
+		}
 		else if (strcmp(argv[i], "-N") == 0) {
 			N = atoi(argv[i + 1]);
+			i++;
+		}
+		else if (strcmp(argv[i], "-out") == 0) {
+			max_out_degree = atoi(argv[i + 1]);
 			i++;
 		}
 		else if (strcmp(argv[i], "-m") == 0) {
@@ -81,7 +91,7 @@ int main(int argc, char *argv[]) {
 		}
 		else if (strcmp(argv[i], "-help") == 0) {
 			cout << "Usage: ./graph_search -d <input file> -q <query file> -k <int> -E <int> -R <int> -N <int> -l <int, only for Search-on-Graph> "\
-				    "-m <1 for GNNS, 2 for MRNG> -o <output file> -save <save graph file> -load <load graph file>" << endl;
+				    "-lq <int, only for NSG> -m <1 for GNNS, 2 for MRNG, 3 for NSG> -o <output file> -save <save graph file> -load <load graph file>" << endl;
 			return 0;
 		}
 		else {
@@ -125,14 +135,13 @@ int main(int argc, char *argv[]) {
 	time(&start1);
 
 	void *structure;
-	vector<int> params = {E, R, l, N, m};
+	vector<int> params = {E, R, l, N, lq, m};
 
 	// load file if string not empty
 	if (!load_graph_file.empty()) {
 		ifstream graph_file(load_graph_file, ios::binary);
 		DirectedGraph *G = new DirectedGraph();
 		G->load(graph_file);
-		graph_file.close();
 		// add graph to structure
 		switch (m) {
 			case 1:
@@ -142,12 +151,15 @@ int main(int argc, char *argv[]) {
 				structure = new MRNG(dataset, G);
 				break;
 			case 3:
-				structure = new NSG(dataset, G);
+				int navigating_node;
+				graph_file.read((char*) &navigating_node, sizeof(int));
+				structure = new NSG(dataset, G, navigating_node);				
 				break;
 			default:
 				cout << "Wrong m value. Run with -help for more info" << endl;
 				exit(1);
 		}
+		graph_file.close();
 	}
 	else {
 		switch (m) {
@@ -158,7 +170,7 @@ int main(int argc, char *argv[]) {
 				structure = new MRNG(dataset);
 				break;
 			case 3:
-				structure = new NSG(dataset);
+				structure = new NSG(dataset, l, max_out_degree, k);
 				break;
 			default:
 				cout << "Wrong m value. Run with -help for more info" << endl;
@@ -171,8 +183,6 @@ int main(int argc, char *argv[]) {
 	// save Graph to binary file
 	if (!save_graph_file.empty()) {
 		ofstream graph_file(save_graph_file, ios::binary);
-		// ((DirectedGraph*) ((m == 1) ? ((GNN*) structure)->get_graph() : ((MRNG*) structure)->get_graph()))->save(graph_file);
-		// with if else
 		if (m == 1) {
 			((ApproximateKNNGraph*) structure)->get_graph()->save(graph_file);
 		}
@@ -181,6 +191,8 @@ int main(int argc, char *argv[]) {
 		}
 		else {
 			((NSG*) structure)->get_graph()->save(graph_file);
+			int navigating_node = ((NSG*) structure)->get_navigating_node();
+			graph_file.write((char*) &navigating_node, sizeof(int));
 		}
 		graph_file.close();
 	}

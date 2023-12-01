@@ -1,9 +1,10 @@
 graphsearch.so_OBJS = \
-					 $(MODULES)/approximate_knn_graph/ApproximateKNNGraph.o \
+					 $(MODULES)/approximate_knn_graph/approximate_knn_graph.o \
 					 $(MODULES)/mrng/mrng.o \
 					 $(MODULES)/nsg/nsg.o \
 					 $(MODULES)/common/directed_graph.o \
 					 $(MODULES)/common/generic_search.o \
+					 $(MODULES)/common/depth_first_search.o \
 					 $(MODULES)/common/handle_output.o \
 					 $(EXERCISE1)/A/LSH/lsh.o \
 					 $(EXERCISE1)/A/RandomProjection/hypercube.o \

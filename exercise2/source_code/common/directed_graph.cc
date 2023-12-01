@@ -50,6 +50,11 @@ void DirectedGraph::add_edge(int origin, const vector<int>& destinations)
     }
 }
 
+unsigned int DirectedGraph::get_number_of_nodes() const
+{
+    return adjacency_lists.size();
+}
+
 vector<int> DirectedGraph::get_successors(int index) const
 {
     if(index < 0 || index >= (int) adjacency_lists.size()){
