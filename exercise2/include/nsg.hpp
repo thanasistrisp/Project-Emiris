@@ -10,8 +10,8 @@ class NSG
 
 	public:
 		NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, int m, int k);
-		NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G, int navigating_node);
-		~NSG();
+		NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G, int navigating_node) : dataset(dataset), G(G), navigating_node(navigating_node) {}
+		~NSG() { delete G; }
 
 		// Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
         // and their distances to the query based on the given distance function.

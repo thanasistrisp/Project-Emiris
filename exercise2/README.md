@@ -19,12 +19,15 @@ Athanasios Trispiotis - 1115202000194
     - [3.2.2. Analysis](#322-analysis)
 - [4. Documentation](#4-documentation)
   - [4.1. Directed Graph](#41-directed-graph)
-  - [4.2. Graph Nearest Neighbor Search](#42-graph-nearest-neighbor-search)
+  - [4.2. Graph Nearest Neighbor Search (GNNS)](#42-graph-nearest-neighbor-search-gnns)
     - [4.2.1. Construction](#421-construction)
     - [4.2.2. GNNS Query Search Algorithm](#422-gnns-query-search-algorithm)
   - [4.3. Monotonic Relative Neighborhood Graph](#43-monotonic-relative-neighborhood-graph)
     - [4.3.1. Construction](#431-construction)
-    - [4.3.2. GNNS Query Search Algorithm](#432-mrng-query-search-algorithm)
+    - [4.3.2. MRNG Query Search Algorithm](#432-mrng-query-search-algorithm)
+  - [4.4. NSG:Practical Approximation For MRNG](#44-nsgpractical-approximation-for-mrng)
+    - [4.4.1. Construction](#441-construction)
+    - [4.4.2. NSG Query Search Algorithm](#442-nsg-query-search-algorithm)
   - [4.4 General Implementation Details](#44-general-implementation-details)
 - [References](#references)
 
@@ -35,23 +38,29 @@ exercise2/
 ├── source_code				    # directory for source code of the main program
 │   ├── common
 │   │   ├── directed_graph.cc	    # implementation of the directed graph
-│   │   ├── generic_search.cc	    # implementation of the generic search on graph (used for mrng)
-│   │   └── handle_output.cc	    # helper function for processing the output
+│   │   ├── depth_first_search.cc	# implementation of the depth first search algorithm
+│   │   ├── handle_output.cc	    # helper function for processing the output
+│   │   └── generic_search.cc	    # implementation of the generic search on graph (used for mrng)
 │   │
 │   ├── approximate_knn_graph						# directory for source files for GNNS (construction, query) implementation
-│   │   └── ApproximateKNNGraph.cc
+│   │   └── approximate_knn_graph.cc
 │   │
 │   ├── mrng					# directory for source files for MRNG (construction) implementation
 │   │   └── mrng.cc
+│   │
+│   ├── nsg					# directory for source files for NSG (construction) implementation
+│   │   └── nsg.cc
 │   │
 │   └── main.cc
 │
 ├── include						# directory for header files
 │   ├── directed_graph.hpp
+│   ├── depth_first_search.hpp
 │   ├── generic_search.hpp
 │   ├── approximate_knn_graph.hpp
 │   ├── handling.hpp
 │   ├── mrng.hpp
+│   ├── nsg.hpp
 │   └── set_utils.hpp			    # overloading of the set operators for using set of pairs
 │
 ├── testing						# directory for testing files (hyperparameter tuning)
@@ -69,7 +78,8 @@ exercise2/
 │
 ├── graph_files				    # directory for saved graph files
 │   ├── gnn_graph.bin
-│   └── mrng_graph.bin
+│   ├── mrng_graph.bin
+│   └── nsg.bin
 │
 ├── output					    # directory for result files
 │   └── output.txt
@@ -125,7 +135,7 @@ at any of the two following directories:
 After running the commands in [2.1.](#21-main-program-graphsearch), run the following command at the root directory of the <code>exercise2/</code>:
 
 ```bash
-./graphsearch -d <input file> -q <query file> -k <int> -E <int> -R <int> -N <int> -l <int, only for Search-on-Graph> -m <1 for GNNS, 2 for MRNG> -o <output file> -save <save graph file> -load <load graph file>
+./graphsearch -d <input file> -q <query file> -k <int> -E <int> -R <int> -N <int> -l <int, only for Search-on-Graph> -lq <int, only for NSG> -m <1 for GNNS, 2 for MRNG, 3 for NSG> -o <output file> -save <save graph file> -load <load graph file>
 ```
 
 where:
@@ -137,7 +147,8 @@ where:
 + `R`: number of random restarts
 + `N`: number of Approximate Nearest Neighbours returned
 + `l`: number of candidate pool size (only for Search-on-Graph)
-+ `m`: 1 for GNNS, 2 for MRNG
++ `lq`: number of candidate pool size (only for Search-on-Graph in NSG query)
++ `m`: 1 for GNNS, 2 for MRNG, 3 for NSG
 + `output file`: file for output
 + `save graph file`: binary file for saving the graph (optional)
 + `load graph file`: binary file for loading the graph (optional)
@@ -151,6 +162,7 @@ If any of the numeric arguments aren't specified except for `m`, the following v
 | `R` | 1 |
 | `N` | 1 |
 | `l` | 20 |
+| `lq` | 20 |
 
 e.g.
 
@@ -191,6 +203,7 @@ Analysis is done in the corresponding jupyter notebook. The notebook contains th
 
 + GNNS
 + MRNG
++ NSG
 + LSH
 + Cube
 
@@ -208,7 +221,7 @@ The graph is implemented using adjacency lists. More specifically, a vector of v
 
 The module provides all basic functions to add nodes and successors and to retrieve a node's successors, as well as predecessors.
 
-In addition to that, a set of save/load functions have been implemented to save/load the graph into a `.bin` file. Two examples can be found in the `graph_files/` directory. This feature has been really useful for debugging the MRNG query process, because the MRNG construction is too time-consuming to be used from scatch every time.
+In addition to that, a set of save/load functions have been implemented to save/load the graph into a `.bin` file. Some examples can be found in the `graph_files/` directory. This feature has been really useful for debugging the MRNG query process, because the MRNG construction is too time-consuming to be used from scratch every time. In NSG, we also save the navigation node at the end of the graph file.
 
 ## 4.2. Graph Nearest Neighbor Search (GNNS)
 
@@ -273,6 +286,21 @@ Average construction time: 8 hours.
 The algorithm used for querying the MRNG graph is the Search-on-Graph (Generic Search) algorithm proposed presented in the course slides.
 
 This algorithm has been implemented in a different file, because it may be applied to other types of graphs as well, and not just to MRNG graphs.
+
+## 4.4. NSG:Practical Approximation For MRNG
+
+### 4.4.1. Construction
+
+We follow the pseudo-code given in Algorithm 2 in [[3]](#references) for the construction of the NSG graph. For the set $E$ we use both checked nodes and
+nearest neighbors of the of v as a union of the two sets. For the edge selection strategy, we use the MRNG one but only for the two edges pv, pr.
+With the MRNG strategy, we add edges to the already defined GNN graph and for the remaining not linked nodes, we connect them using DFS incrementally with
+navigation node $n$ as root of the rooted directed tree.
+
+Average construction time: 15-40 minutes.
+
+### 4.4.2. NSG Query Search Algorithm
+
+The algorithm used for querying the NSG graph is the Search-on-Graph (Generic Search) algorithm with the navigation node as starting point.
 
 ## 4.4 General Implementation Details
 

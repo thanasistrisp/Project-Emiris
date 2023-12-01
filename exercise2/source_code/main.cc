@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 		}
 		else if (strcmp(argv[i], "-help") == 0) {
 			cout << "Usage: ./graph_search -d <input file> -q <query file> -k <int> -E <int> -R <int> -N <int> -l <int, only for Search-on-Graph> "\
-				    "-m <1 for GNNS, 2 for MRNG> -o <output file> -save <save graph file> -load <load graph file>" << endl;
+				    "-lq <int, only for NSG> -m <1 for GNNS, 2 for MRNG, 3 for NSG> -o <output file> -save <save graph file> -load <load graph file>" << endl;
 			return 0;
 		}
 		else {

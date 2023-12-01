@@ -86,7 +86,7 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 
 		// Add an edge between one of the out-of-tree nodes and
 		// its closest in-tree neighbor.
-		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, navigating_node, dataset[i], total_candidates, 1, euclidean_distance);
+		neighbors = generic_search_on_graph(*dfs_spanning_tree, dataset, navigating_node, dataset[i], total_candidates, 1, distance);
 		int closest_neighbor = get<0>(neighbors)[0];
 
 		G->add_edge(closest_neighbor, i);
@@ -100,15 +100,4 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 tuple<vector<int>, vector<double>> NSG::query(const vector<double>& q, unsigned int N, unsigned int L)
 {
 	return generic_search_on_graph(*G, dataset, navigating_node, q, L, N, distance);
-}
-
-
-NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G, int navigation_node) : dataset(dataset), G(G), navigating_node(navigation_node)
-{
-
-}
-
-NSG::~NSG()
-{
-	delete G;
 }
