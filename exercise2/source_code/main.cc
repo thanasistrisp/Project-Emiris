@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	cout << "Read MNIST data" << endl;
-	vector <vector<double>> dataset = read_mnist_data(input_file, 1000);
+	vector <vector<double>> dataset = read_mnist_data(input_file);
 
 	cout << "Creating structure" << endl;
 
@@ -142,7 +142,6 @@ int main(int argc, char *argv[]) {
 		ifstream graph_file(load_graph_file, ios::binary);
 		DirectedGraph *G = new DirectedGraph();
 		G->load(graph_file);
-		graph_file.close();
 		// add graph to structure
 		switch (m) {
 			case 1:
@@ -152,12 +151,15 @@ int main(int argc, char *argv[]) {
 				structure = new MRNG(dataset, G);
 				break;
 			case 3:
-				structure = new NSG(dataset, G);
+				int navigating_node;
+				graph_file.read((char*) &navigating_node, sizeof(int));
+				structure = new NSG(dataset, G, navigating_node);				
 				break;
 			default:
 				cout << "Wrong m value. Run with -help for more info" << endl;
 				exit(1);
 		}
+		graph_file.close();
 	}
 	else {
 		switch (m) {
@@ -181,8 +183,6 @@ int main(int argc, char *argv[]) {
 	// save Graph to binary file
 	if (!save_graph_file.empty()) {
 		ofstream graph_file(save_graph_file, ios::binary);
-		// ((DirectedGraph*) ((m == 1) ? ((GNN*) structure)->get_graph() : ((MRNG*) structure)->get_graph()))->save(graph_file);
-		// with if else
 		if (m == 1) {
 			((ApproximateKNNGraph*) structure)->get_graph()->save(graph_file);
 		}
@@ -191,6 +191,8 @@ int main(int argc, char *argv[]) {
 		}
 		else {
 			((NSG*) structure)->get_graph()->save(graph_file);
+			int navigating_node = ((NSG*) structure)->get_navigating_node();
+			graph_file.write((char*) &navigating_node, sizeof(int));
 		}
 		graph_file.close();
 	}

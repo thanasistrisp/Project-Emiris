@@ -248,8 +248,10 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 		ifstream graph_file;
 		graph_file.open(load_file);
 		G->load(graph_file);
+		int navigating_node;
+		graph_file.read((char*) &navigating_node, sizeof(int));
 		graph_file.close();
-		nsg = new NSG(dataset, G);
+		nsg = new NSG(dataset, G, navigating_node);
 	}
 	else {
 		cout << "Building graph..." << endl;

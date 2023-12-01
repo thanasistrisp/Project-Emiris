@@ -103,7 +103,7 @@ tuple<vector<int>, vector<double>> NSG::query(const vector<double>& q, unsigned 
 }
 
 
-NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G) : dataset(dataset), G(G)
+NSG::NSG(const std::vector<std::vector<double>> &dataset, DirectedGraph *G, int navigation_node) : dataset(dataset), G(G), navigating_node(navigation_node)
 {
 
 }
