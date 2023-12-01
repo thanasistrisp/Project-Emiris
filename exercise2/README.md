@@ -22,10 +22,10 @@ Athanasios Trispiotis - 1115202000194
   - [4.2. Graph Nearest Neighbor Search (GNNS)](#42-graph-nearest-neighbor-search-gnns)
     - [4.2.1. Construction](#421-construction)
     - [4.2.2. GNNS Query Search Algorithm](#422-gnns-query-search-algorithm)
-  - [4.3. Monotonic Relative Neighborhood Graph](#43-monotonic-relative-neighborhood-graph)
+  - [4.3. Monotonic Relative Neighborhood Graph (MRNG)](#43-monotonic-relative-neighborhood-graph-mrng)
     - [4.3.1. Construction](#431-construction)
     - [4.3.2. MRNG Query Search Algorithm](#432-mrng-query-search-algorithm)
-  - [4.4. NSG:Practical Approximation For MRNG](#44-nsgpractical-approximation-for-mrng)
+  - [4.4. Navigating Spreading-out Graph (NSG): Practical Approximation For MRNG (***BONUS***)](#44-navigating-spreading-out-graph-nsg-practical-approximation-for-mrng-bonus)
     - [4.4.1. Construction](#441-construction)
     - [4.4.2. NSG Query Search Algorithm](#442-nsg-query-search-algorithm)
   - [4.5. General Implementation Details](#45-general-implementation-details)
@@ -287,7 +287,7 @@ The algorithm used for querying the MRNG graph is the Search-on-Graph (Generic S
 
 This algorithm has been implemented in a different file, because it may be applied to other types of graphs as well, and not just to MRNG graphs.
 
-## 4.4. Navigating Spreading-out Graph (NSG): Practical Approximation For MRNG
+## 4.4. Navigating Spreading-out Graph (NSG): Practical Approximation For MRNG (***BONUS***)
 
 ### 4.4.1. Construction
 
