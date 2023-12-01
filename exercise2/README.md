@@ -28,7 +28,7 @@ Athanasios Trispiotis - 1115202000194
   - [4.4. NSG:Practical Approximation For MRNG](#44-nsgpractical-approximation-for-mrng)
     - [4.4.1. Construction](#441-construction)
     - [4.4.2. NSG Query Search Algorithm](#442-nsg-query-search-algorithm)
-  - [4.4 General Implementation Details](#44-general-implementation-details)
+  - [4.5. General Implementation Details](#45-general-implementation-details)
 - [References](#references)
 
 
@@ -42,13 +42,13 @@ exercise2/
 │   │   ├── handle_output.cc	    # helper function for processing the output
 │   │   └── generic_search.cc	    # implementation of the generic search on graph (used for mrng)
 │   │
-│   ├── approximate_knn_graph						# directory for source files for GNNS (construction, query) implementation
+│   ├── approximate_knn_graph	# directory for source files for GNNS (construction, query) implementation
 │   │   └── approximate_knn_graph.cc
 │   │
 │   ├── mrng					# directory for source files for MRNG (construction) implementation
 │   │   └── mrng.cc
 │   │
-│   ├── nsg					# directory for source files for NSG (construction) implementation
+│   ├── nsg				       	# directory for source files for NSG (construction) implementation
 │   │   └── nsg.cc
 │   │
 │   └── main.cc
@@ -257,7 +257,7 @@ In comparison to the pseudo-code given, no greedy moves $T$ are used, but it is 
 We also stop the search if we return to a node that we have already visited (i.e. cyclic path in graph). There is no need to sort distances at the end, as we use
 an ordered set.
 
-## 4.3. Monotonic Relative Neighborhood Graph
+## 4.3. Monotonic Relative Neighborhood Graph (MRNG)
 
 ### 4.3.1. Construction
 
@@ -287,14 +287,19 @@ The algorithm used for querying the MRNG graph is the Search-on-Graph (Generic S
 
 This algorithm has been implemented in a different file, because it may be applied to other types of graphs as well, and not just to MRNG graphs.
 
-## 4.4. NSG:Practical Approximation For MRNG
+## 4.4. Navigating Spreading-out Graph (NSG): Practical Approximation For MRNG
 
 ### 4.4.1. Construction
 
-We follow the pseudo-code given in Algorithm 2 in [[3]](#references) for the construction of the NSG graph. For the set $E$ we use both checked nodes and
-nearest neighbors of the of v as a union of the two sets. For the edge selection strategy, we use the MRNG one but only for the two edges pv, pr.
-With the MRNG strategy, we add edges to the already defined GNN graph and for the remaining not linked nodes, we connect them using DFS incrementally with
-navigation node $n$ as root of the rooted directed tree.
+We follow the pseudo-code given in Algorithm 2 in [[3]](#references) for the construction of the NSG graph. First construct an Approximate $k$-NN graph using the LSH algorithm. This graph is initially used to find the navigation node $n$ of the graph, which will also be used during search.
+
+The NSG graph initially has all zero edges. The MRNG method treats all the other nodes as candidate neighbors for each node. On the contrary, the approximation of MRNG, NSG, only uses a set of approximate nearest neighbors as candidates.
+
+For each node $v$ in the Approximate $k$-NN graph, we construct a set $E$ of all checked nodes during the search-on-graph starting from $n$, including the nearest neighbors of $v$. $E$ is used as a priority queue and until $m$ edges with origin $v$ are constructed, its elements are removed.
+
+The edge selection strategy used is the one used for MRNG, but this time, not all edges of each triangle $pvr$ are examined; instead only edges $pv$ and $pr$ are used. If $pv < pr, \forall r$, then there are no conflicts and the edge $vp$ (origin $p$, destination $r$) is added to the NSG graph.
+
+This strategy leads to a disconnected graph, so the rest of nodes are connected using DFS incrementally, with $n$ as the root of the obtained directed spanning tree.
 
 Average construction time: 15-40 minutes.
 
@@ -302,7 +307,7 @@ Average construction time: 15-40 minutes.
 
 The algorithm used for querying the NSG graph is the Search-on-Graph (Generic Search) algorithm with the navigation node as starting point.
 
-## 4.4 General Implementation Details
+## 4.5. General Implementation Details
 
 For the implementation of the algorithms with sets in most cases, we used the following data structures:
 
