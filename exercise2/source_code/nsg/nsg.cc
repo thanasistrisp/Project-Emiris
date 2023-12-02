@@ -49,12 +49,19 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 			double pv = distance(dataset[p], dataset[v]);
 			bool condition = true;
 			for (int r : R) {
-				// If edge pv conflicts with edge pr, break.
-				double pr = distance(dataset[p], dataset[r]);
-				if (pv > pr) {
-					condition = false;
-					break;
+				if (G->is_edge(p, r)) {
+					// if pv longest edge in triangle pvr, break.
+					double pr = distance(dataset[p], dataset[r]);
+					double vr = distance(dataset[v], dataset[r]);
+					if (pv > pr && pv > vr) {
+						condition = false;
+						break;
+					}
 				}
+				else {
+					G->add_edge(p, r);
+				}
+				
 			}
 			// If no conflict occurs, add p to R.
 			if (condition)
@@ -67,9 +74,18 @@ NSG::NSG(const std::vector<std::vector<double>> &dataset, int total_candidates, 
 
 	DirectedGraph *dfs_spanning_tree;
 	unordered_set<int> dfs_checked;
+	bool first = true;
 	while(true){
 		// Build a tree with edges in NSG from root n with DFS.
 		tie(dfs_spanning_tree, dfs_checked) = depth_first_search(*G, navigating_node);
+
+		if (first) {
+			first = false;
+			cout << "NSG tree size: " << dfs_checked.size() << endl;
+		}
+		else {
+			cout << dfs_checked.size() << endl;
+		}
 
 		if(dfs_checked.size() == dataset.size()){
 			delete dfs_spanning_tree;

@@ -136,3 +136,16 @@ void DirectedGraph::load(ifstream& file)
         }
     }
 }
+
+bool DirectedGraph::is_edge(int origin, int destination) const
+{
+    if(origin < 0 || origin >= (int) adjacency_lists.size()){
+        return false;
+    }
+    for(int i = 0; i < (int) adjacency_lists[origin].size(); i++){
+        if(adjacency_lists[origin][i] == destination){
+            return true;
+        }
+    }
+    return false;
+}

@@ -34,4 +34,6 @@ class DirectedGraph
         // Saves/loads the graph to/from a .bin file.
         void save(std::ofstream&) const;
         void load(std::ifstream&);
+
+        bool is_edge(int, int) const;
 };
