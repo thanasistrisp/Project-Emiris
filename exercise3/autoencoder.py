@@ -1,6 +1,13 @@
 import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
+
+import keras
+from keras import layers
+from keras import saving
+
+from tensorflow.keras.models import save_model, load_model
+
+from sklearn.utils import shuffle
+import numpy as np
 
 @keras.saving.register_keras_serializable()
 class Autoencoder(keras.Model):

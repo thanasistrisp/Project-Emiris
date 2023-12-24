@@ -1,4 +1,4 @@
-from autoencoder import autoencoder
+from autoencoder import Autoencoder
 from helper_funcs import *
 
 import os
@@ -33,3 +33,5 @@ output_dataset = args.output_dataset
 output_query = args.output_query
 model = args.model
 
+# load model
+autoencoder = load_model(model)
