@@ -6,6 +6,10 @@ from tensorflow import keras
 
 def save_encoded_binary(encoded_imgs, output_file):
 	with open(output_file, 'wb') as f:
+		# get latent dimension
+		NEW_DIM = encoded_imgs.shape[1] # case dense
+		if encoded_imgs.ndim == 4:      # case conv
+			NEW_DIM *= (encoded_imgs.shape[2] * encoded_imgs.shape[3])
 		# write magic number
 		f.write((0).to_bytes(4, byteorder='big'))
 		# write number of images
