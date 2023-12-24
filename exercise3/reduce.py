@@ -17,13 +17,12 @@ import matplotlib.pyplot as plt
 
 import argparse
 
-
 # handle command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--dataset', help='dataset', type=str)
-parser.add_argument('-q', '--query', help='queryset', type=str)
-parser.add_argument('-od', '--output_dataset', help='output_dataset_file', type=str)
-parser.add_argument('-oq', '--output_query', help='output_query_file', type=str)
+parser.add_argument('-d', '--dataset', help='dataset', type=str, default='MNIST/input.dat')
+parser.add_argument('-q', '--query', help='queryset', type=str, default='MNIST/query.dat')
+parser.add_argument('-od', '--output_dataset', help='output_dataset_file', type=str, default='output.dat')
+parser.add_argument('-oq', '--output_query', help='output_query_file', type=str, default='query.dat')
 parser.add_argument('-m', '--model', help='model_file', type=str, default='models/model_conv_46.keras')
 
 args = parser.parse_args()
@@ -35,3 +34,21 @@ model = args.model
 
 # load model
 autoencoder = load_model(model)
+
+# load dataset
+x_test = load_dataset(query)
+x_test = x_test.astype('float32') / 255.
+x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))
+
+# take first 1000
+x_test = x_test[:1000]
+# split to 50 50
+x_test1 = x_test[:500]
+x_test2 = x_test[500:]
+
+# encode and decode
+encoded_imgs = autoencoder.predict(x_test1).numpy()
+
+# plot
+decoded_imgs = autoencoder.predict(encoded_imgs).numpy()
+print_digits(decoded_imgs, x_test1)

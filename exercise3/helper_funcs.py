@@ -35,7 +35,17 @@ def save_decoded_binary(decoded_imgs, output_file):
 				for k in range(28):
 					f.write(decoded_imgs[i][j * 28 + k].astype('float32').tobytes())
 
-def print_digits(decoded_imgs):
+def load_dataset(dataset):
+	with open(dataset, 'rb') as f:
+		magic_number = int.from_bytes(f.read(4), byteorder='big')
+		num_images = int.from_bytes(f.read(4), byteorder='big')
+		rows = int.from_bytes(f.read(4), byteorder='big')
+		cols = int.from_bytes(f.read(4), byteorder='big')
+		data = np.fromfile(f, dtype=np.uint8)
+		data = data.reshape(num_images, rows, cols)
+		return data
+
+def print_digits(decoded_imgs, x_test):
     n = 10  # How many digits we will display
     plt.figure(figsize=(20, 4))
     for i in range(n):
