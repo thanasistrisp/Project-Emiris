@@ -40,9 +40,7 @@ x_test = load_dataset(query)
 x_test = x_test.astype('float32') / 255.
 x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))
 
-# take first 1000
 x_test = x_test[:1000]
-# split to 50 50
 x_test1 = x_test[:500]
 x_test2 = x_test[500:]
 
