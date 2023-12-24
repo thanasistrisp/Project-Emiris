@@ -9,6 +9,8 @@ from tensorflow.keras.models import save_model, load_model
 from sklearn.utils import shuffle
 import numpy as np
 
+INITIAL_DIM = 784
+
 @keras.saving.register_keras_serializable()
 class Autoencoder(keras.Model):
     def __init__(self, model_type, dim_list, activation, optimizer, loss, patience):
