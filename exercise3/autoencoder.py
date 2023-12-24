@@ -52,17 +52,12 @@ class Autoencoder(keras.Model):
         self.decoder.add(layers.Conv2D(1, self.dim_list[-1][0], activation=activation, padding=self.dim_list[-1][1]))
 
     def encode(self, x):
-        return self.encoder(x)
+        return self.encoder.predict(x)
 
     def decode(self, x):
-        return self.decoder(x)    
-    
-    def call(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
+        return self.decoder.predict(x)
 
-    def predict(self, x):
+    def call(self, x):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
