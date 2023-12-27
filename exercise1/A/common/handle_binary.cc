@@ -44,6 +44,43 @@ vector<vector<double>> read_mnist_data(const string &filename, int number_of_ima
 	return mnist_data;
 }
 
+vector<double> get_mnist_index(const string &filename, int index) {
+	// Read MNIST data from file.
+	ifstream file(filename, ios::binary);
+
+	int magic_number = 0;
+	file.read((char*)&magic_number, sizeof(int));
+	magic_number = reverse_int(magic_number); // Ignore it for our purposes.
+
+	// Read number of images: if 0, read all images.
+	int temp = 0;
+	file.read((char*)&temp, sizeof(int));
+	int number_of_images = reverse_int(temp);
+
+	int rows = 0;
+	file.read((char*)&rows, sizeof(int));
+	rows = reverse_int(rows);
+
+	int cols = 0;
+	file.read((char*)&cols, sizeof(int));
+	cols = reverse_int(cols);
+
+	// Find the desired index from data with offset.
+	file.seekg(rows * cols * index, ios::cur); // rows * cols: size of each image
+
+	// Return image only of the certain row
+	vector<double> mnist_data(rows * cols);
+	for (int r = 0; r < rows; r++) {
+		for (int c = 0; c < cols; c++) { // Read only the desired row.
+			unsigned char temp = 0;
+			file.read((char*)&temp, sizeof(unsigned char));
+			mnist_data[(rows * r) + c] = (double)temp;
+		}
+	}
+
+	return mnist_data;
+}
+
 static int reverse_int(int i) {
 	unsigned char c1, c2, c3, c4; // ci: byte i, int is 4 bytes
 

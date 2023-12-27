@@ -21,8 +21,11 @@
 
 #include "brute_force.hpp"
 
+
 using namespace std;
 using std::cout;
+
+#define cout if(0) cout // Comment this line to enable printing.
 
 vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<variant<int,bool>> &params)
 {
@@ -53,7 +56,7 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 	}
 
 	double elapsed_secs_ANN = 0;
-	double maf = 1;
+	double aaf = 0; // Average approximate factor.
 	int min_neighbors = numeric_limits<int>::max();
 
 	for (int q = 0; q < (int) queries.size(); q++) {
@@ -101,22 +104,21 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
 
-		// Take the minimum approximate factor from all neighbors.
-		int distance_min = distances_ann[0];
-
-		// MAF is maximum approximate factor over all queries.
-		double approximate_factor = (double) distance_min / distances_tnn[0];
-		if (approximate_factor > maf) {
-			maf = approximate_factor;
+		// Take the average approximate factor from all neighbors.
+		double af = 0;
+		for (int i = 0; i < (int) indices_ann.size(); i++) {
+			af += distances_ann[i] / distances_tnn[i];
 		}
+		af /= indices_ann.size();
+		aaf += af;
 	}
 	
-	return {elapsed_secs_ANN / queries.size(), maf, min_neighbors};
+	return {elapsed_secs_ANN / queries.size(), aaf / queries.size(), min_neighbors};
 }
 
 extern "C" void get_gnn_results(const char *input, const char *query, int queries_num,
 										  int k, int E, int R, int N, const char *load_file,
-										  double *approximate_time, double *maf) {
+										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -140,18 +142,18 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 	}
 	cout << "Done" << endl;
 
-	// Return time, MAF.
+	// Return time, aaf.
 	vector<variant<int,bool>> params = {E, R, 0, N, 1};
 	vector<variant<double, int>> results = helper_arg(approximate_knn_graph, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*maf = get<double>(results[1]);
+	*aaf = get<double>(results[1]);
 
 	delete approximate_knn_graph;
 }
 
 extern "C" void get_mrng_results(const char *input, const char *query, int queries_num,
 										  int l, int N, const char *load_file,
-										  double *approximate_time, double *maf) {
+										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -175,11 +177,11 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	}
 	cout << "Done" << endl;
 
-	// Return time, MAF.
+	// Return time, aaf.
 	vector<variant<int,bool>> params = {0, 0, l, N, 2};
 	vector<variant<double, int>> results = helper_arg(mrng, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*maf = get<double>(results[1]);
+	*aaf = get<double>(results[1]);
 
 	delete mrng;
 }
@@ -187,7 +189,7 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 
 extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
 										  int k, int L, int table_size, int window, bool query_trick, int N,
-										  double *approximate_time, double *maf, int *min_neighbors) {
+										  double *approximate_time, double *aaf, int *min_neighbors) {
 	string input_str(input);
 	string query_str(query);
 
@@ -197,11 +199,11 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 	LSH *lsh = new LSH(k, L, table_size, window, dataset);
 	cout << "Done" << endl;
 
-	// Return time, MAF.
+	// Return time, aaf.
 	vector<variant<int,bool>> params = {0, 0, 0, N, 3, query_trick};
 	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*maf = get<double>(results[1]);
+	*aaf = get<double>(results[1]);
 	*min_neighbors = get<int>(results[2]);
 
 	delete lsh;
@@ -209,7 +211,7 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 
 extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
 										  int k, int probes, int M, int N,
-										  double *approximate_time, double *maf) {
+										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 
@@ -219,18 +221,18 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	hypercube *cube = new hypercube(dataset, k, M, probes);
 	cout << "Done" << endl;
 
-	// Return time, MAF.
+	// Return time, aaf.
 	vector<variant<int,bool>> params = {0, 0, 0, N, 4};
 	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*maf = get<double>(results[1]);
+	*aaf = get<double>(results[1]);
 
 	delete cube;
 }
 
 extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
 										  int m, int l, int lq, int k, int N, const char *load_file,
-										  double *approximate_time, double *maf) {
+										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -256,11 +258,141 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	}
 	cout << "Done" << endl;
 
-	// Return time, MAF.
+	// Return time, aaf.
 	vector<variant<int,bool>> params = {0, 0, l, N, 5, lq};
 	vector<variant<double, int>> results = helper_arg(nsg, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
-	*maf = get<double>(results[1]);
+	*aaf = get<double>(results[1]);
 
 	delete nsg;
+}
+
+///////////////////////////////
+///////////////////////////////
+
+struct CA {
+   char* model;
+   int *vals;
+};
+
+extern "C" void get_nearest_neighbor(const char* input, const char* query_string, int query_index, const char* load_file, struct CA* ca, double *approximate_time, int *index) {
+	string input_str(input);
+	string query_str(query_string);
+	string load_file_str(load_file);
+
+	cout << "Read MNIST data" << endl;
+	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector<double> query = get_mnist_index(query_str, query_index);
+
+	if (strcmp(ca->model, "CUBE") == 0) { // k, M, probes
+		hypercube *cube = new hypercube(dataset, ca->vals[0], ca->vals[1], ca->vals[2]);
+		cout << "Done" << endl;
+
+		vector<int> q_proj = cube->calculate_q_proj(query);
+
+		clock_t start_ANN = clock();
+		tuple<vector<int>, vector<double>> ann = cube->query(query, q_proj, 1);
+		clock_t end_ANN = clock();
+
+		*index = get<0>(ann)[0];
+		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+	}
+	else if (strcmp(ca->model, "LSH") == 0) { // k, L, table_size, window, query_trick
+		LSH *lsh = new LSH(ca->vals[0], ca->vals[1], ca->vals[2], ca->vals[3], dataset);
+		cout << "Done" << endl;
+
+		clock_t start_ANN = clock();
+		tuple<vector<int>, vector<double>> ann = lsh->query(query, 1, euclidean_distance, ca->vals[4]);
+		clock_t end_ANN = clock();
+
+		*index = get<0>(ann)[0];
+		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+	}
+	else if (strcmp(ca->model, "MRNG") == 0) { // l
+		MRNG *mrng;
+		if (!load_file_str.empty()) {
+			cout << "Loading graph from file: " << load_file_str << endl;
+			DirectedGraph *G = new DirectedGraph();
+			ifstream graph_file;
+			graph_file.open(load_file);
+			G->load(graph_file);
+			graph_file.close();
+			mrng = new MRNG(dataset, G);
+		}
+		else {
+			cout << "Building graph..." << endl;
+			mrng = new MRNG(dataset);
+		}
+		cout << "Done" << endl;
+
+		clock_t start_ANN = clock();
+		tuple<vector<int>, vector<double>> ann = mrng->query(query, 1, ca->vals[0]);
+		clock_t end_ANN = clock();
+
+		*index = get<0>(ann)[0];
+		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+	}
+	else if (strcmp(ca->model, "NSG") == 0) { // l, m, k, lq
+		NSG *nsg;
+		if (!load_file_str.empty()) {
+			cout << "Loading graph from file: " << load_file_str << endl;
+			DirectedGraph *G = new DirectedGraph();
+			ifstream graph_file;
+			graph_file.open(load_file);
+			G->load(graph_file);
+			int navigating_node;
+			graph_file.read((char*) &navigating_node, sizeof(int));
+			graph_file.close();
+			nsg = new NSG(dataset, G, navigating_node);
+		}
+		else {
+			cout << "Building graph..." << endl;
+			nsg = new NSG(dataset, ca->vals[0], ca->vals[1], ca->vals[2]);
+		}
+		cout << "Done" << endl;
+
+		clock_t start_ANN = clock();
+		tuple<vector<int>, vector<double>> ann = nsg->query(query, 1, ca->vals[3]);
+		clock_t end_ANN = clock();
+
+		*index = get<0>(ann)[0];
+		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+	}
+	else if (strcmp(ca->model, "GNN") == 0) { // k, E, R
+		ApproximateKNNGraph *approximate_knn_graph;
+		if (!load_file_str.empty()) {
+			cout << "Loading graph from file: " << load_file_str << endl;
+			DirectedGraph *G = new DirectedGraph();
+			ifstream graph_file;
+			graph_file.open(load_file);
+			G->load(graph_file);
+			graph_file.close();
+			approximate_knn_graph = new ApproximateKNNGraph(dataset, G);
+		}
+		else {
+			cout << "Building graph..." << endl;
+			approximate_knn_graph = new ApproximateKNNGraph(dataset, ca->vals[0]);
+		}
+		cout << "Done" << endl;
+
+		clock_t start_ANN = clock();
+		tuple<vector<int>, vector<double>> ann = approximate_knn_graph->query(query, 1, ca->vals[1], ca->vals[2]);
+		clock_t end_ANN = clock();
+
+		*index = get<0>(ann)[0];
+		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+	}
+	else if (strcmp(ca->model, "BRUTE") == 0) {
+		clock_t start_ANN = clock();
+		tuple<vector<int>, vector<double>> ann = brute_force(dataset, query, 1);
+		clock_t end_ANN = clock();
+
+		*index = get<0>(ann)[0];
+		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+	
+	}
+	else {
+		cout << "Unknown model" << endl;
+		exit(1);
+	}
 }

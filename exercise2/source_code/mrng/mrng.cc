@@ -40,7 +40,7 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 	unordered_set<int> *Lp = new unordered_set<int>();
 	for (int p: S) {
 		i++;
-		cout << i << endl;
+		// cout << i << endl;
 		// Rp is S - {p}.
 		for (int r : S) {
 			if (r != p) {

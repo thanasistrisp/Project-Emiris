@@ -39,7 +39,7 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
 
 	double elapsed_secs_ANN = 0;
 	double elapsed_secs_TNN = 0;
-	double maf = 1;
+	double aaf = 0; // Average approximate factor.
 
 	for (int q = 0; q < (int) queries.size(); q++) {
 		cout << "Query: " << q << endl;
@@ -68,24 +68,21 @@ void handle_ouput(void *structure, const vector<vector<double>> &dataset, const 
         vector<int> indices_tnn = get<0>(tnn);
         vector<double> distances_tnn = get<1>(tnn);
 
-		// Take the minimum approximate factor from all neighbors.
-		int distance_min = distances_ann[0];
+		// Take the average approximate factor from all neighbors.
+		double af = 0;
         for(int i = 0; (unsigned int) i < indices_ann.size(); i++){
 			output << "Nearest neighbor-" << i+1 << ": " << indices_ann[i] << endl;
 			output << "distanceApproximate: " << distances_ann[i] << endl;
 			output << "distanceTrue: " << distances_tnn[i] << endl;
+			af += distances_ann[i] / distances_tnn[i];
 		}
-
-		// MAF is maximum approximate factor over all queries.
-		double approximate_factor = (double) distance_min / distances_tnn[0];
-		if (approximate_factor > maf) {
-			maf = approximate_factor;
-		}
+		af /= indices_ann.size();
+		aaf += af;
 	}
 
 	output << "tAverageApproximate: " << elapsed_secs_ANN / queries.size() << endl;
 	output << "tAverageTrue: " << elapsed_secs_TNN / queries.size() << endl;
-	output << "MAF: " << maf << endl;
+	output << "MAF: " << aaf / queries.size() << endl;
 	
 	output.close();
 }
