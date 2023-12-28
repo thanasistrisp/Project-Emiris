@@ -42,5 +42,5 @@ int HashFunction::hash(const vector<double>& p)
 
     // Use hash function h_i(p) = floor((p * v + t) / w)
     double result = std::inner_product(p.begin(), p.end(), v.begin(), t);
-    return floor(abs(result) / window);
+    return floor(fabs(result) / window);
 }
