@@ -38,9 +38,10 @@ shape = autoencoder.layers[-2].output_shape[1:] # get shape of encoded layer
 
 # load dataset
 x_train = load_dataset(dataset)
-x_train = x_train.astype('float32') / 255.
+x_train = normalize(x_train)
 x_test = load_dataset(query)
-x_test = x_test.astype('float32') / 255.
+x_test = normalize(x_test)
+
 if len(shape) == 3: # if model type is convolutional
 	x_train = np.reshape(x_train, (len(x_train), 28, 28, 1))
 	x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))
@@ -51,20 +52,30 @@ else:
 encoded_train = autoencoder.encode(x_train)
 encoded_test = autoencoder.encode(x_test)
 
+# deflatten encoded datasets
+encoded_train = deflatten_encoded(encoded_train, shape)
+encoded_test = deflatten_encoded(encoded_test, shape)
+
+# decode encoded datasets
+decoded_train = autoencoder.decode(encoded_train)
+decoded_test = autoencoder.decode(encoded_test)
+
+# save original datasets normalized
+save_decoded_binary(x_train, 'MNIST/normalized_dataset.dat')
+save_decoded_binary(x_test, 'MNIST/normalized_query.dat')
+
+# normalize encoded datasets
+encoded_train = normalize(encoded_train)
+encoded_test = normalize(encoded_test)
+
 # save encoded datasets
 save_encoded_binary(encoded_train, output_dataset)
 save_encoded_binary(encoded_test, output_query)
 
-# # load encoded datasets (already normalized)
-# encoded_train = load_dataset(output_dataset, dtype=np.float32)
-# encoded_test = load_dataset(output_query, dtype=np.float32)
+# normalize decoded datasets
+decoded_train = normalize(decoded_train)
+decoded_test = normalize(decoded_test)
 
-# # deflatten encoded datasets
-# encoded_train = deflatten_encoded(encoded_train, shape)
-# encoded_test = deflatten_encoded(encoded_test, shape)
-
-# # decode encoded datasets
-# decoded_train = autoencoder.decode(encoded_train)
-# decoded_test = autoencoder.decode(encoded_test)
-
-# print_digits(decoded_train, x_train)
+# save decoded datasets
+save_decoded_binary(decoded_train, 'MNIST/decoded_dataset.dat')
+save_decoded_binary(decoded_test, 'MNIST/decoded_query.dat')

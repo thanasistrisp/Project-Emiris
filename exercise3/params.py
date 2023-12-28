@@ -48,16 +48,32 @@ def nsg_test(input, query, queries_num, m, l, lq, k, N):
 
 class CA(Structure):
     _fields_ = [('model', c_char_p),
-                ('vals', POINTER(c_int))]
+                ('enc_vals', POINTER(c_int)),
+                ('dataset', c_char_p),
+                ('query', c_char_p),
+                ('encoded_dataset', c_char_p),
+                ('decoded_dataset', c_char_p)]
 
-def get_nearest_neighbor(input, query, query_index, model, params, load_file = b''):
+def get_aaf(queries_num, ca, load_file = b''):
     tmp = CA()
-    tmp.model = model
-    tmp.vals = (c_int * len(params))(*params)
-    lib.get_nearest_neighbor.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
-    average_time = ctypes.c_double()
-    index = ctypes.c_int()
-    lib.get_nearest_neighbor(input, query, query_index, load_file, ctypes.byref(tmp), ctypes.byref(average_time), ctypes.byref(index))
-    average_time = average_time.value
-    index = index.value
-    return average_time, index
+    tmp.model = ca['model']
+    tmp.enc_vals = (ctypes.c_int * len(ca['enc_vals']))(*ca['enc_vals'])
+    tmp.dataset = ca['dataset']
+    tmp.query = ca['query']
+    tmp.encoded_dataset = ca['encoded_dataset']
+    tmp.decoded_dataset = ca['decoded_dataset']
+    lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_double))
+    aaf = ctypes.c_double()
+    lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf))
+    return aaf.value
+
+ca = {
+    'model': b'BRUTE',
+    'enc_vals': [5,10,10],
+    'dataset': b'MNIST/normalized_dataset.dat',
+    'query': b'MNIST/normalized_query.dat',
+    'encoded_dataset': b'MNIST/output_dataset.dat',
+    'decoded_dataset': b'MNIST/decoded_dataset.dat',
+}
+
+print(get_aaf(10, ca))

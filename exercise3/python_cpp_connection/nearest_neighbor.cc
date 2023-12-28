@@ -25,7 +25,7 @@
 using namespace std;
 using std::cout;
 
-#define cout if(0) cout // Comment this line to enable printing.
+// #define cout if(0) cout // Comment this line to enable printing.
 
 vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<variant<int,bool>> &params)
 {
@@ -271,94 +271,83 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 ///////////////////////////////
 
 struct CA {
-   char* model;
-   int *vals;
+   char* model; // CUBE, LSH, MRNG, NSG, GNN, BRUTE
+   int *enc_vals; // parameters for encoded space
+   const char *dataset;
+   const char *query;
+   const char *encoded_dataset;
+   const char *decoded_dataset;
 };
-
-extern "C" void get_nearest_neighbor(const char* input, const char* query_string, int query_index, const char* load_file, struct CA* ca, double *approximate_time, int *index) {
-	string input_str(input);
-	string query_str(query_string);
+extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, double *aaf) {
+	// Initialize structure.
+	string dataset_str(ca->dataset);
+	string query_str(ca->query);
+	string encoded_dataset_str(ca->encoded_dataset);
+	string decoded_dataset_str(ca->decoded_dataset);
 	string load_file_str(load_file);
 
+	if (!file_exists(dataset_str)) {
+		cout << "File " << dataset_str << " does not exist." << endl;
+		exit(1);
+	}
+	if (!file_exists(query_str)) {
+		cout << "File " << query_str << " does not exist." << endl;
+		exit(1);
+	}
+	if (!file_exists(encoded_dataset_str)) {
+		cout << "File " << encoded_dataset_str << " does not exist." << endl;
+		exit(1);
+	}
+	if (!file_exists(decoded_dataset_str)) {
+		cout << "File " << decoded_dataset_str << " does not exist." << endl;
+		exit(1);
+	}
+	if (!load_file_str.empty() && !file_exists(load_file_str)) {
+		cout << "File " << load_file_str << " does not exist." << endl;
+		exit(1);
+	}
+
+	void *structure;
+
 	cout << "Read MNIST data" << endl;
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector<double> query = get_mnist_index(query_str, query_index);
+	vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
+	vector <vector<double>> queries = read_mnist_data_float(query_str, queries_num);
+	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
+	vector <vector<double>> decoded_dataset = read_mnist_data_float(decoded_dataset_str);
 
-	if (strcmp(ca->model, "CUBE") == 0) { // k, M, probes
-		hypercube *cube = new hypercube(dataset, ca->vals[0], ca->vals[1], ca->vals[2]);
+	if (strcmp(ca->model, "CUBE") == 0) {
+		cout << "Building hypercube..." << endl;
+		int k = ca->enc_vals[0];
+		int M = ca->enc_vals[1];
+		int probes = ca->enc_vals[2];
+		structure = new hypercube(encoded_dataset, k, M, probes);
 		cout << "Done" << endl;
-
-		vector<int> q_proj = cube->calculate_q_proj(query);
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = cube->query(query, q_proj, 1);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 	}
-	else if (strcmp(ca->model, "LSH") == 0) { // k, L, table_size, window, query_trick
-		LSH *lsh = new LSH(ca->vals[0], ca->vals[1], ca->vals[2], ca->vals[3], dataset);
+	else if (strcmp(ca->model, "LSH") == 0) {
+		cout << "Building LSH..." << endl;
+		int k = ca->enc_vals[0];
+		int L = ca->enc_vals[1];
+		int table_size = ca->enc_vals[2];
+		int window = ca->enc_vals[3];
+		structure = new LSH(k, L, table_size, window, encoded_dataset);
 		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = lsh->query(query, 1, euclidean_distance, ca->vals[4]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 	}
-	else if (strcmp(ca->model, "MRNG") == 0) { // l
-		MRNG *mrng;
-		if (!load_file_str.empty()) {
-			cout << "Loading graph from file: " << load_file_str << endl;
-			DirectedGraph *G = new DirectedGraph();
-			ifstream graph_file;
-			graph_file.open(load_file);
-			G->load(graph_file);
-			graph_file.close();
-			mrng = new MRNG(dataset, G);
-		}
-		else {
-			cout << "Building graph..." << endl;
-			mrng = new MRNG(dataset);
-		}
+	else if (strcmp(ca->model, "MRNG") == 0) {
+		cout << "Building MRNG..." << endl;
+		structure = new MRNG(encoded_dataset);
 		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = mrng->query(query, 1, ca->vals[0]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 	}
-	else if (strcmp(ca->model, "NSG") == 0) { // l, m, k, lq
-		NSG *nsg;
-		if (!load_file_str.empty()) {
-			cout << "Loading graph from file: " << load_file_str << endl;
-			DirectedGraph *G = new DirectedGraph();
-			ifstream graph_file;
-			graph_file.open(load_file);
-			G->load(graph_file);
-			int navigating_node;
-			graph_file.read((char*) &navigating_node, sizeof(int));
-			graph_file.close();
-			nsg = new NSG(dataset, G, navigating_node);
-		}
-		else {
-			cout << "Building graph..." << endl;
-			nsg = new NSG(dataset, ca->vals[0], ca->vals[1], ca->vals[2]);
-		}
+	else if (strcmp(ca->model, "NSG") == 0) {
+		cout << "Building NSG..." << endl;
+		int l = ca->enc_vals[0];
+		int m = ca->enc_vals[1];
+		int k = ca->enc_vals[2];
+		structure = new NSG(encoded_dataset, l, m, k);
 		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = nsg->query(query, 1, ca->vals[3]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 	}
-	else if (strcmp(ca->model, "GNN") == 0) { // k, E, R
+	else if (strcmp(ca->model, "GNN") == 0) {
+		cout << "Building graph..." << endl;
+		int k = ca->enc_vals[0];
 		ApproximateKNNGraph *approximate_knn_graph;
 		if (!load_file_str.empty()) {
 			cout << "Loading graph from file: " << load_file_str << endl;
@@ -367,32 +356,84 @@ extern "C" void get_nearest_neighbor(const char* input, const char* query_string
 			graph_file.open(load_file);
 			G->load(graph_file);
 			graph_file.close();
-			approximate_knn_graph = new ApproximateKNNGraph(dataset, G);
+			approximate_knn_graph = new ApproximateKNNGraph(encoded_dataset, G);
 		}
 		else {
 			cout << "Building graph..." << endl;
-			approximate_knn_graph = new ApproximateKNNGraph(dataset, ca->vals[0]);
+			approximate_knn_graph = new ApproximateKNNGraph(encoded_dataset, k);
 		}
 		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = approximate_knn_graph->query(query, 1, ca->vals[1], ca->vals[2]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+		structure = approximate_knn_graph;
 	}
 	else if (strcmp(ca->model, "BRUTE") == 0) {
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = brute_force(dataset, query, 1);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
-	
+		structure = NULL;
 	}
 	else {
 		cout << "Unknown model" << endl;
 		exit(1);
+	}
+
+	double aaf_ = 0;
+	if (queries_num == -1)
+		queries_num = queries.size();
+	for (int q = 0; q < queries_num; q++) {
+		vector<double> query_init = queries[q];
+		tuple<vector<int>, vector<double>> true_nn_init_ = brute_force(dataset, query_init, 1);
+		vector<double> true_nn_init = dataset[get<0>(true_nn_init_)[0]];
+		vector<double> query_enc = encoded_dataset[q];
+		tuple<vector<int>, vector<double>> ann_enc_;
+
+		if (strcmp(ca->model, "CUBE") == 0) {
+			vector<int> q_proj = ((hypercube*) structure)->calculate_q_proj(query_enc);
+			ann_enc_ = ((hypercube*) structure)->query(query_enc, q_proj, 1);
+		}
+		else if (strcmp(ca->model, "LSH") == 0) {
+			bool query_trick = ca->enc_vals[4];
+			ann_enc_ = ((LSH*) structure)->query(query_enc, 1, euclidean_distance, query_trick);
+		}
+		else if (strcmp(ca->model, "MRNG") == 0) {
+			int l = ca->enc_vals[0];
+			ann_enc_ = ((MRNG*) structure)->query(query_enc, 1, l);
+		}
+		else if (strcmp(ca->model, "NSG") == 0) {
+			int lq = ca->enc_vals[4];
+			ann_enc_ = ((NSG*) structure)->query(query_enc, 1, lq);
+		}
+		else if (strcmp(ca->model, "GNN") == 0) {
+			int N = ca->enc_vals[0];
+			int E = ca->enc_vals[1];
+			int R = ca->enc_vals[3];
+			ann_enc_ = ((ApproximateKNNGraph*) structure)->query(query_enc, N, E, R);
+		}
+		else if (strcmp(ca->model, "BRUTE") == 0) {
+			ann_enc_ = brute_force(encoded_dataset, query_enc, 1);
+		}
+		else {
+			cout << "Unknown model" << endl;
+			exit(1);
+		}
+
+		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
+		vector<double> ann_init = decoded_dataset[get<0>(ann_enc_)[0]];
+
+		aaf_ += euclidean_distance(query_init, ann_init) / euclidean_distance(query_init, true_nn_init);
+	}
+	*aaf = aaf_ / queries_num;
+
+	// Free memory.
+	if (strcmp(ca->model, "CUBE") == 0) {
+		delete (hypercube*) structure;
+	}
+	else if (strcmp(ca->model, "LSH") == 0) {
+		delete (LSH*) structure;
+	}
+	else if (strcmp(ca->model, "MRNG") == 0) {
+		delete (MRNG*) structure;
+	}
+	else if (strcmp(ca->model, "NSG") == 0) {
+		delete (NSG*) structure;
+	}
+	else if (strcmp(ca->model, "GNN") == 0) {
+		delete (ApproximateKNNGraph*) structure;
 	}
 }

@@ -48,6 +48,11 @@ def load_dataset(dataset, dtype=np.uint8):
 		data = data.reshape(num_images, rows, cols)
 	return data
 
+def normalize(x):
+	max_value = np.max(x)
+	min_value = np.min(x)
+	return (x - min_value) / (max_value - min_value)
+
 def print_digits(decoded_imgs, x_test):
     n = 10  # How many digits we will display
     plt.figure(figsize=(20, 4))
