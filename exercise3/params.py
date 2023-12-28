@@ -50,14 +50,35 @@ class CA(Structure):
     _fields_ = [('model', c_char_p),
                 ('vals', POINTER(c_int))]
 
-def get_nearest_neighbor(input, query, query_index, model, params, load_file = b''):
+def initialize_ann(input, model, params, load_file = b''): # returns structure
     tmp = CA()
     tmp.model = model
     tmp.vals = (c_int * len(params))(*params)
-    lib.get_nearest_neighbor.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
+    lib.initialize_ann.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_void_p))
+    structure = ctypes.c_void_p()
+    lib.initialize_ann(input, load_file, ctypes.byref(tmp), ctypes.byref(structure))
+    return structure
+
+structure = initialize_ann(b'MNIST/output_dataset.dat', b'CUBE', [3,10,10])
+print(structure)
+
+def freeme(structure, model):
+    lib.freeme.argtypes = (ctypes.c_void_p, ctypes.c_char_p)
+    lib.freeme(structure, model)
+
+# freeme(structure, b'LSH')
+
+def get_nearest_neighbor(input, query, query_index, model, params, structure, load_file = b''):
+    tmp = CA()
+    tmp.model = model
+    tmp.vals = (c_int * len(params))(*params)
+    lib.get_nearest_neighbor.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
     average_time = ctypes.c_double()
     index = ctypes.c_int()
-    lib.get_nearest_neighbor(input, query, query_index, load_file, ctypes.byref(tmp), ctypes.byref(average_time), ctypes.byref(index))
+    lib.get_nearest_neighbor(input, query, query_index, load_file, ctypes.byref(tmp), ctypes.byref(structure), ctypes.byref(average_time), ctypes.byref(index))
     average_time = average_time.value
     index = index.value
     return average_time, index
+
+a,b = get_nearest_neighbor(b'MNIST/input.dat', b'MNIST/query.dat', 1, b'CUBE', [], structure)
+print(a,b)

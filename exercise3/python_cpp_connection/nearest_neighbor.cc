@@ -25,7 +25,7 @@
 using namespace std;
 using std::cout;
 
-#define cout if(0) cout // Comment this line to enable printing.
+// #define cout if(0) cout // Comment this line to enable printing.
 
 vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries, vector<variant<int,bool>> &params)
 {
@@ -275,38 +275,17 @@ struct CA {
    int *vals;
 };
 
-extern "C" void get_nearest_neighbor(const char* input, const char* query_string, int query_index, const char* load_file, struct CA* ca, double *approximate_time, int *index) {
+extern "C" void initialize_ann(const char *input, const char *load_file, struct CA* ca, void **structure) {
 	string input_str(input);
-	string query_str(query_string);
 	string load_file_str(load_file);
 
 	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector<double> query = get_mnist_index(query_str, query_index);
-
 	if (strcmp(ca->model, "CUBE") == 0) { // k, M, probes
-		hypercube *cube = new hypercube(dataset, ca->vals[0], ca->vals[1], ca->vals[2]);
-		cout << "Done" << endl;
-
-		vector<int> q_proj = cube->calculate_q_proj(query);
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = cube->query(query, q_proj, 1);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+		*structure = new hypercube(dataset, ca->vals[0], ca->vals[1], ca->vals[2]);
 	}
 	else if (strcmp(ca->model, "LSH") == 0) { // k, L, table_size, window, query_trick
-		LSH *lsh = new LSH(ca->vals[0], ca->vals[1], ca->vals[2], ca->vals[3], dataset);
-		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = lsh->query(query, 1, euclidean_distance, ca->vals[4]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+		*structure = new LSH(ca->vals[0], ca->vals[1], ca->vals[2], ca->vals[3], dataset);
 	}
 	else if (strcmp(ca->model, "MRNG") == 0) { // l
 		MRNG *mrng;
@@ -323,14 +302,7 @@ extern "C" void get_nearest_neighbor(const char* input, const char* query_string
 			cout << "Building graph..." << endl;
 			mrng = new MRNG(dataset);
 		}
-		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = mrng->query(query, 1, ca->vals[0]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+		*structure = mrng;
 	}
 	else if (strcmp(ca->model, "NSG") == 0) { // l, m, k, lq
 		NSG *nsg;
@@ -349,14 +321,7 @@ extern "C" void get_nearest_neighbor(const char* input, const char* query_string
 			cout << "Building graph..." << endl;
 			nsg = new NSG(dataset, ca->vals[0], ca->vals[1], ca->vals[2]);
 		}
-		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = nsg->query(query, 1, ca->vals[3]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+		*structure = nsg;
 	}
 	else if (strcmp(ca->model, "GNN") == 0) { // k, E, R
 		ApproximateKNNGraph *approximate_knn_graph;
@@ -373,26 +338,84 @@ extern "C" void get_nearest_neighbor(const char* input, const char* query_string
 			cout << "Building graph..." << endl;
 			approximate_knn_graph = new ApproximateKNNGraph(dataset, ca->vals[0]);
 		}
-		cout << "Done" << endl;
-
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = approximate_knn_graph->query(query, 1, ca->vals[1], ca->vals[2]);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+		*structure = approximate_knn_graph;
 	}
 	else if (strcmp(ca->model, "BRUTE") == 0) {
-		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = brute_force(dataset, query, 1);
-		clock_t end_ANN = clock();
-
-		*index = get<0>(ann)[0];
-		*approximate_time = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
-	
+		*structure = NULL;
 	}
 	else {
 		cout << "Unknown model" << endl;
 		exit(1);
 	}
+	cout << "pointer1: " << structure << endl;
+}
+
+extern "C" void freeme(void *structure, const char *model) {
+	if (strcmp(model, "CUBE") == 0) {
+		delete (hypercube*) structure;
+	}
+	else if (strcmp(model, "LSH") == 0) {
+		delete (LSH*) structure;
+	}
+	else if (strcmp(model, "MRNG") == 0) {
+		delete (MRNG*) structure;
+	}
+	else if (strcmp(model, "NSG") == 0) {
+		delete (NSG*) structure;
+	}
+	else if (strcmp(model, "GNN") == 0) {
+		delete (ApproximateKNNGraph*) structure;
+	}
+	else if (strcmp(model, "BRUTE") == 0) {
+		// Do nothing.
+	}
+	else {
+		cout << "Unknown model" << endl;
+		exit(1);
+	}
+}
+
+
+extern "C" void get_nearest_neighbor(const char* input, const char* query_string, int query_index, const char* load_file, struct CA* ca, void *structure, double *time, int *index) {
+	string input_str(input);
+	string load_file_str(load_file);
+	string query_str(query_string);
+
+	cout << "Read MNIST data" << endl;
+	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector <vector<double>> queries = read_mnist_data(query_str, 1);
+	cout << "Done" << endl;
+
+	clock_t start_ANN = clock();
+	if (strcmp(ca->model, "CUBE") == 0) {
+		vector<int> q_proj = ((hypercube*) structure)->calculate_q_proj(queries[0]);
+		tuple<vector<int>, vector<double>> ann = ((hypercube*) structure)->query(queries[0], q_proj, 1);
+		*index = get<0>(ann)[0];
+	}
+	else if (strcmp(ca->model, "LSH") == 0) {
+		bool query_trick = ca->vals[4];
+		tuple<vector<int>, vector<double>> ann = ((LSH*) structure)->query(queries[0], 1, euclidean_distance, query_trick);
+		*index = get<0>(ann)[0];
+	}
+	else if (strcmp(ca->model, "MRNG") == 0) {
+		tuple<vector<int>, vector<double>> ann = ((MRNG*) structure)->query(queries[0], 1, ca->vals[0]);
+		*index = get<0>(ann)[0];
+	}
+	else if (strcmp(ca->model, "NSG") == 0) {
+		tuple<vector<int>, vector<double>> ann = ((NSG*) structure)->query(queries[0], 1, ca->vals[2]);
+		*index = get<0>(ann)[0];
+	}
+	else if (strcmp(ca->model, "GNN") == 0) {
+		tuple<vector<int>, vector<double>> ann = ((ApproximateKNNGraph*) structure)->query(queries[0], ca->vals[3], ca->vals[1], ca->vals[2]);
+		*index = get<0>(ann)[0];
+	}
+	else if (strcmp(ca->model, "BRUTE") == 0) {
+		tuple<vector<int>, vector<double>> ann = brute_force(dataset, queries[0], 1);
+		*index = get<0>(ann)[0];
+	}
+	else {
+		cout << "Unknown model" << endl;
+		exit(1);
+	}
+	*time = double(clock() - start_ANN) / CLOCKS_PER_SEC;
 }
