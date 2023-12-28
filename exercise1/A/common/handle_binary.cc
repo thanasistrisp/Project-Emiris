@@ -10,6 +10,11 @@ static int reverse_int(int);
 vector<vector<double>> read_mnist_data(const string &filename, int number_of_images) {
 	// Read MNIST data from file.
 	ifstream file(filename, ios::binary);
+	if(!file){
+		cout << "Error: could not open file" << endl;
+		vector<vector<double>> ret;
+		return ret;
+	}
 
 	int magic_number = 0;
 	file.read((char*)&magic_number, sizeof(int));
@@ -47,6 +52,11 @@ vector<vector<double>> read_mnist_data(const string &filename, int number_of_ima
 vector<double> get_mnist_index(const string &filename, int index) {
 	// Read MNIST data from file.
 	ifstream file(filename, ios::binary);
+	if(!file){
+		cout << "Error: could not open file" << endl;
+		vector<double> ret;
+		return ret;
+	}
 
 	int magic_number = 0;
 	file.read((char*)&magic_number, sizeof(int));
