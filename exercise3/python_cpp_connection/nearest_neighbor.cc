@@ -278,7 +278,7 @@ struct CA {
    const char *encoded_dataset;
    const char *decoded_dataset;
 };
-extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, double *aaf) {
+extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, double *aaf, double *time) {
 	// Initialize structure.
 	string dataset_str(ca->dataset);
 	string query_str(ca->query);
@@ -374,6 +374,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 	}
 
 	double aaf_ = 0;
+	double time_ = 0;
 	if (queries_num == -1)
 		queries_num = queries.size();
 	for (int q = 0; q < queries_num; q++) {
@@ -382,6 +383,8 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 		vector<double> true_nn_init = dataset[get<0>(true_nn_init_)[0]];
 		vector<double> query_enc = encoded_dataset[q];
 		tuple<vector<int>, vector<double>> ann_enc_;
+
+		clock_t start_ANN = clock();
 
 		if (strcmp(ca->model, "CUBE") == 0) {
 			vector<int> q_proj = ((hypercube*) structure)->calculate_q_proj(query_enc);
@@ -413,12 +416,17 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 			exit(1);
 		}
 
+		clock_t end_ANN = clock();
+
+		time_ += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
+
 		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
 		vector<double> ann_init = decoded_dataset[get<0>(ann_enc_)[0]];
 
 		aaf_ += euclidean_distance(query_init, ann_init) / euclidean_distance(query_init, true_nn_init);
 	}
 	*aaf = aaf_ / queries_num;
+	*time = time_ / queries_num;
 
 	// Free memory.
 	if (strcmp(ca->model, "CUBE") == 0) {

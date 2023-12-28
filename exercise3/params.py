@@ -62,10 +62,11 @@ def get_aaf(queries_num, ca, load_file = b''):
     tmp.query = ca['query']
     tmp.encoded_dataset = ca['encoded_dataset']
     tmp.decoded_dataset = ca['decoded_dataset']
-    lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_double))
+    lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     aaf = ctypes.c_double()
-    lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf))
-    return aaf.value
+    time = ctypes.c_double()
+    lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
+    return aaf.value, time.value
 
 ca = {
     'model': b'BRUTE',
