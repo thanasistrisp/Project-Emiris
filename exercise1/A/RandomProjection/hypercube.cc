@@ -17,9 +17,7 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
 	this->M = M;
 	this->probes = probes;
 	this->distance = distance;
-	
-	clock_t start = clock();
-	
+		
 	// Initialize h_i functions, i = 1, ..., k.
     HashFunction *h;
     for(int i = 0; i < k; i++){
@@ -53,9 +51,6 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
 			hash_table->insert(pair<binary_string, vector<int>>(bs, v));
 		}
 	}
-
-	clock_t end = clock();
-	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
 }
 
 hypercube::~hypercube() {

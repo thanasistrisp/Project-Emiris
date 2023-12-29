@@ -29,7 +29,6 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 	clock_t end_lsh = clock();
 	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	// cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
-	start = clock();
 	
 	// Initialize G.
 	for (int i = 0; i < (int) dataset.size(); i++) {
@@ -72,10 +71,6 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 		}
 		G->add_edge(i, neighbors_indices);
 	}
-
-	clock_t end = clock();
-	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-	// cout << "ApproximateKNNGraph initialization time: " << elapsed_secs << endl;
 }
 
 ApproximateKNNGraph::~ApproximateKNNGraph()

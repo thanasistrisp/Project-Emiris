@@ -21,55 +21,55 @@ class sil_struct:
         lib.free_double_array.argtypes = (ctypes.POINTER(ctypes.c_double),)
         lib.free_double_array(self.pointer)
 
-def lsh_test(input, query, queries_num, k, L, table_size, window_size, query_trick, N):
-    lib.get_lsh_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
+def lsh_test(input, query, queries_num, k, L, table_size, window_size, query_trick, N, int_data=1):
+    lib.get_lsh_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
     min_neighbors = ctypes.c_int()
-    lib.get_lsh_results(input, query, queries_num, k, L, table_size, window_size, query_trick, N, ctypes.byref(average_time), ctypes.byref(aaf), ctypes.byref(min_neighbors))
+    lib.get_lsh_results(input, query, queries_num, k, L, table_size, window_size, query_trick, N, int_data, ctypes.byref(average_time), ctypes.byref(aaf), ctypes.byref(min_neighbors))
     return average_time, aaf, min_neighbors
 
-def hypercube_test(input, query, queries_num, k, M, probes, N):
-    lib.get_hypercube_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def hypercube_test(input, query, queries_num, k, M, probes, N, int_data=1):
+    lib.get_hypercube_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
-    lib.get_hypercube_results(input, query, queries_num, k, M, probes, N, ctypes.byref(average_time), ctypes.byref(aaf))
+    lib.get_hypercube_results(input, query, queries_num, k, M, probes, N, int_data, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
-def kmeans_test(config):
+def kmeans_test(config, int_data=1):
     tmp = encoded_config()
     tmp.model = config['model'] # field for method
     tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
     tmp.dataset = config['dataset']
-    lib.get_kmeans_results.argtypes = (ctypes.POINTER(encoded_config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+    lib.get_kmeans_results.argtypes = (ctypes.POINTER(encoded_config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
     clustering_time = ctypes.c_double()
     sil = ctypes.POINTER(ctypes.c_double)()
-    lib.get_kmeans_results(ctypes.byref(tmp), ctypes.byref(stotal), ctypes.byref(clustering_time), ctypes.byref(sil))
+    lib.get_kmeans_results(ctypes.byref(tmp), int_data, ctypes.byref(stotal), ctypes.byref(clustering_time), ctypes.byref(sil))
     silhouette = sil_struct()
     silhouette.pointer = sil
     silhouette.val = [sil[i] for i in range(10)]
     return stotal.value, clustering_time.value, silhouette
 
-def gnn_test(input, query, queries_num, k, E, R, N, load_file=b''):
-    lib.get_gnn_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def gnn_test(input, query, queries_num, k, E, R, N, int_data = 1, load_file=b''):
+    lib.get_gnn_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
-    lib.get_gnn_results(input, query, queries_num, k, E, R, N, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
+    lib.get_gnn_results(input, query, queries_num, k, E, R, N, int_data, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
-def mrng_test(input, query, queries_num, l, N, load_file=b''):
-    lib.get_mrng_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def mrng_test(input, query, queries_num, l, N, int_data = 1, load_file=b''):
+    lib.get_mrng_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
-    lib.get_mrng_results(input, query, queries_num, l, N, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
+    lib.get_mrng_results(input, query, queries_num, l, N, int_data, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
-def nsg_test(input, query, queries_num, m, l, lq, k, N, load_file=b''):
-    lib.get_nsg_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def nsg_test(input, query, queries_num, m, l, lq, k, N, int_data = 1, load_file=b''):
+    lib.get_nsg_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
-    lib.get_nsg_results(input, query, queries_num, m, l, lq, k, N, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
+    lib.get_nsg_results(input, query, queries_num, m, l, lq, k, N, int_data, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
  
 def get_stotal(config):

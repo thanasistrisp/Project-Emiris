@@ -95,13 +95,23 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 }
 
 extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
-										  int k, int L, int table_size, int window, bool query_trick, int N,
+										  int k, int L, int table_size, int window, bool query_trick, int N, int int_data,
 										  double *approximate_time, double *aaf, int *min_neighbors) {
 	string input_str(input);
 	string query_str(query);
 
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	vector <vector<double>> dataset;
+	vector <vector<double>> queries;
+	if (int_data) {
+		dataset = read_mnist_data(input_str);
+		queries = read_mnist_data(query_str, queries_num);
+	}
+	else {
+		dataset = read_mnist_data_float(input_str);
+		queries = read_mnist_data_float(query_str, queries_num);
+	}
+
+
 	LSH *lsh = new LSH(k, L, table_size, window, dataset);
 
 	// Return time, aaf.
@@ -115,13 +125,22 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 }
 
 extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
-										  int k, int probes, int M, int N,
+										  int k, int probes, int M, int N, int int_data, 
 										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	vector <vector<double>> dataset;
+	vector <vector<double>> queries;
+	if (int_data) {
+		dataset = read_mnist_data(input_str);
+		queries = read_mnist_data(query_str, queries_num);
+	}
+	else {
+		dataset = read_mnist_data_float(input_str);
+		queries = read_mnist_data_float(query_str, queries_num);
+	}
+
 	hypercube *cube = new hypercube(dataset, k, M, probes);
 
 	// Return time, aaf.
@@ -134,14 +153,23 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 }
 
 extern "C" void get_gnn_results(const char *input, const char *query, int queries_num,
-										  int k, int E, int R, int N, const char *load_file,
+										  int k, int E, int R, int N, int int_data, const char *load_file,
 										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
 	
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	vector <vector<double>> dataset;
+	vector <vector<double>> queries;
+	if (int_data) {
+		dataset = read_mnist_data(input_str);
+		queries = read_mnist_data(query_str, queries_num);
+	}
+	else {
+		dataset = read_mnist_data_float(input_str);
+		queries = read_mnist_data_float(query_str, queries_num);
+	}
+
 	ApproximateKNNGraph *approximate_knn_graph;
 	if (!load_file_str.empty()) {
 		DirectedGraph *G = new DirectedGraph();
@@ -165,14 +193,23 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 }
 
 extern "C" void get_mrng_results(const char *input, const char *query, int queries_num,
-										  int l, int N, const char *load_file,
+										  int l, int N, int int_data, const char *load_file,
 										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
 	
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	vector <vector<double>> dataset;
+	vector <vector<double>> queries;
+	if (int_data) {
+		dataset = read_mnist_data(input_str);
+		queries = read_mnist_data(query_str, queries_num);
+	}
+	else {
+		dataset = read_mnist_data_float(input_str);
+		queries = read_mnist_data_float(query_str, queries_num);
+	}
+
 	MRNG *mrng;
 	if (!load_file_str.empty()) {
 		DirectedGraph *G = new DirectedGraph();
@@ -196,14 +233,23 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 }
 
 extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
-										  int m, int l, int lq, int k, int N, const char *load_file,
+										  int m, int l, int lq, int k, int N, int int_data, const char *load_file,
 										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
 	
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	vector <vector<double>> dataset;
+	vector <vector<double>> queries;
+	if (int_data) {
+		dataset = read_mnist_data(input_str);
+		queries = read_mnist_data(query_str, queries_num);
+	}
+	else {
+		dataset = read_mnist_data_float(input_str);
+		queries = read_mnist_data_float(query_str, queries_num);
+	}
+	
 	NSG *nsg;
 	if (!load_file_str.empty()) {
 		DirectedGraph *G = new DirectedGraph();

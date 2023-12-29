@@ -69,7 +69,7 @@ vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct encode
     return {clustering_time, stotal};
 }
 
-extern "C" void get_kmeans_results(struct encoded_config *config,
+extern "C" void get_kmeans_results(struct encoded_config *config, int int_data,
 								   double *clustering_time, double *stotal, double **sil)
 {
     *sil = (double*) malloc(10 * sizeof(double));
@@ -77,7 +77,14 @@ extern "C" void get_kmeans_results(struct encoded_config *config,
 	string input_str(config->dataset);
 	string method_str(config->model);
 
-	vector <vector<double>> dataset = read_mnist_data_float(input_str);
+	vector <vector<double>> dataset;
+    if (int_data == 1) {
+        dataset = read_mnist_data(input_str);
+    }
+    else {
+        dataset = read_mnist_data_float(input_str);
+    }
+
 	KMeans *kmeans = new KMeans(dataset);
 
 	// Return time, stotal.
