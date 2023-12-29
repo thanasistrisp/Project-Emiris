@@ -35,25 +35,6 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 	int R = get<int>(params[2]);
 	int l = get<int>(params[3]);
 	int N = get<int>(params[4]);
-	if (m == 1) {
-		cout << "Algorithm: GNN" << endl;
-	}
-	else if (m == 2) {
-		cout << "Algorithm: MRNG" << endl;
-	}
-	else if (m == 3) {
-		cout << "Algorithm: LSH" << endl;
-	}
-	else if (m == 4) {
-		cout << "Algorithm: Cube" << endl;
-	}
-	else if (m == 5) {
-		cout << "Algorithm: NSG" << endl;
-	}
-	else {
-		cout << "Algorithm: Unknown" << endl;
-		exit(1);
-	}
 
 	double elapsed_secs_ANN = 0;
 	double aaf = 0; // Average approximate factor.
@@ -291,14 +272,12 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 		int table_size = config->enc_vals[2];
 		int window = config->enc_vals[3];
 		structure = new LSH(k, L, table_size, window, encoded_dataset);
-		cout << "Done" << endl;
 	}
 	else if (strcmp(config->model, "CUBE") == 0) {
 		int k = config->enc_vals[0];
 		int M = config->enc_vals[1];
 		int probes = config->enc_vals[2];
 		structure = new hypercube(encoded_dataset, k, M, probes);
-		cout << "Done" << endl;
 	}
 	else if (strcmp(config->model, "GNNS") == 0) {
 		int k = config->enc_vals[0];

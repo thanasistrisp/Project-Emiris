@@ -19,7 +19,6 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
 	this->distance = distance;
 	
 	clock_t start = clock();
-	cout << "Preprocessing..." << endl;
 	
 	// Initialize h_i functions, i = 1, ..., k.
     HashFunction *h;
@@ -57,7 +56,6 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
 
 	clock_t end = clock();
 	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-	cout << "Preprocessing time: " << elapsed_secs << endl;
 }
 
 hypercube::~hypercube() {
