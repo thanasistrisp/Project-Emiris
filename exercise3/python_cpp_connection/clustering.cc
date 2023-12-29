@@ -107,7 +107,7 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
     vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
     vector <vector<double>> decoded_dataset = read_mnist_data_float(decoded_dataset_str);
 
-    void *structure = new KMeans(dataset);
+    KMeans* kmeans = new KMeans(dataset);
 
     string method_str = config->model;
     update_method method;
@@ -130,25 +130,25 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
 
     cout << "Running clustering algorithm..." << endl;
     clock_t start = clock();
-    ((KMeans*)structure)->compute_clusters(10, method, kmean_args);
+    kmeans->compute_clusters(10, method, kmean_args);
     clock_t end = clock();
     double clustering_time_ = (double)(end - start) / CLOCKS_PER_SEC;
 
-    vector<vector<int>> clusters = ((KMeans*) structure)->get_clusters();
+    vector<vector<int>> clusters = kmeans->get_clusters();
     vector<double> si(clusters.size(), 0);
     double stotal_ = 0;
     for (int i = 0; i < (int) clusters.size(); i++) {
         for (int j = 0; j < (int) clusters[i].size(); j++) {
-            si[i] += ((KMeans*) structure)->silhouette(clusters[i][j], decoded_dataset);
+            si[i] += kmeans->silhouette(clusters[i][j], decoded_dataset);
         }
         stotal_ += si[i];
         si[i] /= clusters[i].size();
     }
-    stotal_ /= ((KMeans*) structure)->get_dataset_size();
+    stotal_ /= kmeans->get_dataset_size();
 
     *stotal = stotal_;
     *clustering_time = clustering_time_;
 
     // Free memory.
-    delete (KMeans*) structure;
+    delete kmeans;
 }
