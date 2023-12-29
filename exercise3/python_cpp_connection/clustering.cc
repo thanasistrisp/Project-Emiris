@@ -29,54 +29,56 @@ using std::cout;
 
 // #define cout if(0) cout // Comment this line to enable printing.
 
-vector<variant<double, int>> helper_arg_cluster(void *structure, vector<variant<int, bool, string>> &params)
+vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct encoded_config *config, double **sil)
 {
-    string method_str = get<string>(params[0]);
+    string method_str = config->model;
     update_method method;
-    tuple<int, int, int, int, int> config;
+    tuple<int, int, int, int, int> config_tuple;
     if (method_str == "CLASSIC") {
         method = CLASSIC;
-        config = make_tuple(0, 0, 0, 0, 0);
+        config_tuple = make_tuple(0, 0, 0, 0, 0);
     }
     else if (method_str == "LSH") {
         method = REVERSE_LSH;
-        config = make_tuple(get<int>(params[1]), get<int>(params[2]), 0, 0, 0);
+        config_tuple = make_tuple(config->enc_vals[0], config->enc_vals[1], 0, 0, 0);
     }
     else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
-        config = make_tuple(0, 0, get<int>(params[1]), get<int>(params[2]), get<int>(params[3]));
+        config_tuple = make_tuple(0, 0, config->enc_vals[0], config->enc_vals[1], config->enc_vals[2]);
     }
     else {
         cout << "Invalid method." << endl;
         exit(1);
     }
     clock_t start = clock();
-    ((KMeans*) structure)->compute_clusters(10, method, config);
+    structure->compute_clusters(10, method, config_tuple);
     clock_t end = clock();
     double clustering_time = (double)(end - start) / CLOCKS_PER_SEC;
 
-    vector<vector<int>> clusters = ((KMeans*) structure)->get_clusters();
+    vector<vector<int>> clusters = structure->get_clusters();
     vector<double> si(clusters.size(), 0);
     double stotal = 0;
     for (int i = 0; i < (int) clusters.size(); i++) {
         for (int j = 0; j < (int) clusters[i].size(); j++) {
-            si[i] += ((KMeans*) structure)->silhouette(clusters[i][j]);
+            si[i] += structure->silhouette(clusters[i][j]);
         }
         stotal += si[i];
         si[i] /= clusters[i].size();
+        (*sil)[i] = si[i];
     }
-    stotal /= ((KMeans*) structure)->get_dataset_size();
+    stotal /= structure->get_dataset_size();
 
     // Return time, aaf.
     return {clustering_time, stotal};
 }
 
-extern "C" void get_kmeans_results(const char *input, const char *method,
-                                    int L, int k_lsh, int M, int k_hypercube, int probes,
-									double *clustering_time, double *stotal)
+extern "C" void get_kmeans_results(struct encoded_config *config,
+								   double *clustering_time, double *stotal, double **sil)
 {
-	string input_str(input);
-	string method_str(method);
+    *sil = (double*) malloc(10 * sizeof(double));
+
+	string input_str(config->dataset);
+	string method_str(config->model);
 
 	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data_float(input_str);
@@ -84,8 +86,7 @@ extern "C" void get_kmeans_results(const char *input, const char *method,
 	cout << "Done" << endl;
 
 	// Return time, stotal.
-	vector<variant<int, bool, string>> params = {method_str, L, k_lsh, M, k_hypercube, probes};
-	vector<variant<double, int>> results = helper_arg_cluster(kmeans, params);
+	vector<variant<double, int>> results = helper_arg_cluster(kmeans, config, sil);
 	*clustering_time = get<double>(results[0]);
 	*stotal = get<double>(results[1]);
 
