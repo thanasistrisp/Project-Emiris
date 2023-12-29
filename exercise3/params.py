@@ -55,6 +55,14 @@ class encoded_config(Structure):
                 ('query', c_char_p),
                 ('encoded_dataset', c_char_p),
                 ('decoded_dataset', c_char_p)]
+
+class sil_struct:
+    pointer = POINTER(c_double)
+    val = []
+
+    def __del__(self):
+        lib.free_double_array.argtypes = (ctypes.POINTER(ctypes.c_double),)
+        lib.free_double_array(self.pointer)
     
 def get_stotal(config):
     tmp = encoded_config()
@@ -65,8 +73,12 @@ def get_stotal(config):
     lib.get_stotal.argtypes = (ctypes.POINTER(encoded_config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     stotal = ctypes.c_double()
     time = ctypes.c_double()
-    lib.get_stotal(ctypes.byref(tmp), ctypes.byref(stotal), ctypes.byref(time))
-    return stotal.value, time.value
+    sil = ctypes.POINTER(ctypes.c_double)()
+    lib.get_stotal(ctypes.byref(tmp), ctypes.byref(stotal), ctypes.byref(time), ctypes.byref(sil))
+    silhouette = sil_struct()
+    silhouette.pointer = sil
+    silhouette.val = [sil[i] for i in range(10)]
+    return stotal.value, time.value, silhouette
 
 def get_aaf(queries_num, config, load_file = b''):
     tmp = encoded_config()
@@ -83,12 +95,16 @@ def get_aaf(queries_num, config, load_file = b''):
     return aaf.value, time.value
 
 config = {
-    'model': b'BRUTE',
-    'enc_vals': [5,10,10],
+    'model': b'CLASSIC',
+    'enc_vals': [],
     'dataset': b'MNIST/normalized_dataset.dat',
     'query': b'MNIST/normalized_query.dat',
     'encoded_dataset': b'MNIST/output_dataset.dat',
     'decoded_dataset': b'MNIST/decoded_dataset.dat',
 }
 
-print(get_aaf(10, config))
+stotal, time, sil = get_stotal(config)
+print("stotal: ", stotal)
+print("time: ", time)
+print("silhouette: ", sil.val)
+del sil

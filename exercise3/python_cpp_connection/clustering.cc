@@ -27,24 +27,28 @@
 using namespace std;
 using std::cout;
 
-#define cout if(0) cout // Comment this line to enable printing.
+// #define cout if(0) cout // Comment this line to enable printing.
 
 vector<variant<double, int>> helper_arg_cluster(void *structure, vector<variant<int, bool, string>> &params)
 {
     string method_str = get<string>(params[0]);
     update_method method;
     tuple<int, int, int, int, int> config;
-    if (method_str == "classic") {
+    if (method_str == "CLASSIC") {
         method = CLASSIC;
         config = make_tuple(0, 0, 0, 0, 0);
     }
-    else if (method_str == "lsh") {
+    else if (method_str == "LSH") {
         method = REVERSE_LSH;
         config = make_tuple(get<int>(params[1]), get<int>(params[2]), 0, 0, 0);
     }
-    else {
+    else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
         config = make_tuple(0, 0, get<int>(params[1]), get<int>(params[2]), get<int>(params[3]));
+    }
+    else {
+        cout << "Invalid method." << endl;
+        exit(1);
     }
     clock_t start = clock();
     ((KMeans*) structure)->compute_clusters(10, method, config);
@@ -88,8 +92,12 @@ extern "C" void get_kmeans_results(const char *input, const char *method,
 	delete kmeans;
 }
 
-extern "C" void get_stotal(struct encoded_config* config, double *stotal, double *clustering_time)
+extern "C" void free_double_array(double *sil) { free(sil); }
+
+extern "C" void get_stotal(struct encoded_config* config, double *stotal, double *clustering_time, double **sil)
 {
+    *sil = (double*) malloc(10 * sizeof(double));
+
     // Initialize structure.
     string dataset_str(config->dataset);
     string decoded_dataset_str(config->decoded_dataset);
@@ -112,19 +120,23 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
     string method_str = config->model;
     update_method method;
     int L = 0, k_lsh = 0, M = 0, k_hypercube = 0, probes = 0;
-    if (method_str == "classic") {
+    if (method_str == "CLASSIC") {
         method = CLASSIC;
     }
-    else if (method_str == "lsh") {
+    else if (method_str == "LSH") {
         method = REVERSE_LSH;
         L = config->enc_vals[0];
         k_lsh = config->enc_vals[1];
     }
-    else {
+    else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
         M = config->enc_vals[0];
         k_hypercube = config->enc_vals[1];
         probes = config->enc_vals[2];
+    }
+    else {
+        cout << "Invalid method." << endl;
+        exit(1);
     }
     tuple<int, int, int, int, int> kmean_args = make_tuple(L, k_lsh, M, k_hypercube, probes);
 
@@ -143,6 +155,7 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
         }
         stotal_ += si[i];
         si[i] /= clusters[i].size();
+        (*sil)[i] = si[i];
     }
     stotal_ /= kmeans->get_dataset_size();
 
