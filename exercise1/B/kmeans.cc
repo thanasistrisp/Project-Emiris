@@ -360,3 +360,30 @@ double KMeans::silhouette(int i)
     
     return (b - a) / max(a, b);
 }
+
+double KMeans::silhouette(int i, const vector<vector<double>> &dataset)
+{
+    int cluster = point_to_cluster[i];
+    double a = 0, b = 0;
+    for(int j : clusters[cluster]){
+        a += distance(dataset[i], dataset[j]);
+    }
+    a /= clusters[cluster].size();
+
+    // Find second closest cluster.
+    int c1 = cluster, c2 = -1;
+    for(int j = 0; j < (int) centroids.size(); j++){
+        if(j != c1){
+            double dist = distance(dataset[i], centroids[j]);
+            if(c2 == -1 || dist < distance(dataset[i], centroids[c2])){
+                c2 = j;
+            }
+        }
+    }
+    for(int j : clusters[c2]){
+        b += distance(dataset[i], dataset[j]);
+    }
+    b /= clusters[c2].size();
+    
+    return (b - a) / max(a, b);
+}

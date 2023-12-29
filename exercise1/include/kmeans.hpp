@@ -79,4 +79,5 @@ class KMeans
         
         // Returns the silhouette of the i-th point of the dataset.
         double silhouette(int i);
+        double silhouette(int i, const std::vector<std::vector<double>> &dataset); 
 };
