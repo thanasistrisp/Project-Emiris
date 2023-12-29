@@ -20,6 +20,6 @@ shared_lib.so_OBJS = \
 					 $(EXERCISE2)/source_code/common/depth_first_search.o \
 					 $(EXERCISE2)/source_code/common/handle_output.o \
 					 $(TESTING)/nearest_neighbor.o \
-					#  $(TESTING)/kmeans.o
+					 $(TESTING)/clustering.o
 
 include ../common.mk

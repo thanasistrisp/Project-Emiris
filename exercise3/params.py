@@ -20,6 +20,13 @@ def hypercube_test(input, query, queries_num, k, M, probes, N):
     lib.get_hypercube_results(input, query, queries_num, k, M, probes, N, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
+def kmeans_test(input, method, k, L, k_lsh, M, k_hypercube, probes):
+    lib.get_kmeans_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.int, ctypes.int, ctypes.int, ctypes.int, ctypes.int, ctypes.int)
+    clustering_time = ctypes.c_double()
+    stotal = ctypes.c_double()
+    lib.get_kmeans_results(input, method, k, L, k_lsh, M, k_hypercube, probes)
+    return clustering_time, stotal
+
 def gnn_test(input, query, queries_num, k, E, R, N, load_file=b''):
     lib.get_gnn_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     average_time = ctypes.c_double()
@@ -72,4 +79,4 @@ ca = {
     'decoded_dataset': b'MNIST/decoded_dataset.dat',
 }
 
-print(get_aaf(10, ca))
+# print(get_aaf(10, ca))

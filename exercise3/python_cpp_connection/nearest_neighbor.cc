@@ -29,14 +29,14 @@ using std::cout;
 #define cout if(0) cout // Comment this line to enable printing.
 
 vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries,
-										vector<variant<int, bool, string>> &params)
+										vector<variant<int, bool>> &params)
 {
 	// Initialize parameters.
-	int E = get<int>(params[0]);
-	int R = get<int>(params[1]);
-	int l = get<int>(params[2]);
-	int N = get<int>(params[3]);
-	int m = get<int>(params[4]);
+	int m = get<int>(params[0]);
+	int E = get<int>(params[1]);
+	int R = get<int>(params[2]);
+	int l = get<int>(params[3]);
+	int N = get<int>(params[4]);
 	if (m == 1) {
 		cout << "Algorithm: GNN" << endl;
 	}
@@ -82,39 +82,6 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 		else if (m == 5){
 			int lq = get<int>(params[5]);
 			ann = ((NSG*) structure)->query(queries[q], N, lq);
-		}
-		else {
-			int probes = get<int>(params[5]);
-			string method_str = get<string>(params[6]);
-			update_method method;
-			if (method_str == "classic") {
-				method = CLASSIC;
-			}
-			else if (method_str == "lsh") {
-				method = REVERSE_LSH;
-			}
-			else if (method_str == "hypercube") {
-				method = REVERSE_HYPERCUBE;
-			}
-			tuple<int, int, int, int, int> config = make_tuple(E, R, l, N, probes);
-			clock_t start = clock();
-			((KMeans*) structure)->compute_clusters(10, method, config);
-			clock_t end = clock();
-			double clustering_time = (double)(end - start) / CLOCKS_PER_SEC;
-
-			vector<vector<int>> clusters = ((KMeans*) structure)->get_clusters();
-			vector<double> si(clusters.size(), 0);
-			double stotal = 0;
-			for (int i = 0; i < (int) clusters.size(); i++) {
-				for (int j = 0; j < (int) clusters[i].size(); j++) {
-					si[i] += ((KMeans*) structure)->silhouette(clusters[i][j]);
-				}
-				stotal += si[i];
-				si[i] /= clusters[i].size();
-			}
-			stotal /= ((KMeans*) structure)->get_dataset_size();
-
-			return {clustering_time, stotal};
 		}
 		if (q == 0) {
 			int temp = get<0>(ann).size();
@@ -176,7 +143,7 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 	cout << "Done" << endl;
 
 	// Return time, aaf.
-	vector<variant<int, bool, string>> params = {E, R, 0, N, 1};
+	vector<variant<int, bool>> params = {1, E, R, 0, N};
 	vector<variant<double, int>> results = helper_arg(approximate_knn_graph, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*aaf = get<double>(results[1]);
@@ -211,7 +178,7 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	cout << "Done" << endl;
 
 	// Return time, aaf.
-	vector<variant<int, bool, string>> params = {0, 0, l, N, 2};
+	vector<variant<int, bool>> params = {2, 0, 0, l, N};
 	vector<variant<double, int>> results = helper_arg(mrng, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*aaf = get<double>(results[1]);
@@ -233,7 +200,7 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 	cout << "Done" << endl;
 
 	// Return time, aaf.
-	vector<variant<int, bool, string>> params = {0, 0, 0, N, 3, query_trick};
+	vector<variant<int, bool>> params = {3, 0, 0, 0, N, query_trick};
 	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*aaf = get<double>(results[1]);
@@ -255,34 +222,12 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	cout << "Done" << endl;
 
 	// Return time, aaf.
-	vector<variant<int, bool, string>> params = {0, 0, 0, N, 4};
+	vector<variant<int, bool>> params = {4, 0, 0, 0, N};
 	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*aaf = get<double>(results[1]);
 
 	delete cube;
-}
-
-extern "C" void get_kmeans_results(const char *input, const char *query, int queries_num,
-									const char *method, int L, int k_lsh, int M, int k_hypercube, int probes,
-									double *clustering_time, double *stotal) {
-	string input_str(input);
-	string query_str(query);
-	string method_str(method);
-
-	cout << "Read MNIST data" << endl;
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
-	KMeans *kmeans = new KMeans(dataset);
-	cout << "Done" << endl;
-
-	// Return time, stotal.
-	vector<variant<int, bool, string>> params = {L, k_lsh, M, k_hypercube, 6, probes, method_str};
-	vector<variant<double, int>> results = helper_arg(kmeans, dataset, queries, params);
-	*clustering_time = get<double>(results[0]);
-	*stotal = get<double>(results[1]);
-
-	delete kmeans;
 }
 
 extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
@@ -314,7 +259,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	cout << "Done" << endl;
 
 	// Return time, aaf.
-	vector<variant<int, bool, string>> params = {0, 0, l, N, 5, lq};
+	vector<variant<int, bool>> params = {5, 0, 0, l, N, lq};
 	vector<variant<double, int>> results = helper_arg(nsg, dataset, queries, params);
 	*approximate_time = get<double>(results[0]);
 	*aaf = get<double>(results[1]);
