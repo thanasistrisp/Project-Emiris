@@ -96,6 +96,50 @@ vector<vector<double>> read_mnist_data_float(const string &filename, int number_
 	return mnist_data;
 }
 
+vector<double> get_mnist_float_index(const string &filename, int index) {
+	// Read MNIST data from file.
+	if (!file_exists(filename)) {
+		cout << "File " << filename << " does not exist." << endl;
+		exit(1);
+	}
+
+	ifstream file(filename, ios::binary);
+
+	int magic_number = 0;
+	file.read((char*)&magic_number, sizeof(int));
+	magic_number = reverse_int(magic_number); // Ignore it for our purposes.
+
+	// Read number of images: if 0, read all images.
+	int temp = 0;
+	file.read((char*)&temp, sizeof(int));
+	// int number_of_images = reverse_int(temp);
+
+	int rows = 0;
+	file.read((char*)&rows, sizeof(int));
+	rows = reverse_int(rows);
+
+	int cols = 0;
+	file.read((char*)&cols, sizeof(int));
+	cols = reverse_int(cols);
+
+	// Read data.
+	// go to position of index
+	file.seekg(16 + (rows * cols * index * sizeof(float)));
+	vector<double> mnist_data(rows * cols);
+	for (int r = 0; r < rows; r++) {
+		for (int c = 0; c < cols; c++) {
+				unsigned char temp[4];
+				file.read((char*)&temp, sizeof(unsigned char) * 4);
+				float f;
+				memcpy(&f, &temp, sizeof(float));
+				mnist_data[(rows * r) + c] = (double)f;
+		}
+	}
+
+	return mnist_data;
+
+}
+
 static int reverse_int(int i) {
 	unsigned char c1, c2, c3, c4; // ci: byte i, int is 4 bytes
 

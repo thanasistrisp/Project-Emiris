@@ -7,8 +7,7 @@
 // Reads the dataset from the given file and returns a vector of vectors (Important: it does not check if the file exists).
 std::vector<std::vector<double>> read_mnist_data(const std::string &filename, int num=0);
 std::vector<std::vector<double>> read_mnist_data_float(const std::string &filename, int num=0);
-std::vector<double> get_mnist_index(const std::string &filename, int index);
-
+std::vector<double> get_mnist_float_index(const std::string &filename, int index);
 
 // Reads the config file and returns a tuple of the parameters (Important: it does not check if the file exists).
 /* The tuple contains:

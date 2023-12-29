@@ -313,7 +313,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 	vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
 	vector <vector<double>> queries = read_mnist_data_float(query_str, queries_num);
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
-	vector <vector<double>> decoded_dataset = read_mnist_data_float(decoded_dataset_str);
 
 	if (strcmp(ca->model, "CUBE") == 0) {
 		cout << "Building hypercube..." << endl;
@@ -421,7 +420,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 		time_ += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
 		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
-		vector<double> ann_init = decoded_dataset[get<0>(ann_enc_)[0]];
+		vector<double> ann_init = get_mnist_float_index(decoded_dataset_str, get<0>(ann_enc_)[0]);
 
 		aaf_ += euclidean_distance(query_init, ann_init) / euclidean_distance(query_init, true_nn_init);
 	}
