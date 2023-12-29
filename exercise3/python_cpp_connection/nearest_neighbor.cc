@@ -14,8 +14,9 @@
 #include "defines.hpp"
 #include "lp_metric.hpp"
 
-#include "brute_force.hpp"
+#include "encoded_config.hpp"
 
+#include "brute_force.hpp"
 #include "lsh.hpp"
 #include "hypercube.hpp"
 #include "kmeans.hpp"
@@ -116,6 +117,49 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 	return {elapsed_secs_ANN / queries.size(), aaf / queries.size(), min_neighbors};
 }
 
+extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
+										  int k, int L, int table_size, int window, bool query_trick, int N,
+										  double *approximate_time, double *aaf, int *min_neighbors) {
+	string input_str(input);
+	string query_str(query);
+
+	cout << "Read MNIST data" << endl;
+	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	LSH *lsh = new LSH(k, L, table_size, window, dataset);
+	cout << "Done" << endl;
+
+	// Return time, aaf.
+	vector<variant<int, bool>> params = {3, 0, 0, 0, N, query_trick};
+	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
+	*approximate_time = get<double>(results[0]);
+	*aaf = get<double>(results[1]);
+	*min_neighbors = get<int>(results[2]);
+
+	delete lsh;
+}
+
+extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
+										  int k, int probes, int M, int N,
+										  double *approximate_time, double *aaf) {
+	string input_str(input);
+	string query_str(query);
+
+	cout << "Read MNIST data" << endl;
+	vector <vector<double>> dataset = read_mnist_data(input_str);
+	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
+	hypercube *cube = new hypercube(dataset, k, M, probes);
+	cout << "Done" << endl;
+
+	// Return time, aaf.
+	vector<variant<int, bool>> params = {4, 0, 0, 0, N};
+	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
+	*approximate_time = get<double>(results[0]);
+	*aaf = get<double>(results[1]);
+
+	delete cube;
+}
+
 extern "C" void get_gnn_results(const char *input, const char *query, int queries_num,
 										  int k, int E, int R, int N, const char *load_file,
 										  double *approximate_time, double *aaf) {
@@ -186,50 +230,6 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	delete mrng;
 }
 
-
-extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
-										  int k, int L, int table_size, int window, bool query_trick, int N,
-										  double *approximate_time, double *aaf, int *min_neighbors) {
-	string input_str(input);
-	string query_str(query);
-
-	cout << "Read MNIST data" << endl;
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
-	LSH *lsh = new LSH(k, L, table_size, window, dataset);
-	cout << "Done" << endl;
-
-	// Return time, aaf.
-	vector<variant<int, bool>> params = {3, 0, 0, 0, N, query_trick};
-	vector<variant<double, int>> results = helper_arg(lsh, dataset, queries, params);
-	*approximate_time = get<double>(results[0]);
-	*aaf = get<double>(results[1]);
-	*min_neighbors = get<int>(results[2]);
-
-	delete lsh;
-}
-
-extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
-										  int k, int probes, int M, int N,
-										  double *approximate_time, double *aaf) {
-	string input_str(input);
-	string query_str(query);
-
-	cout << "Read MNIST data" << endl;
-	vector <vector<double>> dataset = read_mnist_data(input_str);
-	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
-	hypercube *cube = new hypercube(dataset, k, M, probes);
-	cout << "Done" << endl;
-
-	// Return time, aaf.
-	vector<variant<int, bool>> params = {4, 0, 0, 0, N};
-	vector<variant<double, int>> results = helper_arg(cube, dataset, queries, params);
-	*approximate_time = get<double>(results[0]);
-	*aaf = get<double>(results[1]);
-
-	delete cube;
-}
-
 extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
 										  int m, int l, int lq, int k, int N, const char *load_file,
 										  double *approximate_time, double *aaf) {
@@ -270,21 +270,12 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 ///////////////////////////////
 ///////////////////////////////
 
-struct CA {
-   char* model;   // LSH, CUBE, MRNG, NSG, GNN, BRUTE
-   int *enc_vals; // parameters for encoded space
-   const char *dataset;
-   const char *query;
-   const char *encoded_dataset;
-   const char *decoded_dataset;
-};
-
-extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, double *aaf, double *time) {
+extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_config* config, double *aaf, double *time) {
 	// Initialize structure.
-	string dataset_str(ca->dataset);
-	string query_str(ca->query);
-	string encoded_dataset_str(ca->encoded_dataset);
-	string decoded_dataset_str(ca->decoded_dataset);
+	string dataset_str(config->dataset);
+	string query_str(config->query);
+	string encoded_dataset_str(config->encoded_dataset);
+	string decoded_dataset_str(config->decoded_dataset);
 	string load_file_str(load_file);
 
 	if (!file_exists(dataset_str)) {
@@ -315,39 +306,25 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 	vector <vector<double>> queries = read_mnist_data_float(query_str, queries_num);
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
 
-	if (strcmp(ca->model, "CUBE") == 0) {
-		cout << "Building hypercube..." << endl;
-		int k = ca->enc_vals[0];
-		int M = ca->enc_vals[1];
-		int probes = ca->enc_vals[2];
-		structure = new hypercube(encoded_dataset, k, M, probes);
-		cout << "Done" << endl;
-	}
-	else if (strcmp(ca->model, "LSH") == 0) {
+	if (strcmp(config->model, "LSH") == 0) {
 		cout << "Building LSH..." << endl;
-		int k = ca->enc_vals[0];
-		int L = ca->enc_vals[1];
-		int table_size = ca->enc_vals[2];
-		int window = ca->enc_vals[3];
+		int k = config->enc_vals[0];
+		int L = config->enc_vals[1];
+		int table_size = config->enc_vals[2];
+		int window = config->enc_vals[3];
 		structure = new LSH(k, L, table_size, window, encoded_dataset);
 		cout << "Done" << endl;
 	}
-	else if (strcmp(ca->model, "MRNG") == 0) {
-		cout << "Building MRNG..." << endl;
-		structure = new MRNG(encoded_dataset);
+	else if (strcmp(config->model, "CUBE") == 0) {
+		cout << "Building hypercube..." << endl;
+		int k = config->enc_vals[0];
+		int M = config->enc_vals[1];
+		int probes = config->enc_vals[2];
+		structure = new hypercube(encoded_dataset, k, M, probes);
 		cout << "Done" << endl;
 	}
-	else if (strcmp(ca->model, "NSG") == 0) {
-		cout << "Building NSG..." << endl;
-		int l = ca->enc_vals[0];
-		int m = ca->enc_vals[1];
-		int k = ca->enc_vals[2];
-		structure = new NSG(encoded_dataset, l, m, k);
-		cout << "Done" << endl;
-	}
-	else if (strcmp(ca->model, "GNN") == 0) {
-		cout << "Building graph..." << endl;
-		int k = ca->enc_vals[0];
+	else if (strcmp(config->model, "GNNS") == 0) {
+		int k = config->enc_vals[0];
 		ApproximateKNNGraph *approximate_knn_graph;
 		if (!load_file_str.empty()) {
 			cout << "Loading graph from file: " << load_file_str << endl;
@@ -365,7 +342,51 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 		cout << "Done" << endl;
 		structure = approximate_knn_graph;
 	}
-	else if (strcmp(ca->model, "BRUTE") == 0) {
+	else if (strcmp(config->model, "MRNG") == 0) {
+		cout << "Building MRNG..." << endl;
+		// structure = new MRNG(encoded_dataset);
+		MRNG *mrng;
+		if(!load_file_str.empty()){
+			cout << "Loading graph from file: " << load_file_str << endl;
+			DirectedGraph *G = new DirectedGraph();
+			ifstream graph_file;
+			graph_file.open(load_file);
+			G->load(graph_file);
+			graph_file.close();
+			mrng = new MRNG(dataset, G);
+		}
+		else{
+			cout << "Building graph..." << endl;
+			mrng = new MRNG(encoded_dataset);
+		}
+		cout << "Done" << endl;
+		structure = mrng;
+	}
+	else if (strcmp(config->model, "NSG") == 0) {
+		cout << "Building NSG..." << endl;
+		int l = config->enc_vals[0];
+		int m = config->enc_vals[1];
+		int k = config->enc_vals[2];
+		NSG *nsg;
+		if(!load_file_str.empty()){
+			cout << "Loading graph from file: " << load_file_str << endl;
+			DirectedGraph *G = new DirectedGraph();
+			ifstream graph_file;
+			graph_file.open(load_file);
+			G->load(graph_file);
+			int navigating_node;
+			graph_file.read((char*) &navigating_node, sizeof(int));
+			graph_file.close();
+			nsg = new NSG(encoded_dataset, G, navigating_node);
+		}
+		else{
+			cout << "Building graph..." << endl;
+			nsg = new NSG(encoded_dataset, l, m, k);
+		}
+		cout << "Done" << endl;
+		structure = nsg;
+	}
+	else if (strcmp(config->model, "BRUTE") == 0) {
 		structure = NULL;
 	}
 	else {
@@ -386,29 +407,29 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 
 		clock_t start_ANN = clock();
 
-		if (strcmp(ca->model, "CUBE") == 0) {
+		if (strcmp(config->model, "LSH") == 0) {
+			bool query_trick = config->enc_vals[4];
+			ann_enc_ = ((LSH*) structure)->query(query_enc, 1, euclidean_distance, query_trick);
+		}
+		else if (strcmp(config->model, "CUBE") == 0) {
 			vector<int> q_proj = ((hypercube*) structure)->calculate_q_proj(query_enc);
 			ann_enc_ = ((hypercube*) structure)->query(query_enc, q_proj, 1);
 		}
-		else if (strcmp(ca->model, "LSH") == 0) {
-			bool query_trick = ca->enc_vals[4];
-			ann_enc_ = ((LSH*) structure)->query(query_enc, 1, euclidean_distance, query_trick);
-		}
-		else if (strcmp(ca->model, "MRNG") == 0) {
-			int l = ca->enc_vals[0];
-			ann_enc_ = ((MRNG*) structure)->query(query_enc, 1, l);
-		}
-		else if (strcmp(ca->model, "NSG") == 0) {
-			int lq = ca->enc_vals[4];
-			ann_enc_ = ((NSG*) structure)->query(query_enc, 1, lq);
-		}
-		else if (strcmp(ca->model, "GNN") == 0) {
-			int N = ca->enc_vals[0];
-			int E = ca->enc_vals[1];
-			int R = ca->enc_vals[3];
+		else if (strcmp(config->model, "GNNS") == 0) {
+			int N = config->enc_vals[0];
+			int E = config->enc_vals[1];
+			int R = config->enc_vals[3];
 			ann_enc_ = ((ApproximateKNNGraph*) structure)->query(query_enc, N, E, R);
 		}
-		else if (strcmp(ca->model, "BRUTE") == 0) {
+		else if (strcmp(config->model, "MRNG") == 0) {
+			int l = config->enc_vals[0];
+			ann_enc_ = ((MRNG*) structure)->query(query_enc, 1, l);
+		}
+		else if (strcmp(config->model, "NSG") == 0) {
+			int lq = config->enc_vals[4];
+			ann_enc_ = ((NSG*) structure)->query(query_enc, 1, lq);
+		}
+		else if (strcmp(config->model, "BRUTE") == 0) {
 			ann_enc_ = brute_force(encoded_dataset, query_enc, 1);
 		}
 		else {
@@ -429,19 +450,19 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct CA* ca, d
 	*time = time_ / queries_num;
 
 	// Free memory.
-	if (strcmp(ca->model, "CUBE") == 0) {
+	if (strcmp(config->model, "CUBE") == 0) {
 		delete (hypercube*) structure;
 	}
-	else if (strcmp(ca->model, "LSH") == 0) {
+	else if (strcmp(config->model, "LSH") == 0) {
 		delete (LSH*) structure;
 	}
-	else if (strcmp(ca->model, "MRNG") == 0) {
+	else if (strcmp(config->model, "MRNG") == 0) {
 		delete (MRNG*) structure;
 	}
-	else if (strcmp(ca->model, "NSG") == 0) {
+	else if (strcmp(config->model, "NSG") == 0) {
 		delete (NSG*) structure;
 	}
-	else if (strcmp(ca->model, "GNN") == 0) {
+	else if (strcmp(config->model, "GNNS") == 0) {
 		delete (ApproximateKNNGraph*) structure;
 	}
 }

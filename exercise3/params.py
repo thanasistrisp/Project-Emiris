@@ -48,29 +48,41 @@ def nsg_test(input, query, queries_num, m, l, lq, k, N, load_file=b''):
     lib.get_nsg_results(input, query, queries_num, m, l, lq, k, N, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
-class CA(Structure):
+class encoded_config(Structure):
     _fields_ = [('model', c_char_p),
                 ('enc_vals', POINTER(c_int)),
                 ('dataset', c_char_p),
                 ('query', c_char_p),
                 ('encoded_dataset', c_char_p),
                 ('decoded_dataset', c_char_p)]
+    
+def get_stotal(config):
+    tmp = encoded_config()
+    tmp.model = config['model'] # field for method
+    tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
+    tmp.dataset = config['dataset']
+    tmp.decoded_dataset = config['decoded_dataset']
+    lib.get_stotal.argtypes = (ctypes.POINTER(encoded_config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+    stotal = ctypes.c_double()
+    time = ctypes.c_double()
+    lib.get_stotal(ctypes.byref(tmp), ctypes.byref(stotal), ctypes.byref(time))
+    return stotal.value, time.value
 
-def get_aaf(queries_num, ca, load_file = b''):
-    tmp = CA()
-    tmp.model = ca['model']
-    tmp.enc_vals = (ctypes.c_int * len(ca['enc_vals']))(*ca['enc_vals'])
-    tmp.dataset = ca['dataset']
-    tmp.query = ca['query']
-    tmp.encoded_dataset = ca['encoded_dataset']
-    tmp.decoded_dataset = ca['decoded_dataset']
-    lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(CA), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def get_aaf(queries_num, config, load_file = b''):
+    tmp = encoded_config()
+    tmp.model = config['model']
+    tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
+    tmp.dataset = config['dataset']
+    tmp.query = config['query']
+    tmp.encoded_dataset = config['encoded_dataset']
+    tmp.decoded_dataset = config['decoded_dataset']
+    lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(encoded_config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     aaf = ctypes.c_double()
     time = ctypes.c_double()
     lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
     return aaf.value, time.value
 
-ca = {
+config = {
     'model': b'BRUTE',
     'enc_vals': [5,10,10],
     'dataset': b'MNIST/normalized_dataset.dat',
@@ -79,4 +91,4 @@ ca = {
     'decoded_dataset': b'MNIST/decoded_dataset.dat',
 }
 
-# print(get_aaf(10, ca))
+print(get_aaf(10, config))
