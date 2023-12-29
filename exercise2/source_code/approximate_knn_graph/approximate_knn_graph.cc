@@ -24,10 +24,10 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 	int L = 4;
 	int table_size = 15000;
 	int window_size = 1815;
-	clock_t start = clock();
+	// clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
-	clock_t end_lsh = clock();
-	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
+	// clock_t end_lsh = clock();
+	// double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
 	// cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
 	
 	// Initialize G.
