@@ -58,7 +58,7 @@ def gnn_test(input, query, queries_num, k, E, R, N, load_file=b''):
     lib.get_gnn_results(input, query, queries_num, k, E, R, N, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
-def mrng_test(input, query, queries_num, l, N, load_file=b'../exercise2/graph_files/mrng_graph.bin'):
+def mrng_test(input, query, queries_num, l, N, load_file=b''):
     lib.get_mrng_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
