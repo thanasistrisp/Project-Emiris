@@ -25,9 +25,6 @@
 #include "mrng.hpp"
 
 using namespace std;
-using std::cout;
-
-// #define cout if(0) cout // Comment this line to enable printing.
 
 vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct encoded_config *config, double **sil)
 {
@@ -80,10 +77,8 @@ extern "C" void get_kmeans_results(struct encoded_config *config,
 	string input_str(config->dataset);
 	string method_str(config->model);
 
-	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data_float(input_str);
 	KMeans *kmeans = new KMeans(dataset);
-	cout << "Done" << endl;
 
 	// Return time, stotal.
 	vector<variant<double, int>> results = helper_arg_cluster(kmeans, config, sil);
@@ -112,7 +107,6 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
         exit(1);
     }
 
-    cout << "Read MNIST data" << endl;
     vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
     vector <vector<double>> decoded_dataset = read_mnist_data_float(decoded_dataset_str);
 
@@ -141,7 +135,6 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
     }
     tuple<int, int, int, int, int> kmean_args = make_tuple(L, k_lsh, M, k_hypercube, probes);
 
-    cout << "Running clustering algorithm..." << endl;
     clock_t start = clock();
     kmeans->compute_clusters(10, method, kmean_args);
     clock_t end = clock();

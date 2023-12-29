@@ -25,9 +25,6 @@
 #include "mrng.hpp"
 
 using namespace std;
-using std::cout;
-
-#define cout if(0) cout // Comment this line to enable printing.
 
 vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries,
 										vector<variant<int, bool>> &params)
@@ -63,7 +60,6 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 	int min_neighbors = numeric_limits<int>::max();
 
 	for (int q = 0; q < (int) queries.size(); q++) {
-		cout << "Query: " << q << endl;
 		tuple<vector<int>, vector<double>> ann;
 		clock_t start_ANN = clock();
 		if (m == 1) {
@@ -123,11 +119,9 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 	string input_str(input);
 	string query_str(query);
 
-	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
 	LSH *lsh = new LSH(k, L, table_size, window, dataset);
-	cout << "Done" << endl;
 
 	// Return time, aaf.
 	vector<variant<int, bool>> params = {3, 0, 0, 0, N, query_trick};
@@ -145,11 +139,9 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	string input_str(input);
 	string query_str(query);
 
-	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
 	hypercube *cube = new hypercube(dataset, k, M, probes);
-	cout << "Done" << endl;
 
 	// Return time, aaf.
 	vector<variant<int, bool>> params = {4, 0, 0, 0, N};
@@ -167,12 +159,10 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 	string query_str(query);
 	string load_file_str(load_file);
 	
-	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
 	ApproximateKNNGraph *approximate_knn_graph;
 	if (!load_file_str.empty()) {
-		cout << "Loading graph from file: " << load_file_str << endl;
 		DirectedGraph *G = new DirectedGraph();
 		ifstream graph_file;
 		graph_file.open(load_file);
@@ -181,10 +171,8 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 		approximate_knn_graph = new ApproximateKNNGraph(dataset, G);
 	}
 	else {
-		cout << "Building graph..." << endl;
 		approximate_knn_graph = new ApproximateKNNGraph(dataset, k);
 	}
-	cout << "Done" << endl;
 
 	// Return time, aaf.
 	vector<variant<int, bool>> params = {1, E, R, 0, N};
@@ -202,12 +190,10 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 	string query_str(query);
 	string load_file_str(load_file);
 	
-	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
 	MRNG *mrng;
 	if (!load_file_str.empty()) {
-		cout << "Loading graph from file: " << load_file_str << endl;
 		DirectedGraph *G = new DirectedGraph();
 		ifstream graph_file;
 		graph_file.open(load_file);
@@ -216,10 +202,8 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 		mrng = new MRNG(dataset, G);
 	}
 	else {
-		cout << "Building graph..." << endl;
 		mrng = new MRNG(dataset);
 	}
-	cout << "Done" << endl;
 
 	// Return time, aaf.
 	vector<variant<int, bool>> params = {2, 0, 0, l, N};
@@ -237,12 +221,10 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 	string query_str(query);
 	string load_file_str(load_file);
 	
-	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
 	NSG *nsg;
 	if (!load_file_str.empty()) {
-		cout << "Loading graph from file: " << load_file_str << endl;
 		DirectedGraph *G = new DirectedGraph();
 		ifstream graph_file;
 		graph_file.open(load_file);
@@ -253,10 +235,8 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 		nsg = new NSG(dataset, G, navigating_node);
 	}
 	else {
-		cout << "Building graph..." << endl;
 		nsg = new NSG(dataset, l, m, k);
 	}
-	cout << "Done" << endl;
 
 	// Return time, aaf.
 	vector<variant<int, bool>> params = {5, 0, 0, l, N, lq};
@@ -301,13 +281,11 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 
 	void *structure;
 
-	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
 	vector <vector<double>> queries = read_mnist_data_float(query_str, queries_num);
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
 
 	if (strcmp(config->model, "LSH") == 0) {
-		cout << "Building LSH..." << endl;
 		int k = config->enc_vals[0];
 		int L = config->enc_vals[1];
 		int table_size = config->enc_vals[2];
@@ -316,7 +294,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 		cout << "Done" << endl;
 	}
 	else if (strcmp(config->model, "CUBE") == 0) {
-		cout << "Building hypercube..." << endl;
 		int k = config->enc_vals[0];
 		int M = config->enc_vals[1];
 		int probes = config->enc_vals[2];
@@ -327,7 +304,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 		int k = config->enc_vals[0];
 		ApproximateKNNGraph *approximate_knn_graph;
 		if (!load_file_str.empty()) {
-			cout << "Loading graph from file: " << load_file_str << endl;
 			DirectedGraph *G = new DirectedGraph();
 			ifstream graph_file;
 			graph_file.open(load_file);
@@ -336,18 +312,13 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 			approximate_knn_graph = new ApproximateKNNGraph(encoded_dataset, G);
 		}
 		else {
-			cout << "Building graph..." << endl;
 			approximate_knn_graph = new ApproximateKNNGraph(encoded_dataset, k);
 		}
-		cout << "Done" << endl;
 		structure = approximate_knn_graph;
 	}
 	else if (strcmp(config->model, "MRNG") == 0) {
-		cout << "Building MRNG..." << endl;
-		// structure = new MRNG(encoded_dataset);
 		MRNG *mrng;
 		if(!load_file_str.empty()){
-			cout << "Loading graph from file: " << load_file_str << endl;
 			DirectedGraph *G = new DirectedGraph();
 			ifstream graph_file;
 			graph_file.open(load_file);
@@ -356,20 +327,16 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 			mrng = new MRNG(dataset, G);
 		}
 		else{
-			cout << "Building graph..." << endl;
 			mrng = new MRNG(encoded_dataset);
 		}
-		cout << "Done" << endl;
 		structure = mrng;
 	}
 	else if (strcmp(config->model, "NSG") == 0) {
-		cout << "Building NSG..." << endl;
 		int l = config->enc_vals[0];
 		int m = config->enc_vals[1];
 		int k = config->enc_vals[2];
 		NSG *nsg;
 		if(!load_file_str.empty()){
-			cout << "Loading graph from file: " << load_file_str << endl;
 			DirectedGraph *G = new DirectedGraph();
 			ifstream graph_file;
 			graph_file.open(load_file);
@@ -380,10 +347,8 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 			nsg = new NSG(encoded_dataset, G, navigating_node);
 		}
 		else{
-			cout << "Building graph..." << endl;
 			nsg = new NSG(encoded_dataset, l, m, k);
 		}
-		cout << "Done" << endl;
 		structure = nsg;
 	}
 	else if (strcmp(config->model, "BRUTE") == 0) {
