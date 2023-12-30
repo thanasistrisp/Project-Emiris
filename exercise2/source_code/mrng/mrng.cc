@@ -23,11 +23,11 @@ using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	clock_t start = clock();
+	// clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
-	clock_t end_lsh = clock();
-	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
-	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
+	// clock_t end_lsh = clock();
+	// double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
+	// cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
 	// Initialize graph.
 	G = new DirectedGraph();
 	unordered_set<int> S;
@@ -125,7 +125,7 @@ void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 	// In case LSH returns no neighbors, pick a random one.
 	if((int) neighbors_indices.size() == 0){
 
-		cout << "LSH returned no neighbors, adding a random neighbor instead" << endl;
+		// cout << "LSH returned no neighbors, adding a random neighbor instead" << endl;
 
 		int r_index = rand() % dataset.size();
 		while(r_index != p){

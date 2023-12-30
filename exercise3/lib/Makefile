@@ -22,6 +22,6 @@ shared_lib.so_OBJS = \
 					 $(TESTING)/nearest_neighbor.o \
 					 $(TESTING)/clustering.o
 
-# shared_lib.so_DEFINE += -DNEW
+# shared_lib.so_FLAGS += -DNEW
 
 include ../common.mk

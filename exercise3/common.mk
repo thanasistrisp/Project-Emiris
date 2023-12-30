@@ -66,15 +66,15 @@ CC = g++
 
 # Λίστα με όλα τα εκτελέσιμα & βιβλιοθήκες <foo> για τα οποία υπάρχει μια μεταβλητή <foo>_OBJS
 WITH_OBJS := $(subst _OBJS,,$(filter %_OBJS,$(.VARIABLES)))
-WITH_DEFINE := $(subst _DEFINE,,$(filter %_DEFINE,$(.VARIABLES)))
+WITH_FLAGS := $(subst _FLAGS,,$(filter %_FLAGS,$(.VARIABLES)))
 PROGS := $(filter-out %.so,$(WITH_OBJS))
 LIBS := $(filter %.so,$(WITH_OBJS))
 
 # Μαζεύουμε όλα τα objects σε μία μεταβλητή
 OBJS := $(foreach target, $(WITH_OBJS), $($(target)_OBJS))
 
-# if vars contain _DEFINE, add them to CXXFLAGS
-$(foreach target, $(WITH_DEFINE), $(eval override CXXFLAGS += $($(target)_DEFINE)))
+# if vars contain _FLAGS, add them to CXXFLAGS
+$(foreach target, $(WITH_FLAGS), $(eval override CXXFLAGS += $($(target)_FLAGS)))
 
 # Για κάθε .o ο g++ παράγει ένα .d, τα αποθηκεύουμε εδώ (το filter κρατάει μόνο τα .o, όχι τα .a)
 DEPS := $(patsubst %.o, %.d, $(filter %.o, $(OBJS)))
