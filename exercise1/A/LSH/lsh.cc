@@ -16,7 +16,7 @@ using namespace std;
 // Initializes an instance with the given number of hash functions,
 // number of hash tables, table size and window.
 // The last argument is the set of points the LSH algorithm will be applied to.
-LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int table_size, int window, const vector<vector<double>> &dataset)
+LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int table_size, double window, const vector<vector<double>> &dataset)
 : number_of_dimensions(dataset.at(0).size()), number_of_hash_functions(number_of_hash_functions),
   table_size(table_size), number_of_hash_tables(number_of_hash_tables), dataset(dataset)
 {

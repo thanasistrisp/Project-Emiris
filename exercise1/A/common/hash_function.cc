@@ -13,7 +13,7 @@ using std::vector;
 
 // ---------- Functions for class HashFunction ---------- //
 
-HashFunction::HashFunction(int number_of_dimensions, int window)
+HashFunction::HashFunction(int number_of_dimensions, double window)
 : number_of_dimensions(number_of_dimensions), window(window)
 {
     // t ~ U[0, w)

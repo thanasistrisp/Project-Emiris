@@ -50,7 +50,7 @@ template <typename K, typename V> class HashTable
     public:
         // Initializes a hash table with the given table size, number of dimensions of data points stored,
         // number of hash functions and window.
-        HashTable(int, int, int, int);
+        HashTable(int, int, int, double);
         ~HashTable();
 
         // Returns the size of the hash table.
@@ -111,7 +111,7 @@ template <typename V> V HashBucket<V>::get_data(int index, bool &valid)
 
 // Initializes a hash table with the given table size, number of dimensions of data points stored,
 // number of hash functions and window.
-template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int number_of_dimensions, int number_of_hash_functions, int window)
+template <typename K, typename V> HashTable<K, V>::HashTable(int table_size, int number_of_dimensions, int number_of_hash_functions, double window)
 : table_size(table_size), number_of_hash_functions(number_of_hash_functions),
   recent_chain_index(0), recent_bucket_index(0), recent_element_index(0), finished_chain_search(true)
 {

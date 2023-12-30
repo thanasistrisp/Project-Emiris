@@ -25,7 +25,7 @@ class LSH
         // Initializes an instance with the given number of hash functions,
         // number of hash tables, table size and window.
         // The last argument is the set of points the LSH algorithm will be applied to.
-        LSH(int, int, int, int, const std::vector<std::vector<double>>&);
+        LSH(int, int, int, double, const std::vector<std::vector<double>>&);
         ~LSH();
 
         // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
