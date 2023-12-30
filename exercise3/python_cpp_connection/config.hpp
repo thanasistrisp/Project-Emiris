@@ -1,7 +1,7 @@
-struct encoded_config
+struct config
 {
     char* model;   // LSH, CUBE, MRNG, NSG, GNN, BRUTE
-    int *enc_vals; // parameters for encoded space
+    int *vals;     // algorithm parameters
     double window;
     const char *dataset;
     const char *query;

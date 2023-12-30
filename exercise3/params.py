@@ -5,7 +5,7 @@ import pathlib
 libname = pathlib.Path().absolute() / "lib" / "shared_lib.so"
 lib = ctypes.CDLL(libname)
 
-class encoded_config(Structure):
+class config(Structure):
     _fields_ = [('model', c_char_p),
                 ('enc_vals', POINTER(c_int)),
                 ('window', c_double),
@@ -37,12 +37,12 @@ def hypercube_test(input, query, queries_num, k, M, probes, N, window = 1000, in
     lib.get_hypercube_results(input, query, queries_num, k, M, probes, N, window, int_data, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
-def kmeans_test(config, int_data=1):
-    tmp = encoded_config()
-    tmp.model = config['model'] # field for method
-    tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
-    tmp.dataset = config['dataset']
-    lib.get_kmeans_results.argtypes = (ctypes.POINTER(encoded_config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+def kmeans_test(conf, int_data=1):
+    tmp = config()
+    tmp.model = conf['model'] # field for method
+    tmp.enc_vals = (ctypes.c_int * len(conf['enc_vals']))(*conf['enc_vals'])
+    tmp.dataset = conf['dataset']
+    lib.get_kmeans_results.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
     clustering_time = ctypes.c_double()
     sil = ctypes.POINTER(ctypes.c_double)()
@@ -73,15 +73,15 @@ def nsg_test(input, query, queries_num, m, l, lq, k, N, int_data = 1, load_file=
     lib.get_nsg_results(input, query, queries_num, m, l, lq, k, N, int_data, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
  
-def get_stotal(config):
-    tmp = encoded_config()
-    tmp.model = config['model'] # field for method
-    tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
-    if 'window' in config:
-        tmp.window = config['window']
-    tmp.dataset = config['dataset']
-    tmp.decoded_dataset = config['decoded_dataset']
-    lib.get_stotal.argtypes = (ctypes.POINTER(encoded_config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+def get_stotal(conf):
+    tmp = config()
+    tmp.model = conf['model'] # field for method
+    tmp.enc_vals = (ctypes.c_int * len(conf['enc_vals']))(*conf['enc_vals'])
+    if 'window' in conf:
+        tmp.window = conf['window']
+    tmp.dataset = conf['dataset']
+    tmp.decoded_dataset = conf['decoded_dataset']
+    lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
     time = ctypes.c_double()
     sil = ctypes.POINTER(ctypes.c_double)()
@@ -91,23 +91,23 @@ def get_stotal(config):
     silhouette.val = [sil[i] for i in range(10)]
     return stotal.value, time.value, silhouette
 
-def get_aaf(queries_num, config, load_file = b''):
-    tmp = encoded_config()
-    tmp.model = config['model']
-    tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
-    if 'window' in config:
-        tmp.window = config['window']
-    tmp.dataset = config['dataset']
-    tmp.query = config['query']
-    tmp.encoded_dataset = config['encoded_dataset']
-    tmp.decoded_dataset = config['decoded_dataset']
-    lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(encoded_config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def get_aaf(queries_num, conf, load_file = b''):
+    tmp = config()
+    tmp.model = conf['model']
+    tmp.enc_vals = (ctypes.c_int * len(conf['enc_vals']))(*conf['enc_vals'])
+    if 'window' in conf:
+        tmp.window = conf['window']
+    tmp.dataset = conf['dataset']
+    tmp.query = conf['query']
+    tmp.encoded_dataset = conf['encoded_dataset']
+    tmp.decoded_dataset = conf['decoded_dataset']
+    lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     aaf = ctypes.c_double()
     time = ctypes.c_double()
     lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
     return aaf.value, time.value
 
-# config = {
+# conf = {
 #     'model': b'CLASSIC',
 #     'enc_vals': [],
 #     'dataset': b'MNIST/normalized_dataset.dat',
@@ -116,13 +116,13 @@ def get_aaf(queries_num, config, load_file = b''):
 #     'decoded_dataset': b'MNIST/decoded_dataset.dat',
 # }
 
-# stotal, time, sil = get_stotal(config)
+# stotal, time, sil = get_stotal(conf)
 # print("stotal: ", stotal)
 # print("time: ", time)
 # print("silhouette: ", sil.val)
 # del sil
 
-# stotal, time, sil = kmeans_test(config)
+# stotal, time, sil = kmeans_test(conf)
 # print("stotal: ", stotal)
 # print("time: ", time)
 # print("silhouette: ", sil.val)

@@ -13,7 +13,7 @@
 #include "handling.hpp"
 #include "lp_metric.hpp"
 
-#include "encoded_config.hpp"
+#include "config.hpp"
 
 #include "brute_force.hpp"
 #include "lsh.hpp"
@@ -25,7 +25,7 @@
 
 using namespace std;
 
-vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct encoded_config *config, double **sil)
+vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config *config, double **sil)
 {
     string method_str = config->model;
     update_method method;
@@ -36,11 +36,11 @@ vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct encode
     }
     else if (method_str == "LSH") {
         method = REVERSE_LSH;
-        config_tuple = make_tuple(config->enc_vals[0], config->enc_vals[1], 0, 0, 0, config->window);
+        config_tuple = make_tuple(config->vals[0], config->vals[1], 0, 0, 0, config->window);
     }
     else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
-        config_tuple = make_tuple(0, 0, config->enc_vals[0], config->enc_vals[1], config->enc_vals[2], config->window);
+        config_tuple = make_tuple(0, 0, config->vals[0], config->vals[1], config->vals[2], config->window);
     }
     else {
         cout << "Invalid method." << endl;
@@ -68,7 +68,7 @@ vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct encode
     return {clustering_time, stotal};
 }
 
-extern "C" void get_kmeans_results(struct encoded_config *config, int int_data,
+extern "C" void get_kmeans_results(struct config *config, int int_data,
 								   double *clustering_time, double *stotal, double **sil)
 {
     *sil = (double*) malloc(10 * sizeof(double));
@@ -96,7 +96,7 @@ extern "C" void get_kmeans_results(struct encoded_config *config, int int_data,
 
 extern "C" void free_double_array(double *sil) { free(sil); }
 
-extern "C" void get_stotal(struct encoded_config* config, double *stotal, double *clustering_time, double **sil)
+extern "C" void get_stotal(struct config* config, double *stotal, double *clustering_time, double **sil)
 {
     *sil = (double*) malloc(10 * sizeof(double));
 
@@ -127,15 +127,15 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
     }
     else if (method_str == "LSH") {
         method = REVERSE_LSH;
-        L = config->enc_vals[0];
-        k_lsh = config->enc_vals[1];
+        L = config->vals[0];
+        k_lsh = config->vals[1];
         window = config->window;
     }
     else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
-        M = config->enc_vals[0];
-        k_hypercube = config->enc_vals[1];
-        probes = config->enc_vals[2];
+        M = config->vals[0];
+        k_hypercube = config->vals[1];
+        probes = config->vals[2];
         window = config->window;
     }
     else {

@@ -13,7 +13,7 @@
 #include "handling.hpp"
 #include "lp_metric.hpp"
 
-#include "encoded_config.hpp"
+#include "config.hpp"
 
 #include "brute_force.hpp"
 #include "lsh.hpp"
@@ -276,7 +276,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 ///////////////////////////////
 ///////////////////////////////
 
-extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_config* config, double *aaf, double *time) {
+extern "C" void get_aaf(const char* load_file, int queries_num, struct config* config, double *aaf, double *time) {
 	// Initialize structure.
 	string dataset_str(config->dataset);
 	string query_str(config->query);
@@ -312,21 +312,21 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
 
 	if (strcmp(config->model, "LSH") == 0) {
-		int k = config->enc_vals[0];
-		int L = config->enc_vals[1];
-		int table_size = config->enc_vals[2];
-		int window = config->enc_vals[3];
+		int k = config->vals[0];
+		int L = config->vals[1];
+		int table_size = config->vals[2];
+		int window = config->vals[3];
 		structure = new LSH(k, L, table_size, window, encoded_dataset);
 	}
 	else if (strcmp(config->model, "CUBE") == 0) {
-		int k = config->enc_vals[0];
-		int M = config->enc_vals[1];
-		int probes = config->enc_vals[2];
+		int k = config->vals[0];
+		int M = config->vals[1];
+		int probes = config->vals[2];
 		double window = config->window;
 		structure = new hypercube(encoded_dataset, k, M, probes, window);
 	}
 	else if (strcmp(config->model, "GNNS") == 0) {
-		int k = config->enc_vals[0];
+		int k = config->vals[0];
 		ApproximateKNNGraph *approximate_knn_graph;
 		if (!load_file_str.empty()) {
 			DirectedGraph *G = new DirectedGraph();
@@ -357,9 +357,9 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 		structure = mrng;
 	}
 	else if (strcmp(config->model, "NSG") == 0) {
-		int l = config->enc_vals[0];
-		int m = config->enc_vals[1];
-		int k = config->enc_vals[2];
+		int l = config->vals[0];
+		int m = config->vals[1];
+		int k = config->vals[2];
 		NSG *nsg;
 		if(!load_file_str.empty()){
 			DirectedGraph *G = new DirectedGraph();
@@ -398,7 +398,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 		clock_t start_ANN = clock();
 
 		if (strcmp(config->model, "LSH") == 0) {
-			bool query_trick = config->enc_vals[4];
+			bool query_trick = config->vals[4];
 			ann_enc_ = ((LSH*) structure)->query(query_enc, 1, euclidean_distance, query_trick);
 		}
 		else if (strcmp(config->model, "CUBE") == 0) {
@@ -406,17 +406,17 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 			ann_enc_ = ((hypercube*) structure)->query(query_enc, q_proj, 1);
 		}
 		else if (strcmp(config->model, "GNNS") == 0) {
-			int N = config->enc_vals[0];
-			int E = config->enc_vals[1];
-			int R = config->enc_vals[3];
+			int N = config->vals[0];
+			int E = config->vals[1];
+			int R = config->vals[3];
 			ann_enc_ = ((ApproximateKNNGraph*) structure)->query(query_enc, N, E, R);
 		}
 		else if (strcmp(config->model, "MRNG") == 0) {
-			int l = config->enc_vals[0];
+			int l = config->vals[0];
 			ann_enc_ = ((MRNG*) structure)->query(query_enc, 1, l);
 		}
 		else if (strcmp(config->model, "NSG") == 0) {
-			int lq = config->enc_vals[4];
+			int lq = config->vals[4];
 			ann_enc_ = ((NSG*) structure)->query(query_enc, 1, lq);
 		}
 		else if (strcmp(config->model, "BRUTE") == 0) {
