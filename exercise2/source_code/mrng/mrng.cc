@@ -13,15 +13,16 @@
 #include "brute_force.hpp"
 #include "generic_search.hpp"
 
+#ifdef NEW
+#include "defines_new_space.hpp"
+#else
+#include "defines_initial_space.hpp"
+#endif
+
 using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	// Optimal hyperparameters for LSH yielded by fine tuning.
-	int k_lsh = 10;
-	int L = 5;
-	int table_size = 7500;
-	int window_size = 3276;
 	clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	clock_t end_lsh = clock();

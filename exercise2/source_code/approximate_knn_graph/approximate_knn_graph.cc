@@ -10,6 +10,12 @@
 #include "vector_utils.hpp"
 #include "set_utils.hpp"
 
+#ifdef NEW
+#include "defines_new_space.hpp"
+#else
+#include "defines_initial_space.hpp"
+#endif
+
 using namespace std;
 
 ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, int k): dataset(dataset)
@@ -18,11 +24,6 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 	unordered_set<int> unique_indices;
 
 	G = new DirectedGraph();
-	// Optimal hyperparameters for LSH yielded by fine tuning.
-	int k_lsh = 7;
-	int L = 4;
-	int table_size = 15000;
-	int window_size = 1815;
 	// clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
 	// clock_t end_lsh = clock();
