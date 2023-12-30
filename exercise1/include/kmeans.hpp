@@ -50,7 +50,7 @@ class KMeans
         void compute_clusters_reverse_lsh();
         void compute_clusters_reverse_hypercube();
 
-        int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes;
+        int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes, window;
 
     public:
         // Initializes an instance.
@@ -65,7 +65,7 @@ class KMeans
          * 4. k of the Hypercube (number of dimensions)
          * 5. number of probes of the Hypercube
          */
-        void compute_clusters(int, update_method, const std::tuple<int,int,int,int,int> &config);
+        void compute_clusters(int, update_method, const std::tuple<int,int,int,int,int,double> &config);
 
         // Returns the centroid coordinates.
         std::vector<std::vector<double>> get_centroids() const;

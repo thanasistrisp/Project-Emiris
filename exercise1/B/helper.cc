@@ -8,7 +8,7 @@
 
 using namespace std;
 
-tuple<int, int, int, int, int, int> read_config_file(const string &filename)
+tuple<int, int, int, int, int, int, double> read_config_file(const string &filename)
 {
 	ifstream config_file(filename);
 
@@ -19,6 +19,7 @@ tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 	int M = 10;
 	int k_of_hypercube = 3;
 	int probes = 2;
+	double window = 1000;
 
 	// Read line by line and parse and ignore // comments at begin or end of line.
 	string line;
@@ -47,11 +48,14 @@ tuple<int, int, int, int, int, int> read_config_file(const string &filename)
 		else if (line.find("max_number_M_hypercube:") != string::npos) {
 			M = stoi(line.substr(line.find(":") + 1));
 		}
+		else if (line.find("window:") != string::npos) {
+			window = stod(line.substr(line.find(":") + 1));
+		}
 	}
-	return make_tuple(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes);
+	return make_tuple(K_of_Kmeans, L, k_of_LSH, M, k_of_hypercube, probes, window);
 }
 
-void handle_cluster_output(KMeans &kmeans, const string &output_file, bool complete, update_method method, const tuple<int, int, int, int, int, int> &config)
+void handle_cluster_output(KMeans &kmeans, const string &output_file, bool complete, update_method method, const tuple<int, int, int, int, int, int, double> &config)
 {
 	ofstream output(output_file);
 	switch (method) {
@@ -67,7 +71,7 @@ void handle_cluster_output(KMeans &kmeans, const string &output_file, bool compl
 	}
 	cout << "Running clustering algorithm..." << endl;
 	clock_t start = clock();
-	tuple<int, int, int, int, int> kmean_args = make_tuple(get<1>(config), get<2>(config), get<3>(config), get<4>(config), get<5>(config));
+	tuple<int, int, int, int, int, double> kmean_args = make_tuple(get<1>(config), get<2>(config), get<3>(config), get<4>(config), get<5>(config), get<6>(config));
 	int k = get<0>(config);
 	kmeans.compute_clusters(k, method, kmean_args);
 	clock_t end = clock();

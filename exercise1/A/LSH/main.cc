@@ -12,7 +12,6 @@
 #include "lsh.hpp"
 #include "helper_LSH.hpp"
 #include "helper.hpp"
-#include "defines.hpp"
 
 using namespace std;
 
@@ -24,6 +23,7 @@ int main(int argc, char *argv[]) {
 	string output_file;
 	int k = 4;
 	int L = 5;
+	double w = 1000;
 	int N = 1;
 	double R = 10000;
 

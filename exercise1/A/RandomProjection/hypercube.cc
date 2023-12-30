@@ -6,11 +6,10 @@
 
 #include "lp_metric.hpp"
 #include "hypercube.hpp"
-#include "defines.hpp"
 
 using namespace std;
 
-hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, 
+hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, double w,
 					 double (*distance)(const std::vector<double> &, const std::vector<double> &)) : p(p)
 {
 	this->k = k;

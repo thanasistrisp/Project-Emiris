@@ -6,7 +6,6 @@
 
 #include "approximate_knn_graph.hpp"
 #include "lsh.hpp"
-#include "defines.hpp"
 #include "lp_metric.hpp"
 #include "vector_utils.hpp"
 #include "set_utils.hpp"

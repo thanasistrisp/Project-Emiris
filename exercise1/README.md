@@ -71,7 +71,6 @@ exercise1/
 ├── include/                    # directory for header files used in all three programs
 │   ├── binary_string.hpp           # header file for `binary_string.cc`
 │   ├── brute_force.hpp             # header file for `brute_force.cc`
-│   ├── defines.hpp                 # definition of constants used throughout the whole program
 │   ├── hash_function.hpp           # header file for `hash_function.cc`
 │   ├── hash_table.hpp              # HashTable template class definition and implementation
 │   ├── helper.hpp                  # header file for `handle_binary.cc`

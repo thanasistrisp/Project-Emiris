@@ -7,7 +7,6 @@
 
 #include "mrng.hpp"
 #include "lsh.hpp"
-#include "defines.hpp"
 #include "set_utils.hpp"
 #include "lp_metric.hpp"
 #include "vector_utils.hpp"
