@@ -86,11 +86,11 @@ int main(int argc, char *argv[]) {
 		cout << "File " << input_file << " does not exist" << endl;
 		exit(1);
 	}
-	vector <vector<double>> dataset = read_mnist_data(input_file);
+	vector <vector<double>> dataset = read_mnist_data_float(input_file, 1000);
 
 	cout << "Read MNIST data" << endl;
 
-	LSH lsh(k, L, dataset.size() / 4, w, dataset);
+	LSH lsh(2, 1, dataset.size() / 16, 10, dataset);
 
 	cout << "Created LSH" << endl;
 
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 			end = clock();
 			goto cont;
 		}
-		queries = read_mnist_data(query_file);
+		queries = read_mnist_data_float(query_file, 1);
 		// queries.resize(10);
 
 		handle_ouput(lsh, dataset, queries, N, R, output);

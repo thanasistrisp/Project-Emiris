@@ -7,6 +7,8 @@
 #include "list.hpp"
 #include "hash_function.hpp"
 
+using namespace std;
+
 template <typename V> class HashBucket
 {
     private:
@@ -192,6 +194,7 @@ template <typename K, typename V> int HashTable<K, V>::get_table_size() const
 template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
 {
     int bucket_index = primary_hash_function(key);
+    cout << "bucket_index: " << bucket_index << endl;
     unsigned int bucket_id = secondary_hash_function(key);
     bool valid, inserted = false;
     HashBucket<V> *bucket;
@@ -199,6 +202,7 @@ template <typename K, typename V> void HashTable<K, V>::insert(K key, V value)
     if(list == NULL){ // No buckets in chain, add new bucket to store value.
         list = new List<HashBucket<V>*>;
         bucket = new HashBucket<V>(bucket_id);
+        cout << "bucket_id: " << bucket_id << endl;
         bucket->insert(value);
         list->insert_first(bucket);
         buckets[bucket_index] = list;

@@ -65,6 +65,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
     bool valid = true;
     unsigned int q_id;
     unsigned int p_id;
+    int counter = 0;
 
     for(int i = 0; i < number_of_hash_tables; i++){
         // Hash query.
@@ -78,6 +79,8 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
             }
 
             vector<double> p = dataset.at(p_index);
+            // cout << "p_index: " << p_index << endl;
+            counter++;
 
             // Skip query if found.
             if(p == q){
@@ -108,6 +111,7 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
         indices.push_back(get<0>(*iter));
         distances.push_back(get<1>(*iter));
     }
+    cout << "counter: " << counter << endl;
     return make_tuple(indices, distances);
 }
 

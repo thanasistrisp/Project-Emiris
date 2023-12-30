@@ -26,7 +26,7 @@ void handle_ouput(LSH &lsh, const vector<vector<double>> &dataset, const vector<
 		cout << "Query: " << q << endl;
 		output << "Query: " << q << endl;
 		clock_t start_ANN = clock();
-		tuple<vector<int>, vector<double>> ann = lsh.query(queries[q], n, euclidean_distance);
+		tuple<vector<int>, vector<double>> ann = lsh.query(queries[q], n, euclidean_distance, false);
 		clock_t end_ANN = clock();
 		double elapsed_secs_ANN = double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 

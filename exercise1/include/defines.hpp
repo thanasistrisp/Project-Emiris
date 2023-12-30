@@ -1,4 +1,4 @@
 #pragma once
 
 // Window used for the entire algorithm.
-#define w 1000
+#define w 10
