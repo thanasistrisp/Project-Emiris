@@ -11,7 +11,6 @@
 
 #include "helper.hpp"
 #include "handling.hpp"
-#include "defines.hpp"
 #include "lp_metric.hpp"
 
 #include "encoded_config.hpp"
@@ -95,7 +94,7 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 }
 
 extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
-										  int k, int L, int table_size, int window, bool query_trick, int N, int int_data,
+										  int k, int L, int table_size, double window, bool query_trick, int N, int int_data,
 										  double *approximate_time, double *aaf, int *min_neighbors) {
 	string input_str(input);
 	string query_str(query);
@@ -125,7 +124,7 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 }
 
 extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
-										  int k, int probes, int M, int N, int int_data, 
+										  int k, int probes, int M, int N, double window, int int_data, 
 										  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
@@ -141,7 +140,7 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 		queries = read_mnist_data_float(query_str, queries_num);
 	}
 
-	hypercube *cube = new hypercube(dataset, k, M, probes);
+	hypercube *cube = new hypercube(dataset, k, M, probes, window);
 
 	// Return time, aaf.
 	vector<variant<int, bool>> params = {4, 0, 0, 0, N};
@@ -323,7 +322,8 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 		int k = config->enc_vals[0];
 		int M = config->enc_vals[1];
 		int probes = config->enc_vals[2];
-		structure = new hypercube(encoded_dataset, k, M, probes);
+		double window = config->window;
+		structure = new hypercube(encoded_dataset, k, M, probes, window);
 	}
 	else if (strcmp(config->model, "GNNS") == 0) {
 		int k = config->enc_vals[0];

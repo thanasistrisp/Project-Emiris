@@ -11,7 +11,6 @@
 
 #include "helper.hpp"
 #include "handling.hpp"
-#include "defines.hpp"
 #include "lp_metric.hpp"
 
 #include "encoded_config.hpp"
@@ -30,18 +29,18 @@ vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct encode
 {
     string method_str = config->model;
     update_method method;
-    tuple<int, int, int, int, int> config_tuple;
+    tuple<int, int, int, int, int, double> config_tuple;
     if (method_str == "CLASSIC") {
         method = CLASSIC;
-        config_tuple = make_tuple(0, 0, 0, 0, 0);
+        config_tuple = make_tuple(0, 0, 0, 0, 0, 0);
     }
     else if (method_str == "LSH") {
         method = REVERSE_LSH;
-        config_tuple = make_tuple(config->enc_vals[0], config->enc_vals[1], 0, 0, 0);
+        config_tuple = make_tuple(config->enc_vals[0], config->enc_vals[1], 0, 0, 0, config->window);
     }
     else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
-        config_tuple = make_tuple(0, 0, config->enc_vals[0], config->enc_vals[1], config->enc_vals[2]);
+        config_tuple = make_tuple(0, 0, config->enc_vals[0], config->enc_vals[1], config->enc_vals[2], config->window);
     }
     else {
         cout << "Invalid method." << endl;
@@ -122,6 +121,7 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
     string method_str = config->model;
     update_method method;
     int L = 0, k_lsh = 0, M = 0, k_hypercube = 0, probes = 0;
+    double window = 0;
     if (method_str == "CLASSIC") {
         method = CLASSIC;
     }
@@ -129,18 +129,20 @@ extern "C" void get_stotal(struct encoded_config* config, double *stotal, double
         method = REVERSE_LSH;
         L = config->enc_vals[0];
         k_lsh = config->enc_vals[1];
+        window = config->window;
     }
     else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
         M = config->enc_vals[0];
         k_hypercube = config->enc_vals[1];
         probes = config->enc_vals[2];
+        window = config->window;
     }
     else {
         cout << "Invalid method." << endl;
         exit(1);
     }
-    tuple<int, int, int, int, int> kmean_args = make_tuple(L, k_lsh, M, k_hypercube, probes);
+    tuple<int, int, int, int, int, double> kmean_args = make_tuple(L, k_lsh, M, k_hypercube, probes, window);
 
     clock_t start = clock();
     kmeans->compute_clusters(10, method, kmean_args);

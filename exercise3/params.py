@@ -8,6 +8,7 @@ lib = ctypes.CDLL(libname)
 class encoded_config(Structure):
     _fields_ = [('model', c_char_p),
                 ('enc_vals', POINTER(c_int)),
+                ('window', c_double),
                 ('dataset', c_char_p),
                 ('query', c_char_p),
                 ('encoded_dataset', c_char_p),
@@ -22,18 +23,18 @@ class sil_struct:
         lib.free_double_array(self.pointer)
 
 def lsh_test(input, query, queries_num, k, L, table_size, window_size, query_trick, N, int_data=1):
-    lib.get_lsh_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
+    lib.get_lsh_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_double, ctypes.c_bool, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
     min_neighbors = ctypes.c_int()
     lib.get_lsh_results(input, query, queries_num, k, L, table_size, window_size, query_trick, N, int_data, ctypes.byref(average_time), ctypes.byref(aaf), ctypes.byref(min_neighbors))
     return average_time, aaf, min_neighbors
 
-def hypercube_test(input, query, queries_num, k, M, probes, N, int_data=1):
-    lib.get_hypercube_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
+def hypercube_test(input, query, queries_num, k, M, probes, N, window = 1000, int_data=1):
+    lib.get_hypercube_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_double, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     average_time = ctypes.c_double()
     aaf = ctypes.c_double()
-    lib.get_hypercube_results(input, query, queries_num, k, M, probes, N, int_data, ctypes.byref(average_time), ctypes.byref(aaf))
+    lib.get_hypercube_results(input, query, queries_num, k, M, probes, N, window, int_data, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
 
 def kmeans_test(config, int_data=1):
@@ -76,6 +77,8 @@ def get_stotal(config):
     tmp = encoded_config()
     tmp.model = config['model'] # field for method
     tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
+    if 'window' in config:
+        tmp.window = config['window']
     tmp.dataset = config['dataset']
     tmp.decoded_dataset = config['decoded_dataset']
     lib.get_stotal.argtypes = (ctypes.POINTER(encoded_config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
@@ -92,6 +95,8 @@ def get_aaf(queries_num, config, load_file = b''):
     tmp = encoded_config()
     tmp.model = config['model']
     tmp.enc_vals = (ctypes.c_int * len(config['enc_vals']))(*config['enc_vals'])
+    if 'window' in config:
+        tmp.window = config['window']
     tmp.dataset = config['dataset']
     tmp.query = config['query']
     tmp.encoded_dataset = config['encoded_dataset']
