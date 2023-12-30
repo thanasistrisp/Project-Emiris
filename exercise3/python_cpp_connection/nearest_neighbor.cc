@@ -431,8 +431,12 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct encoded_c
 
 		time_ += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
+		// Let p be the ANN of q.
+		// Encode p and decode its encoding.
+		// Treat the decoding as a query and find its exact NN in the initial dataset, p' (initial space induction).
 		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
-		vector<double> ann_init = get_mnist_float_index(decoded_dataset_str, get<0>(ann_enc_)[0]);
+		vector<double> ann_dec = get_mnist_float_index(decoded_dataset_str, get<0>(ann_enc_)[0]);
+		vector<double> ann_init = dataset[get<0>(brute_force(dataset, ann_dec, 1))[0]];
 
 		aaf_ += euclidean_distance(query_init, ann_init) / euclidean_distance(query_init, true_nn_init);
 	}
