@@ -50,7 +50,7 @@ def kmeans_test(conf, int_data=1):
     silhouette = sil_struct()
     silhouette.pointer = sil
     silhouette.val = [sil[i] for i in range(10)]
-    return stotal.value, clustering_time.value, silhouette
+    return stotal, clustering_time, silhouette
 
 def gnn_test(input, query, queries_num, k, E, R, N, int_data = 1, load_file=b''):
     lib.get_gnn_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
@@ -89,7 +89,7 @@ def get_stotal(conf):
     silhouette = sil_struct()
     silhouette.pointer = sil
     silhouette.val = [sil[i] for i in range(10)]
-    return stotal.value, time.value, silhouette
+    return stotal, time, silhouette
 
 def get_aaf(queries_num, conf, load_file = b''):
     tmp = config()
@@ -105,7 +105,7 @@ def get_aaf(queries_num, conf, load_file = b''):
     aaf = ctypes.c_double()
     time = ctypes.c_double()
     lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
-    return aaf.value, time.value
+    return aaf, time
 
 # conf = {
 #     'model': b'CLASSIC',
