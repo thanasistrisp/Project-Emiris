@@ -132,7 +132,8 @@ tuple<vector<int>, vector<double>> ApproximateKNNGraph::query(const vector<doubl
 	unordered_set<int> unique_indices;
 
 	for (uint i = 0; i < R; i++) {
-		int y0, y1, y0_dist, y1_dist;
+		int y0, y1;
+		double y0_dist, y1_dist;
 		unordered_set<int> visited;
 
 		// Y_0: a random point (uniformly) over D.

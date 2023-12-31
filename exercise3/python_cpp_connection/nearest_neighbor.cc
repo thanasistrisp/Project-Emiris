@@ -437,8 +437,12 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
 		vector<double> ann_dec = get_mnist_float_index(decoded_dataset_str, get<0>(ann_enc_)[0]);
 		vector<double> ann_init = dataset[get<0>(brute_force(dataset, ann_dec, 1))[0]];
-
-		aaf_ += euclidean_distance(query_init, ann_init) / euclidean_distance(query_init, true_nn_init);
+		if (euclidean_distance(query_init, ann_init) == 0) { // very rare case: if the ANN from decoded is the same with query (same representation)
+			aaf_ += 1;
+		}
+		else {
+			aaf_ += euclidean_distance(query_init, ann_init) / euclidean_distance(query_init, true_nn_init);
+		}
 	}
 	*aaf = aaf_ / queries_num;
 	*time = time_ / queries_num;
