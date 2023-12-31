@@ -11,7 +11,7 @@
 #include "set_utils.hpp"
 
 #ifdef NEW
-#include "defines_new_space.hpp"
+#include "defines_latent_space.hpp"
 #else
 #include "defines_initial_space.hpp"
 #endif
