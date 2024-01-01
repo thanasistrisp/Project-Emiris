@@ -7,7 +7,7 @@ lib = ctypes.CDLL(libname)
 
 class config(Structure):
     _fields_ = [('model', c_char_p),
-                ('enc_vals', POINTER(c_int)),
+                ('vals', POINTER(c_int)),
                 ('window', c_double),
                 ('dataset', c_char_p),
                 ('query', c_char_p),
@@ -40,7 +40,7 @@ def hypercube_test(input, query, queries_num, k, M, probes, N, window = 1000, in
 def kmeans_test(conf, int_data=1):
     tmp = config()
     tmp.model = conf['model'] # field for method
-    tmp.enc_vals = (ctypes.c_int * len(conf['enc_vals']))(*conf['enc_vals'])
+    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
     tmp.dataset = conf['dataset']
     lib.get_kmeans_results.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
@@ -76,7 +76,7 @@ def nsg_test(input, query, queries_num, m, l, lq, k, N, int_data = 1, load_file=
 def get_stotal(conf):
     tmp = config()
     tmp.model = conf['model'] # field for method
-    tmp.enc_vals = (ctypes.c_int * len(conf['enc_vals']))(*conf['enc_vals'])
+    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
     if 'window' in conf:
         tmp.window = conf['window']
     tmp.dataset = conf['dataset']
@@ -94,7 +94,7 @@ def get_stotal(conf):
 def get_aaf(queries_num, conf, load_file = b''):
     tmp = config()
     tmp.model = conf['model']
-    tmp.enc_vals = (ctypes.c_int * len(conf['enc_vals']))(*conf['enc_vals'])
+    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
     if 'window' in conf:
         tmp.window = conf['window']
     tmp.dataset = conf['dataset']
@@ -109,7 +109,7 @@ def get_aaf(queries_num, conf, load_file = b''):
 
 # conf = {
 #     'model': b'CLASSIC',
-#     'enc_vals': [],
+#     'vals': [],
 #     'dataset': b'MNIST/normalized_dataset.dat',
 #     'query': b'MNIST/normalized_query.dat',
 #     'encoded_dataset': b'MNIST/output_dataset.dat',
