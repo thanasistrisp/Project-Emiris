@@ -18,8 +18,9 @@ std::vector<double> get_mnist_float_index(const std::string &filename, int index
  * 5. k of the Hypercube (number of dimensions)
  * 6. number of probes of the Hypercube
  * 7. window for LSH, Hypercube
+ * 8. limit queries option for LSH
  */
-std::tuple<int, int, int, int, int, int, double> read_config_file(const std::string &filename);
+std::tuple<int, int, int, int, int, int, double, int> read_config_file(const std::string &filename);
 
 void export_image(const std::vector<double> &image, std::string filename);
 

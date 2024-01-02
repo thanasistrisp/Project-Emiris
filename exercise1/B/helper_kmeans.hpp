@@ -8,4 +8,4 @@
 
 // Writes the results of the clustering to output file in the required format.
 void handle_cluster_output(KMeans &kmeans, const std::string &output_file, bool complete, update_method method,
-                           const std::tuple<int,int,int,int,int,int,double> &config);
+                           const std::tuple<int,int,int,int,int,int,double,int> &config);

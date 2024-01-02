@@ -29,18 +29,18 @@ vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config
 {
     string method_str = config->model;
     update_method method;
-    tuple<int, int, int, int, int, double> config_tuple;
+    tuple<int, int, int, int, int, double, int> config_tuple;
     if (method_str == "CLASSIC") {
         method = CLASSIC;
-        config_tuple = make_tuple(0, 0, 0, 0, 0, 0);
+        config_tuple = make_tuple(0, 0, 0, 0, 0, 0, 0);
     }
     else if (method_str == "LSH") {
         method = REVERSE_LSH;
-        config_tuple = make_tuple(config->vals[0], config->vals[1], 0, 0, 0, config->window);
+        config_tuple = make_tuple(config->vals[0], config->vals[1], 0, 0, 0, config->window, config->vals[2]);
     }
     else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
-        config_tuple = make_tuple(0, 0, config->vals[0], config->vals[1], config->vals[2], config->window);
+        config_tuple = make_tuple(0, 0, config->vals[0], config->vals[1], config->vals[2], config->window, 0);
     }
     else {
         cout << "Invalid method." << endl;
@@ -120,7 +120,7 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
 
     string method_str = config->model;
     update_method method;
-    int L = 0, k_lsh = 0, M = 0, k_hypercube = 0, probes = 0;
+    int L = 0, k_lsh = 0, limit_queries = 0, M = 0, k_hypercube = 0, probes = 0;
     double window = 0;
     if (method_str == "CLASSIC") {
         method = CLASSIC;
@@ -130,6 +130,7 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
         L = config->vals[0];
         k_lsh = config->vals[1];
         window = config->window;
+        limit_queries = config->vals[2];
     }
     else if (method_str == "CUBE") {
         method = REVERSE_HYPERCUBE;
@@ -142,7 +143,7 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
         cout << "Invalid method." << endl;
         exit(1);
     }
-    tuple<int, int, int, int, int, double> kmean_args = make_tuple(L, k_lsh, M, k_hypercube, probes, window);
+    tuple<int, int, int, int, int, double, int> kmean_args = make_tuple(L, k_lsh, M, k_hypercube, probes, window, limit_queries);
 
     clock_t start = clock();
     kmeans->compute_clusters(10, method, kmean_args);

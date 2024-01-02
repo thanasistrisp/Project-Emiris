@@ -39,5 +39,6 @@ class LSH
         // and their distances to the query based on the given distance function.
         // All the neighbours returned lie within radius r.
         std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double>&, double r,
-                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance);
+                                                                      double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance,
+                                                                      bool limit_queries=false);
 };

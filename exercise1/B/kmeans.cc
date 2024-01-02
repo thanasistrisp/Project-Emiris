@@ -109,7 +109,7 @@ void KMeans::compute_clusters_reverse_lsh()
             for(int i = 0; i < (int) centroids.size(); i++){
                 // At each iteration, for each centroid c, range/ball queries centered at c.
                 // Avoid buckets with very few items.
-                tie(ball, distances) = lsh.query_range(centroids[i], radius, distance);
+                tie(ball, distances) = lsh.query_range(centroids[i], radius, distance, limit_queries);
                 for(int j = 0; j < (int) ball.size(); j++){
                     p_index = ball[j];
                     iter = point_2_cluster.find(p_index);
@@ -284,8 +284,8 @@ void KMeans::compute_clusters_lloyds()
     std::cout << loops << " iterations" << std::endl;
 }
 
-void KMeans::compute_clusters(int k, update_method method, const tuple<int, int, int, int, int, double> &config) {
-    tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes, window) = config;
+void KMeans::compute_clusters(int k, update_method method, const tuple<int, int, int, int, int, double, int> &config) {
+    tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes, window, limit_queries) = config;
     // Again initialize with certain size to avoid reallocation.
     clusters.resize(k);
 
