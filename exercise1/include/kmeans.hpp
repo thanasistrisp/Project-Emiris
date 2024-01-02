@@ -50,7 +50,8 @@ class KMeans
         void compute_clusters_reverse_lsh();
         void compute_clusters_reverse_hypercube();
 
-        int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes, window, limit_queries;
+        int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes, limit_queries;
+        double window;
 
     public:
         // Initializes an instance.

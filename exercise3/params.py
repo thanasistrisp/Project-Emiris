@@ -41,6 +41,8 @@ def kmeans_test(conf, int_data=1):
     tmp = config()
     tmp.model = conf['model'] # field for method
     tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
+    if 'window' in conf:
+        tmp.window = conf['window']
     tmp.dataset = conf['dataset']
     lib.get_kmeans_results.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
