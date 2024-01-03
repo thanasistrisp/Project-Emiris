@@ -1,22 +1,14 @@
 #include <iostream>
 #include <tuple>
-#include <variant>
 
-#include "kmeans_new.hpp"
+#include "kmeans_eval.hpp"
 #include "brute_force.hpp"
 
 using namespace std;
 
 KMeansEval::KMeansEval(const std::vector<std::vector<double>>& dataset) : KMeans(dataset) {}
 
-vector<variant<double, vector<double>>> KMeansEval::silhouette(vector<vector<double>> &initial_dataset) {
-    // project centroids to initial space (decoded_centroids)
-    vector<vector<double>> decoded_centroids(centroids.size());
-    for (int i = 0; i < (int) centroids.size(); i++) {
-        int enc_index = get<0>(brute_force(dataset, centroids[i], 1))[0];
-        decoded_centroids[i] = initial_dataset[enc_index];
-    }
-
+vector<variant<double, vector<double>>> KMeansEval::silhouette(vector<vector<double>> &initial_dataset, vector<vector<double>> &decoded_centroids) {
 	// compute silhouette
 	vector<double> si(clusters.size(), 0);
 	vector<double> sil(clusters.size(), 0);

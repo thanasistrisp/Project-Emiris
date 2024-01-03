@@ -1,6 +1,7 @@
 import ctypes
 from ctypes import *
 import pathlib
+import numpy as np
 
 libname = pathlib.Path().absolute() / "lib" / "shared_lib.so"
 lib = ctypes.CDLL(libname)
@@ -73,24 +74,21 @@ def nsg_test(input, query, queries_num, m, l, lq, k, N, int_data = 1, load_file=
     lib.get_nsg_results(input, query, queries_num, m, l, lq, k, N, int_data, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
  
-def get_stotal(conf):
+def get_stotal(conf, dim, kmeansnew, centroids):
     tmp = config()
     tmp.model = conf['model'] # field for method
     tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
     if 'window' in conf:
         tmp.window = conf['window']
-    tmp.dataset = conf['dataset']
     tmp.encoded_dataset = conf['encoded_dataset']
-    tmp.decoded_dataset = conf['decoded_dataset']
-    lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+    lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
-    time = ctypes.c_double()
     sil = ctypes.POINTER(ctypes.c_double)()
-    lib.get_stotal(ctypes.byref(tmp), ctypes.byref(stotal), ctypes.byref(time), ctypes.byref(sil))
+    lib.get_stotal(ctypes.byref(tmp), dim, ctypes.byref(stotal), ctypes.byref(sil), kmeansnew, centroids)
     silhouette = sil_struct()
     silhouette.pointer = sil
     silhouette.val = [sil[i] for i in range(10)]
-    return stotal, time, silhouette
+    return stotal, silhouette
 
 def get_aaf(queries_num, conf, load_file = b''):
     tmp = config()
@@ -108,22 +106,78 @@ def get_aaf(queries_num, conf, load_file = b''):
     lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
     return aaf, time
 
+def get_kmeansnew_object(conf):
+    tmp = config()
+    tmp.model = conf['model'] # field for method
+    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
+    if 'window' in conf:
+        tmp.window = conf['window']
+    tmp.encoded_dataset = conf['encoded_dataset']
+    lib.get_kmeans.argtypes = (ctypes.POINTER(config), ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p)))
+    kmeans = ctypes.POINTER(ctypes.c_void_p)()
+    lib.get_kmeans(ctypes.byref(tmp), ctypes.byref(kmeans))
+    return kmeans
+
+def free_centroids(centroids):
+    lib.free_centroids.argtypes = (ctypes.POINTER(ctypes.POINTER(ctypes.c_double)),)
+    lib.free_centroids(centroids)
+
+def get_centroids(kmeansnew):
+    centroids = ctypes.POINTER(ctypes.POINTER(ctypes.c_double))()
+    lib.get_centroids.argtypes = (ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))), ctypes.POINTER(ctypes.c_int))
+    dim = ctypes.c_int()
+    lib.get_centroids(kmeansnew, ctypes.byref(centroids), ctypes.byref(dim))
+    centroids_ = np.array([[centroids[i][j] for j in range(dim.value)] for i in range(10)])
+    # free_centroids(centroids)
+    return centroids_, dim.value, centroids
+
+def free_kmeans(kmeans):
+    lib.free_kmeans.argtypes = (ctypes.c_void_p,)
+    lib.free_kmeans(kmeans)
+
 conf = {
     'model': b'CLASSIC',
     'vals': [],
     'dataset': b'MNIST/normalized_dataset.dat',
-    'encoded_dataset': b'MNIST/output_dataset.dat',
-    'decoded_dataset': b'MNIST/decoded_dataset.dat',
+    'encoded_dataset': b'MNIST/output_dataset.dat'
 }
 
-stotal, time, sil = get_stotal(conf)
+from tensorflow.keras.models import save_model, load_model
+from helper_funcs import *
+from autoencoder import Autoencoder
+
+
+kmeans = get_kmeansnew_object(conf)
+
+centroids, dim, centroids_ = get_centroids(kmeans)
+
+print(centroids)
+
+print(centroids.shape)
+
+model = 'models/model_conv_12.keras'
+
+autoencoder = load_model(model)
+shape = autoencoder.layers[-2].output_shape[1:] # get shape of encoded layer
+
+centroids = deflatten_encoded(centroids, shape)
+
+decoded_centroids = autoencoder.decode(centroids)
+
+print(decoded_centroids)
+
+print(decoded_centroids.shape)
+
+# convert centroids to double array (to already allocated in memory centroid_)
+for i in range(10):
+    for j in range(dim):
+        centroids_[i][j] = decoded_centroids[i][j]
+
+stotal, sil = get_stotal(conf, dim, kmeans, centroids)
 print("stotal: ", stotal.value)
-print("time: ", time.value)
 print("silhouette: ", sil.val)
 del sil
 
-# stotal, time, sil = kmeans_test(conf)
-# print("stotal: ", stotal)
-# print("time: ", time)
-# print("silhouette: ", sil.val)
-# del sil
+free_kmeans(kmeans)
+
+print('All ok')
