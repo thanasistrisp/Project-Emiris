@@ -7,25 +7,16 @@
 
 using namespace std;
 
-KMeansNew::KMeansNew(const std::vector<std::vector<double>>& dataset) : KMeans(dataset), dataset_size(dataset.size()) {}
+KMeansEval::KMeansEval(const std::vector<std::vector<double>>& dataset) : KMeans(dataset) {}
 
-void KMeansNew::compute_decoded(vector<vector<double>> &decoded_dataset, vector<vector<double>> &initial_dataset) {
+vector<variant<double, vector<double>>> KMeansEval::silhouette(vector<vector<double>> &initial_dataset) {
     // project centroids to initial space (decoded_centroids)
-	decoded_centroids = new vector<vector<double>>(centroids.size());
-	for (int i = 0; i < (int) centroids.size(); i++) {
-		int enc_index = get<0>(brute_force(dataset, centroids[i], 1))[0];
-		(*decoded_centroids)[i] = initial_dataset[get<0>(brute_force(initial_dataset, decoded_dataset[enc_index], 1))[0]];
-	}
+    vector<vector<double>> decoded_centroids(centroids.size());
+    for (int i = 0; i < (int) centroids.size(); i++) {
+        int enc_index = get<0>(brute_force(dataset, centroids[i], 1))[0];
+        decoded_centroids[i] = initial_dataset[enc_index];
+    }
 
-	// project points to initial space (decoded_points)
-	decoded_points = new vector<vector<double>>(dataset.size());
-	for (int i = 0; i < (int) dataset.size(); i++) {
-		(*decoded_points)[i] = initial_dataset[get<0>(brute_force(initial_dataset, decoded_dataset[i], 1))[0]];
-        cout << "Decoded point " << i << endl;
-	}
-}
-
-vector<variant<double, vector<double>>> KMeansNew::silhouette() {
 	// compute silhouette
 	vector<double> si(clusters.size(), 0);
 	vector<double> sil(clusters.size(), 0);
@@ -33,28 +24,24 @@ vector<variant<double, vector<double>>> KMeansNew::silhouette() {
     double stotal = 0;
     for (int i = 0; i < (int) clusters.size(); i++) {
         for (int j = 0; j < (int) clusters[i].size(); j++) {
-            si[i] += silhouette(clusters[i][j]);
+            si[i] += silhouette(clusters[i][j], initial_dataset, decoded_centroids);
         }   
         stotal += si[i];
         si[i] /= clusters[i].size();
         sil[i] = si[i];
     }
-    stotal /= dataset_size;
-
-	// free memory
-	delete decoded_centroids;
-	delete decoded_points;	
+    stotal /= dataset.size();
 
     // return stotal, sil
     return {stotal, sil};
 }
 
-double KMeansNew::silhouette(int i)
+double KMeansEval::silhouette(int i, vector<vector<double>> &initial_dataset, vector<vector<double>> &decoded_centroids)
 {
     int cluster = point_to_cluster[i];
     double a = 0, b = 0;
     for(int j : clusters[cluster]){
-        a += distance((*decoded_points)[i], (*decoded_points)[j]);
+        a += distance(initial_dataset[i], initial_dataset[j]);
     }
     a /= clusters[cluster].size();
 
@@ -62,14 +49,14 @@ double KMeansNew::silhouette(int i)
     int c1 = cluster, c2 = -1;
     for(int j = 0; j < (int) centroids.size(); j++){
         if(j != c1){
-            double dist = distance((*decoded_points)[i], (*decoded_centroids)[j]);
-            if(c2 == -1 || dist < distance((*decoded_points)[i], (*decoded_centroids)[c2])){
+            double dist = distance(initial_dataset[i], decoded_centroids[j]);
+            if(c2 == -1 || dist < distance(initial_dataset[i], decoded_centroids[c2])){
                 c2 = j;
             }
         }
     }
     for(int j : clusters[c2]){
-        b += distance((*decoded_points)[i], (*decoded_points)[j]);
+        b += distance(initial_dataset[i], initial_dataset[j]);
     }
     b /= clusters[c2].size();
     

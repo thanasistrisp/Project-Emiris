@@ -115,11 +115,11 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
         exit(1);
     }
 
-    vector <vector<double>> *encoded_dataset = new vector<vector<double>>(read_mnist_data_float(encoded_dataset_str));
-    vector <vector<double>> *decoded_dataset = new vector<vector<double>>(read_mnist_data_float(decoded_dataset_str));
-    vector <vector<double>> *initial_dataset = new vector<vector<double>>(read_mnist_data_float(initial_dataset_str));
+    vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
+    vector <vector<double>> decoded_dataset = read_mnist_data_float(decoded_dataset_str);
+    vector <vector<double>> initial_dataset = read_mnist_data_float(initial_dataset_str);
 
-    KMeansNew* kmeans = new KMeansNew(*encoded_dataset);
+    KMeansEval* kmeans = new KMeansEval(encoded_dataset);
 
     string method_str = config->model;
     update_method method;
@@ -152,12 +152,7 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
     clock_t end = clock();
     double clustering_time_ = (double)(end - start) / CLOCKS_PER_SEC;
 
-    kmeans->compute_decoded(*decoded_dataset, *initial_dataset);
-    // delete datasets
-    delete encoded_dataset;
-    delete decoded_dataset;
-    delete initial_dataset;
-    vector<variant<double, vector<double>>> results = kmeans->silhouette();
+    vector<variant<double, vector<double>>> results = kmeans->silhouette(initial_dataset);
     double stotal_ = get<double>(results[0]);
     vector<double> sil_ = get<vector<double>>(results[1]);
     for (int i = 0; i < (int) sil_.size(); i++) {
