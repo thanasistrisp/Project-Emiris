@@ -22,7 +22,7 @@ vector<variant<double, vector<double>>> KMeansEval::silhouette(vector<vector<dou
         si[i] /= clusters[i].size();
         sil[i] = si[i];
     }
-    stotal /= dataset.size();
+    stotal /= initial_dataset.size();
 
     // return stotal, sil
     return {stotal, sil};
