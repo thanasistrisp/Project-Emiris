@@ -19,6 +19,7 @@
 #include "lsh.hpp"
 #include "hypercube.hpp"
 #include "kmeans.hpp"
+#include "kmeans_new.hpp"
 #include "approximate_knn_graph.hpp"
 #include "nsg.hpp"
 #include "mrng.hpp"
@@ -101,11 +102,12 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
     *sil = (double*) malloc(10 * sizeof(double));
 
     // Initialize structure.
-    string dataset_str(config->dataset);
+    string encoded_dataset_str(config->encoded_dataset);
     string decoded_dataset_str(config->decoded_dataset);
+    string initial_dataset_str(config->dataset);
 
-    if(!file_exists(dataset_str)){
-        cout << "File " << dataset_str << " does not exist." << endl;
+    if(!file_exists(encoded_dataset_str)){
+        cout << "File " << encoded_dataset_str << " does not exist." << endl;
         exit(1);
     }
     if(!file_exists(decoded_dataset_str)){
@@ -113,10 +115,11 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
         exit(1);
     }
 
-    vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
-    vector <vector<double>> decoded_dataset = read_mnist_data_float(decoded_dataset_str);
+    vector <vector<double>> *encoded_dataset = new vector<vector<double>>(read_mnist_data_float(encoded_dataset_str));
+    vector <vector<double>> *decoded_dataset = new vector<vector<double>>(read_mnist_data_float(decoded_dataset_str));
+    vector <vector<double>> *initial_dataset = new vector<vector<double>>(read_mnist_data_float(initial_dataset_str));
 
-    KMeans* kmeans = new KMeans(dataset);
+    KMeansNew* kmeans = new KMeansNew(*encoded_dataset);
 
     string method_str = config->model;
     update_method method;
@@ -149,18 +152,17 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
     clock_t end = clock();
     double clustering_time_ = (double)(end - start) / CLOCKS_PER_SEC;
 
-    vector<vector<int>> clusters = kmeans->get_clusters();
-    vector<double> si(clusters.size(), 0);
-    double stotal_ = 0;
-    for (int i = 0; i < (int) clusters.size(); i++) {
-        for (int j = 0; j < (int) clusters[i].size(); j++) {
-            si[i] += kmeans->silhouette(clusters[i][j], decoded_dataset);
-        }
-        stotal_ += si[i];
-        si[i] /= clusters[i].size();
-        (*sil)[i] = si[i];
+    kmeans->compute_decoded(*decoded_dataset, *initial_dataset);
+    // delete datasets
+    delete encoded_dataset;
+    delete decoded_dataset;
+    delete initial_dataset;
+    vector<variant<double, vector<double>>> results = kmeans->silhouette();
+    double stotal_ = get<double>(results[0]);
+    vector<double> sil_ = get<vector<double>>(results[1]);
+    for (int i = 0; i < (int) sil_.size(); i++) {
+        (*sil)[i] = sil_[i];
     }
-    stotal_ /= kmeans->get_dataset_size();
 
     *stotal = stotal_;
     *clustering_time = clustering_time_;

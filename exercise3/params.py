@@ -80,6 +80,7 @@ def get_stotal(conf):
     if 'window' in conf:
         tmp.window = conf['window']
     tmp.dataset = conf['dataset']
+    tmp.encoded_dataset = conf['encoded_dataset']
     tmp.decoded_dataset = conf['decoded_dataset']
     lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
@@ -107,20 +108,19 @@ def get_aaf(queries_num, conf, load_file = b''):
     lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
     return aaf, time
 
-# conf = {
-#     'model': b'CLASSIC',
-#     'vals': [],
-#     'dataset': b'MNIST/normalized_dataset.dat',
-#     'query': b'MNIST/normalized_query.dat',
-#     'encoded_dataset': b'MNIST/output_dataset.dat',
-#     'decoded_dataset': b'MNIST/decoded_dataset.dat',
-# }
+conf = {
+    'model': b'CLASSIC',
+    'vals': [],
+    'dataset': b'MNIST/normalized_dataset.dat',
+    'encoded_dataset': b'MNIST/output_dataset.dat',
+    'decoded_dataset': b'MNIST/decoded_dataset.dat',
+}
 
-# stotal, time, sil = get_stotal(conf)
-# print("stotal: ", stotal)
-# print("time: ", time)
-# print("silhouette: ", sil.val)
-# del sil
+stotal, time, sil = get_stotal(conf)
+print("stotal: ", stotal.value)
+print("time: ", time.value)
+print("silhouette: ", sil.val)
+del sil
 
 # stotal, time, sil = kmeans_test(conf)
 # print("stotal: ", stotal)
