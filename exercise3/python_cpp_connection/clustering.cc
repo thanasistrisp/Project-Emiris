@@ -199,3 +199,13 @@ extern "C" void free_centroids(double **centroids) {
     }
     free(centroids);
 }
+
+extern "C" void convert_1d_to_2d(double *array, int dim, double ***array2d) {
+    *array2d = (double**) malloc(10 * sizeof(double*));
+    for (int i = 0; i < 10; i++) {
+        (*array2d)[i] = (double*) malloc(dim * sizeof(double));
+        for (int j = 0; j < dim; j++) {
+            (*array2d)[i][j] = array[i * dim + j];
+        }
+    }
+}

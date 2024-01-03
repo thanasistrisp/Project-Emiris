@@ -80,7 +80,7 @@ def get_stotal(conf, dim, kmeansnew, centroids):
     tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
     if 'window' in conf:
         tmp.window = conf['window']
-    tmp.encoded_dataset = conf['encoded_dataset']
+    tmp.dataset = conf['dataset']
     lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
     sil = ctypes.POINTER(ctypes.c_double)()
@@ -128,12 +128,18 @@ def get_centroids(kmeansnew):
     dim = ctypes.c_int()
     lib.get_centroids(kmeansnew, ctypes.byref(centroids), ctypes.byref(dim))
     centroids_ = np.array([[centroids[i][j] for j in range(dim.value)] for i in range(10)])
-    # free_centroids(centroids)
-    return centroids_, dim.value, centroids
+    free_centroids(centroids)
+    return centroids_, dim.value
 
 def free_kmeans(kmeans):
     lib.free_kmeans.argtypes = (ctypes.c_void_p,)
     lib.free_kmeans(kmeans)
+
+def convert_to_2d_array(array, dim):
+    lib.convert_1d_to_2d.argtypes = (ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))))
+    array2d = ctypes.POINTER(ctypes.POINTER(ctypes.c_double))()
+    lib.convert_1d_to_2d(array, dim, ctypes.byref(array2d))
+    return array2d
 
 conf = {
     'model': b'CLASSIC',
@@ -149,7 +155,7 @@ from autoencoder import Autoencoder
 
 kmeans = get_kmeansnew_object(conf)
 
-centroids, dim, centroids_ = get_centroids(kmeans)
+centroids, dim = get_centroids(kmeans)
 
 print(centroids)
 
@@ -166,18 +172,22 @@ decoded_centroids = autoencoder.decode(centroids)
 
 print(decoded_centroids)
 
+decoded_centroids = flatten_encoded(decoded_centroids)
+
 print(decoded_centroids.shape)
 
-# convert centroids to double array (to already allocated in memory centroid_)
-for i in range(10):
-    for j in range(dim):
-        centroids_[i][j] = decoded_centroids[i][j]
+decoded_centroids = decoded_centroids.astype(np.float64)
+decoded_centroids = decoded_centroids.flatten()
+print(decoded_centroids.shape)
+decoded_centroids = decoded_centroids.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+decoded_centroids = convert_to_2d_array(decoded_centroids, 784)
 
-stotal, sil = get_stotal(conf, dim, kmeans, centroids)
+stotal, sil = get_stotal(conf, dim, kmeans, decoded_centroids)
 print("stotal: ", stotal.value)
 print("silhouette: ", sil.val)
 del sil
 
+free_centroids(decoded_centroids)
 free_kmeans(kmeans)
 
 print('All ok')
