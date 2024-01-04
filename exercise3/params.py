@@ -143,52 +143,52 @@ def convert_to_2d_array(array, dim):
     lib.convert_1d_to_2d(array, dim, ctypes.byref(array2d))
     return array2d
 
-conf = {
-    'model': b'CLASSIC',
-    'vals': [],
-    'dataset': b'MNIST/normalized_dataset.dat',
-    'encoded_dataset': b'MNIST/output_dataset.dat'
-}
+# conf = {
+#     'model': b'CLASSIC',
+#     'vals': [],
+#     'dataset': b'MNIST/normalized_dataset.dat',
+#     'encoded_dataset': b'MNIST/output_dataset.dat'
+# }
 
-from tensorflow.keras.models import save_model, load_model
-from helper_funcs import *
-from autoencoder import Autoencoder
+# from tensorflow.keras.models import save_model, load_model
+# from helper_funcs import *
+# from autoencoder import Autoencoder
 
-kmeans = get_kmeans_eval_object(conf)
+# kmeans = get_kmeans_eval_object(conf)
 
-centroids, dim = get_centroids(kmeans)
+# centroids, dim = get_centroids(kmeans)
 
-print(centroids)
+# print(centroids)
 
-print(centroids.shape)
+# print(centroids.shape)
 
-model = 'models/model_conv_12.keras'
+# model = 'models/model_conv_12.keras'
 
-autoencoder = load_model(model)
-shape = autoencoder.layers[-2].output_shape[1:] # get shape of encoded layer
+# autoencoder = load_model(model)
+# shape = autoencoder.layers[-2].output_shape[1:] # get shape of encoded layer
 
-centroids = deflatten_encoded(centroids, shape)
+# centroids = deflatten_encoded(centroids, shape)
 
-decoded_centroids = autoencoder.decode(centroids)
+# decoded_centroids = autoencoder.decode(centroids)
 
-print(decoded_centroids)
+# print(decoded_centroids)
 
-decoded_centroids = flatten_encoded(decoded_centroids)
+# decoded_centroids = flatten_encoded(decoded_centroids)
 
-print(decoded_centroids.shape)
+# print(decoded_centroids.shape)
 
-decoded_centroids = decoded_centroids.astype(np.float64)
-decoded_centroids = decoded_centroids.flatten()
-print(decoded_centroids.shape)
-decoded_centroids = decoded_centroids.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-decoded_centroids = convert_to_2d_array(decoded_centroids, 784)
+# decoded_centroids = decoded_centroids.astype(np.float64)
+# decoded_centroids = decoded_centroids.flatten()
+# print(decoded_centroids.shape)
+# decoded_centroids = decoded_centroids.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+# decoded_centroids = convert_to_2d_array(decoded_centroids, 784)
 
-stotal, sil = get_stotal(conf, dim, kmeans, decoded_centroids)
-print("stotal: ", stotal.value)
-print("silhouette: ", sil.val)
-del sil
+# stotal, sil = get_stotal(conf, dim, kmeans, decoded_centroids)
+# print("stotal: ", stotal.value)
+# print("silhouette: ", sil.val)
+# del sil
 
-free_centroids(decoded_centroids)
-free_kmeans(kmeans)
+# free_centroids(decoded_centroids)
+# free_kmeans(kmeans)
 
-print('All ok')
+# print('All ok')
