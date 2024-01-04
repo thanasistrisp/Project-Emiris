@@ -12,20 +12,6 @@ typedef enum {CLASSIC, REVERSE_LSH, REVERSE_HYPERCUBE} update_method;
 class KMeans
 {
     private:
-        std::vector<std::vector<double>> centroids;
-
-        // Array of sets of points, where clusters[i] is the set of points of the i-th cluster
-        // unordered_set is used to for fast lookup and deletion in specific cluster.
-        std::vector<std::unordered_set<int>> clusters;
-
-        // Point_to_cluster[i] = j means that the i-th point of the dataset belongs to the j-th cluster (zero-indexed).
-        // Needs to  be updated together with clusters.
-        std::vector<int> point_to_cluster;
-
-        std::unordered_map<int, int> point_2_cluster;
-
-        const std::vector<std::vector<double>> &dataset;
-
         // Initializes centroids with random points from dataset using KMeans++ algorithm.
         void kmeanspp();
 
@@ -53,6 +39,20 @@ class KMeans
         int number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes, limit_queries;
         double window;
 
+    protected:
+        std::vector<std::vector<double>> centroids;
+
+        // Array of sets of points, where clusters[i] is the set of points of the i-th cluster
+        // unordered_set is used to for fast lookup and deletion in specific cluster.
+        std::vector<std::unordered_set<int>> clusters;
+
+        // Point_to_cluster[i] = j means that the i-th point of the dataset belongs to the j-th cluster (zero-indexed).
+        // Needs to  be updated together with clusters.
+        std::vector<int> point_to_cluster;
+
+        std::unordered_map<int, int> point_2_cluster;
+
+        const std::vector<std::vector<double>> &dataset;
     public:
         // Initializes an instance.
         // The argument is the dataset the clustering algorithms will be applied to.
@@ -80,5 +80,4 @@ class KMeans
         
         // Returns the silhouette of the i-th point of the dataset.
         double silhouette(int i);
-        double silhouette(int i, const std::vector<std::vector<double>> &dataset); 
 };

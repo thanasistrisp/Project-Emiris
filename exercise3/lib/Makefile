@@ -20,7 +20,8 @@ shared_lib.so_OBJS = \
 					 $(EXERCISE2)/source_code/common/depth_first_search.o \
 					 $(EXERCISE2)/source_code/common/handle_output.o \
 					 $(TESTING)/nearest_neighbor.o \
-					 $(TESTING)/clustering.o
+					 $(TESTING)/clustering.o \
+					 $(TESTING)/kmeans_eval.o
 
 shared_lib.so_FLAGS += -DNEW
 

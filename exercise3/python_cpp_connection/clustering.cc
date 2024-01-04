@@ -19,6 +19,7 @@
 #include "lsh.hpp"
 #include "hypercube.hpp"
 #include "kmeans.hpp"
+#include "kmeans_eval.hpp"
 #include "approximate_knn_graph.hpp"
 #include "nsg.hpp"
 #include "mrng.hpp"
@@ -96,27 +97,50 @@ extern "C" void get_kmeans_results(struct config *config, int int_data,
 
 extern "C" void free_double_array(double *sil) { free(sil); }
 
-extern "C" void get_stotal(struct config* config, double *stotal, double *clustering_time, double **sil)
+extern "C" void get_stotal(struct config* config, int dim, double *stotal, double **sil, void *kmeansnew, double **centroids)
 {
     *sil = (double*) malloc(10 * sizeof(double));
 
     // Initialize structure.
-    string dataset_str(config->dataset);
-    string decoded_dataset_str(config->decoded_dataset);
+    string initial_dataset_str(config->dataset);
 
-    if(!file_exists(dataset_str)){
-        cout << "File " << dataset_str << " does not exist." << endl;
-        exit(1);
-    }
-    if(!file_exists(decoded_dataset_str)){
-        cout << "File " << decoded_dataset_str << " does not exist." << endl;
+    if(!file_exists(initial_dataset_str)){
+        cout << "File " << initial_dataset_str << " does not exist." << endl;
         exit(1);
     }
 
-    vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
-    vector <vector<double>> decoded_dataset = read_mnist_data_float(decoded_dataset_str);
+    // convert centroids to vector<vector<double>>
+    vector<vector<double>> centroids_;
+    for (int i = 0; i < 10; i++) {
+        vector<double> centroid;
+        for (int j = 0; j < dim; j++) {
+            centroid.push_back(centroids[i][j]);
+        }
+        centroids_.push_back(centroid);
+    }
 
-    KMeans* kmeans = new KMeans(dataset);
+    vector <vector<double>> initial_dataset = read_mnist_data_float(initial_dataset_str);
+
+    KMeansEval* kmeans = (KMeansEval*) kmeansnew;
+
+    vector<variant<double, vector<double>>> results = kmeans->silhouette(initial_dataset, centroids_);
+    double stotal_ = get<double>(results[0]);
+    vector<double> sil_ = get<vector<double>>(results[1]);
+    for (int i = 0; i < (int) sil_.size(); i++) {
+        (*sil)[i] = sil_[i];
+    }
+
+    *stotal = stotal_;
+}
+
+extern "C" void get_kmeans(struct config* config, void **kmeansnew)
+{
+    // Initialize structure.
+    string encoded_dataset_str(config->encoded_dataset);
+
+    vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
+
+    KMeansEval* kmeans = new KMeansEval(encoded_dataset);
 
     string method_str = config->model;
     update_method method;
@@ -145,27 +169,44 @@ extern "C" void get_stotal(struct config* config, double *stotal, double *cluste
     }
     tuple<int, int, int, int, int, double, int> kmean_args = make_tuple(L, k_lsh, M, k_hypercube, probes, window, limit_queries);
 
-    clock_t start = clock();
     kmeans->compute_clusters(10, method, kmean_args);
-    clock_t end = clock();
-    double clustering_time_ = (double)(end - start) / CLOCKS_PER_SEC;
+    
+    *kmeansnew = kmeans;
+}
 
-    vector<vector<int>> clusters = kmeans->get_clusters();
-    vector<double> si(clusters.size(), 0);
-    double stotal_ = 0;
-    for (int i = 0; i < (int) clusters.size(); i++) {
-        for (int j = 0; j < (int) clusters[i].size(); j++) {
-            si[i] += kmeans->silhouette(clusters[i][j], decoded_dataset);
-        }
-        stotal_ += si[i];
-        si[i] /= clusters[i].size();
-        (*sil)[i] = si[i];
-    }
-    stotal_ /= kmeans->get_dataset_size();
-
-    *stotal = stotal_;
-    *clustering_time = clustering_time_;
-
-    // Free memory.
+extern "C" void free_kmeans(void *kmeansnew)
+{
+    KMeansEval *kmeans = (KMeansEval*) kmeansnew;
     delete kmeans;
+}
+
+extern "C" void get_centroids(void *kmeansnew, double ***centroids, int *dim) {
+    KMeansEval *kmeans = (KMeansEval*) kmeansnew;
+    vector<vector<double>> centroids_ = kmeans->get_centroids();
+    *centroids = (double**) malloc(centroids_.size() * sizeof(double*));
+    for (int i = 0; i < (int) centroids_.size(); i++) {
+        (*centroids)[i] = (double*) malloc(centroids_[i].size() * sizeof(double));
+        for (int j = 0; j < (int) centroids_[i].size(); j++) {
+            (*centroids)[i][j] = centroids_[i][j];
+        }
+    }
+
+    *dim = centroids_[0].size();
+}
+
+extern "C" void free_centroids(double **centroids) {
+    for (int i = 0; i < 10; i++) {
+        free(centroids[i]);
+    }
+    free(centroids);
+}
+
+extern "C" void convert_1d_to_2d(double *array, int dim, double ***array2d) {
+    *array2d = (double**) malloc(10 * sizeof(double*));
+    for (int i = 0; i < 10; i++) {
+        (*array2d)[i] = (double*) malloc(dim * sizeof(double));
+        for (int j = 0; j < dim; j++) {
+            (*array2d)[i][j] = array[i * dim + j];
+        }
+    }
 }
