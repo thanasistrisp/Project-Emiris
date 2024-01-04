@@ -8,9 +8,9 @@ def save_encoded_binary(encoded_imgs, output_file):
 	with open(output_file, 'wb') as f:
 		# flatten encoded images
 		encoded_imgs = flatten_encoded(encoded_imgs)
-		# write magic number
+		# write magic number (we don't care about it)
 		f.write((0).to_bytes(4, byteorder='big'))
-		# write number of images
+		# write number of images (shape of images will be (num_images, 1, dim))
 		f.write((len(encoded_imgs)).to_bytes(4, byteorder='big'))
 		# write number of rows
 		f.write((1).to_bytes(4, byteorder='big'))
@@ -19,13 +19,13 @@ def save_encoded_binary(encoded_imgs, output_file):
 		# write data
 		f.write(encoded_imgs.astype('float32').tobytes())
 
-def flatten_encoded(encoded_imgs):
+def flatten_encoded(encoded_imgs): # flattens images, e.g. (60000, 1, 32, 32) -> (60000, 1024)
 	return encoded_imgs.reshape(len(encoded_imgs), np.prod(encoded_imgs.shape[1:]))
 
-def deflatten_encoded(encoded_imgs, shape):
+def deflatten_encoded(encoded_imgs, shape): # deflattens images to original shape, e.g. (60000, 1024) -> (60000, 1, 32, 32)
 	return encoded_imgs.reshape(encoded_imgs.shape[0], *shape)
 
-def save_decoded_binary(decoded_imgs, output_file):
+def save_decoded_binary(decoded_imgs, output_file): # saves decoded images of shape (num_images, 28, 28) to binary file
 	with open(output_file, 'wb') as f:
 		# write magic number
 		f.write((0).to_bytes(4, byteorder='big'))
@@ -38,7 +38,7 @@ def save_decoded_binary(decoded_imgs, output_file):
 		# write data
 		f.write(decoded_imgs.astype('float32').tobytes())
 
-def load_dataset(dataset, dtype=np.uint8):
+def load_dataset(dataset, dtype=np.uint8): # loads MNIST like dataset from binary file to numpy array of shape (num_images, rows, cols)
 	with open(dataset, 'rb') as f:
 		magic_number = int.from_bytes(f.read(4), byteorder='big')
 		num_images = int.from_bytes(f.read(4), byteorder='big')
@@ -48,7 +48,7 @@ def load_dataset(dataset, dtype=np.uint8):
 		data = data.reshape(num_images, rows, cols)
 	return data
 
-def normalize(x):
+def normalize(x): # normalizes numpy array to [0, 1]
 	max_value = np.max(x)
 	min_value = np.min(x)
 	return (x - min_value) / (max_value - min_value)
