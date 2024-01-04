@@ -108,7 +108,7 @@ def get_aaf(queries_num, conf, load_file = b''):
     lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
     return aaf, time
 
-def get_kmeansnew_object(conf):
+def get_kmeans_eval_object(conf):
     tmp = config()
     tmp.model = conf['model'] # field for method
     tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
@@ -154,8 +154,7 @@ from tensorflow.keras.models import save_model, load_model
 from helper_funcs import *
 from autoencoder import Autoencoder
 
-
-kmeans = get_kmeansnew_object(conf)
+kmeans = get_kmeans_eval_object(conf)
 
 centroids, dim = get_centroids(kmeans)
 
