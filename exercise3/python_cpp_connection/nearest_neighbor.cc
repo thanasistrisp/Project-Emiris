@@ -315,7 +315,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		int k = config->vals[0];
 		int L = config->vals[1];
 		int table_size = config->vals[2];
-		int window = config->vals[3];
+		double window = config->window;
 		structure = new LSH(k, L, table_size, window, encoded_dataset);
 	}
 	else if (strcmp(config->model, "CUBE") == 0) {
@@ -406,17 +406,16 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 			ann_enc_ = ((hypercube*) structure)->query(query_enc, q_proj, 1);
 		}
 		else if (strcmp(config->model, "GNNS") == 0) {
-			int N = config->vals[0];
 			int E = config->vals[1];
-			int R = config->vals[3];
-			ann_enc_ = ((ApproximateKNNGraph*) structure)->query(query_enc, N, E, R);
+			int R = config->vals[2];
+			ann_enc_ = ((ApproximateKNNGraph*) structure)->query(query_enc, 1, E, R);
 		}
 		else if (strcmp(config->model, "MRNG") == 0) {
 			int l = config->vals[0];
 			ann_enc_ = ((MRNG*) structure)->query(query_enc, 1, l);
 		}
 		else if (strcmp(config->model, "NSG") == 0) {
-			int lq = config->vals[4];
+			int lq = config->vals[3];
 			ann_enc_ = ((NSG*) structure)->query(query_enc, 1, lq);
 		}
 		else if (strcmp(config->model, "BRUTE") == 0) {
