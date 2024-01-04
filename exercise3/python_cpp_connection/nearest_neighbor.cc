@@ -308,7 +308,11 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	void *structure;
 
 	vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
-	vector <vector<double>> queries = read_mnist_data_float(query_str, queries_num);
+	vector <vector<double>> queries;
+	if (queries_num == -1)
+		queries = read_mnist_data_float(query_str);
+	else
+		queries = read_mnist_data_float(query_str, queries_num);
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
 
 	if (strcmp(config->model, "LSH") == 0) {
@@ -326,7 +330,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		structure = new hypercube(encoded_dataset, k, M, probes, window);
 	}
 	else if (strcmp(config->model, "GNNS") == 0) {
-		int k = config->vals[0];
 		ApproximateKNNGraph *approximate_knn_graph;
 		if (!load_file_str.empty()) {
 			DirectedGraph *G = new DirectedGraph();
@@ -337,6 +340,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 			approximate_knn_graph = new ApproximateKNNGraph(encoded_dataset, G);
 		}
 		else {
+			int k = config->vals[0];
 			approximate_knn_graph = new ApproximateKNNGraph(encoded_dataset, k);
 		}
 		structure = approximate_knn_graph;
@@ -357,9 +361,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		structure = mrng;
 	}
 	else if (strcmp(config->model, "NSG") == 0) {
-		int l = config->vals[0];
-		int m = config->vals[1];
-		int k = config->vals[2];
 		NSG *nsg;
 		if(!load_file_str.empty()){
 			DirectedGraph *G = new DirectedGraph();
@@ -372,6 +373,9 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 			nsg = new NSG(encoded_dataset, G, navigating_node);
 		}
 		else{
+			int l = config->vals[0];
+			int m = config->vals[1];
+			int k = config->vals[2];
 			nsg = new NSG(encoded_dataset, l, m, k);
 		}
 		structure = nsg;
@@ -386,8 +390,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 
 	double aaf_ = 0;
 	double time_ = 0;
-	if (queries_num == -1)
-		queries_num = queries.size();
 	for (int q = 0; q < queries_num; q++) {
 		vector<double> query_init = queries[q];
 		tuple<vector<int>, vector<double>> true_nn_init_ = brute_force(dataset, query_init, 1);
@@ -398,7 +400,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		clock_t start_ANN = clock();
 
 		if (strcmp(config->model, "LSH") == 0) {
-			bool query_trick = config->vals[4];
+			bool query_trick = config->vals[3];
 			ann_enc_ = ((LSH*) structure)->query(query_enc, 1, euclidean_distance, query_trick);
 		}
 		else if (strcmp(config->model, "CUBE") == 0) {
