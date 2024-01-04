@@ -56,14 +56,6 @@ encoded_test = autoencoder.encode(x_test)
 encoded_train = deflatten_encoded(encoded_train, shape)
 encoded_test = deflatten_encoded(encoded_test, shape)
 
-# decode encoded datasets
-decoded_train = autoencoder.decode(encoded_train)
-decoded_test = autoencoder.decode(encoded_test)
-
-# save original datasets normalized
-save_decoded_binary(x_train, 'MNIST/normalized_dataset.dat')
-save_decoded_binary(x_test, 'MNIST/normalized_query.dat')
-
 # normalize encoded datasets
 encoded_train = normalize(encoded_train)
 encoded_test = normalize(encoded_test)
@@ -71,11 +63,3 @@ encoded_test = normalize(encoded_test)
 # save encoded datasets
 save_encoded_binary(encoded_train, output_dataset)
 save_encoded_binary(encoded_test, output_query)
-
-# normalize decoded datasets
-decoded_train = normalize(decoded_train)
-decoded_test = normalize(decoded_test)
-
-# save decoded datasets
-save_decoded_binary(decoded_train, 'MNIST/decoded_dataset.dat')
-save_decoded_binary(decoded_test, 'MNIST/decoded_query.dat')

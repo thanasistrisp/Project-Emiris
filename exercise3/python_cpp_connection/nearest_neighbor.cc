@@ -89,6 +89,8 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 		af /= indices_ann.size();
 		aaf += af;
 	}
+
+	// return average time, average aaf of all queries, min_neighbors returned by the algorithm.
 	
 	return {elapsed_secs_ANN / queries.size(), aaf / queries.size(), min_neighbors};
 }
@@ -449,11 +451,11 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	*time = time_ / queries_num;
 
 	// Free memory.
-	if (strcmp(config->model, "CUBE") == 0) {
-		delete (hypercube*) structure;
-	}
-	else if (strcmp(config->model, "LSH") == 0) {
+	if (strcmp(config->model, "LSH") == 0) {
 		delete (LSH*) structure;
+	}
+	else if (strcmp(config->model, "CUBE") == 0) {
+		delete (hypercube*) structure;
 	}
 	else if (strcmp(config->model, "MRNG") == 0) {
 		delete (MRNG*) structure;

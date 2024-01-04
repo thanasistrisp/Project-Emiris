@@ -7,21 +7,30 @@ libname = pathlib.Path().absolute() / "lib" / "shared_lib.so"
 lib = ctypes.CDLL(libname)
 
 class config(Structure):
-    _fields_ = [('model', c_char_p),
-                ('vals', POINTER(c_int)),
+    _fields_ = [('model', c_char_p), # algorithm name ("BRUTE", "LSH", "CUBE", "GNNS", "MRNG", "NSG" for ann / "CLASSIC", "LSH", "CUBE" for kmeans)
+                ('vals', POINTER(c_int)), # array of int parameters given with the following order for each method:
+                                          # (K, L, table_size, query_trick for LSH)
+                                          # (K, M, probes for CUBE)
+                                          # (K, E, R for GNNS)
+                                          # (l for MRNG)
+                                          # (l, m, k, lq for NSG)
+                                          # (L, K, limit_queries for reversed LSH)
+                                          # (M, K, probes for reversed CUBE)
                 ('window', c_double),
-                ('dataset', c_char_p),
+                ('dataset', c_char_p), # initial dataset
                 ('query', c_char_p),
                 ('encoded_dataset', c_char_p),
                 ('decoded_dataset', c_char_p)]
 
-class sil_struct:
+class sil_struct: # struct for silhouette (double array of size 10 for each cluster)
     pointer = POINTER(c_double)
     val = []
 
     def __del__(self):
         lib.free_double_array.argtypes = (ctypes.POINTER(ctypes.c_double),)
         lib.free_double_array(self.pointer)
+
+# AAF: Average Approximation Factor
 
 def lsh_test(input, query, queries_num, k, L, table_size, window_size, query_trick, N, int_data=1):
     lib.get_lsh_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_double, ctypes.c_bool, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_int))
@@ -37,23 +46,6 @@ def hypercube_test(input, query, queries_num, k, M, probes, N, window = 1000, in
     aaf = ctypes.c_double()
     lib.get_hypercube_results(input, query, queries_num, k, M, probes, N, window, int_data, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
-
-def kmeans_test(conf, int_data=1):
-    tmp = config()
-    tmp.model = conf['model'] # field for method
-    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
-    if 'window' in conf:
-        tmp.window = conf['window']
-    tmp.dataset = conf['dataset']
-    lib.get_kmeans_results.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
-    stotal = ctypes.c_double()
-    clustering_time = ctypes.c_double()
-    sil = ctypes.POINTER(ctypes.c_double)()
-    lib.get_kmeans_results(ctypes.byref(tmp), int_data, ctypes.byref(stotal), ctypes.byref(clustering_time), ctypes.byref(sil))
-    silhouette = sil_struct()
-    silhouette.pointer = sil
-    silhouette.val = [sil[i] for i in range(10)]
-    return stotal, clustering_time, silhouette
 
 def gnn_test(input, query, queries_num, k, E, R, N, int_data = 1, load_file=b''):
     lib.get_gnn_results.argtypes = (ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
@@ -75,24 +67,8 @@ def nsg_test(input, query, queries_num, m, l, lq, k, N, int_data = 1, load_file=
     aaf = ctypes.c_double()
     lib.get_nsg_results(input, query, queries_num, m, l, lq, k, N, int_data, load_file, ctypes.byref(average_time), ctypes.byref(aaf))
     return average_time, aaf
- 
-def get_stotal(conf, dim, kmeansnew, centroids):
-    tmp = config()
-    tmp.model = conf['model'] # field for method
-    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
-    if 'window' in conf:
-        tmp.window = conf['window']
-    tmp.dataset = conf['dataset']
-    lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
-    stotal = ctypes.c_double()
-    sil = ctypes.POINTER(ctypes.c_double)()
-    lib.get_stotal(ctypes.byref(tmp), dim, ctypes.byref(stotal), ctypes.byref(sil), kmeansnew, centroids)
-    silhouette = sil_struct()
-    silhouette.pointer = sil
-    silhouette.val = [sil[i] for i in range(10)]
-    return stotal, silhouette
 
-def get_aaf(queries_num, conf, load_file = b''):
+def get_aaf(queries_num, conf, load_file = b''): # calculates the fraction {P_approx_new_projected - q_init} / {P_true_init - q_init}
     tmp = config()
     tmp.model = conf['model']
     tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
@@ -108,9 +84,45 @@ def get_aaf(queries_num, conf, load_file = b''):
     lib.get_aaf(load_file, queries_num, ctypes.byref(tmp), ctypes.byref(aaf), ctypes.byref(time))
     return aaf, time
 
-def get_kmeans_eval_object(conf):
+# Kmeans
+
+def kmeans_test(conf, int_data=1): # returns kmeans results for a given dataset (can be encoded or not)
     tmp = config()
-    tmp.model = conf['model'] # field for method
+    tmp.model = conf['model']
+    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
+    if 'window' in conf:
+        tmp.window = conf['window']
+    tmp.dataset = conf['dataset']
+    lib.get_kmeans_results.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+    stotal = ctypes.c_double()
+    clustering_time = ctypes.c_double()
+    sil = ctypes.POINTER(ctypes.c_double)()
+    lib.get_kmeans_results(ctypes.byref(tmp), int_data, ctypes.byref(stotal), ctypes.byref(clustering_time), ctypes.byref(sil))
+    silhouette = sil_struct()
+    silhouette.pointer = sil
+    silhouette.val = [sil[i] for i in range(10)]
+    return stotal, clustering_time, silhouette
+ 
+def get_stotal(conf, dim, kmeans_eval, centroids): # takes encoded centroids and pointer of KmeansEval class and returns projected silhouette
+    tmp = config()
+    tmp.model = conf['model']
+    tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
+    if 'window' in conf:
+        tmp.window = conf['window']
+    tmp.dataset = conf['dataset']
+    lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+    stotal = ctypes.c_double()
+    sil = ctypes.POINTER(ctypes.c_double)()
+    lib.get_stotal(ctypes.byref(tmp), dim, ctypes.byref(stotal), ctypes.byref(sil), kmeans_eval, centroids)
+    silhouette = sil_struct()
+    silhouette.pointer = sil
+    silhouette.val = [sil[i] for i in range(10)]
+    return stotal, silhouette
+
+
+def get_kmeans_eval_object(conf): # returns pointer of KmeansEval class
+    tmp = config()
+    tmp.model = conf['model']
     tmp.vals = (ctypes.c_int * len(conf['vals']))(*conf['vals'])
     if 'window' in conf:
         tmp.window = conf['window']
@@ -120,75 +132,25 @@ def get_kmeans_eval_object(conf):
     lib.get_kmeans(ctypes.byref(tmp), ctypes.byref(kmeans))
     return kmeans
 
-def free_centroids(centroids):
-    lib.free_centroids.argtypes = (ctypes.POINTER(ctypes.POINTER(ctypes.c_double)),)
-    lib.free_centroids(centroids)
-
-def get_centroids(kmeansnew):
+def get_centroids(kmeans_eval): # returns centroids as numpy array and dimension of centroids, shape: (10, dim)
     centroids = ctypes.POINTER(ctypes.POINTER(ctypes.c_double))()
     lib.get_centroids.argtypes = (ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))), ctypes.POINTER(ctypes.c_int))
     dim = ctypes.c_int()
-    lib.get_centroids(kmeansnew, ctypes.byref(centroids), ctypes.byref(dim))
+    lib.get_centroids(kmeans_eval, ctypes.byref(centroids), ctypes.byref(dim))
     centroids_ = np.array([[centroids[i][j] for j in range(dim.value)] for i in range(10)])
     free_centroids(centroids)
     return centroids_, dim.value
 
-def free_kmeans(kmeans):
-    lib.free_kmeans.argtypes = (ctypes.c_void_p,)
-    lib.free_kmeans(kmeans)
-
-def convert_to_2d_array(array, dim):
+def convert_to_2d_array(array, dim): # converts 1d flatten c array to 2d array
     lib.convert_1d_to_2d.argtypes = (ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))))
     array2d = ctypes.POINTER(ctypes.POINTER(ctypes.c_double))()
     lib.convert_1d_to_2d(array, dim, ctypes.byref(array2d))
     return array2d
 
-# conf = {
-#     'model': b'CLASSIC',
-#     'vals': [],
-#     'dataset': b'MNIST/normalized_dataset.dat',
-#     'encoded_dataset': b'MNIST/output_dataset.dat'
-# }
+def free_centroids(centroids):
+    lib.free_centroids.argtypes = (ctypes.POINTER(ctypes.POINTER(ctypes.c_double)),)
+    lib.free_centroids(centroids)
 
-# from tensorflow.keras.models import save_model, load_model
-# from helper_funcs import *
-# from autoencoder import Autoencoder
-
-# kmeans = get_kmeans_eval_object(conf)
-
-# centroids, dim = get_centroids(kmeans)
-
-# print(centroids)
-
-# print(centroids.shape)
-
-# model = 'models/model_conv_12.keras'
-
-# autoencoder = load_model(model)
-# shape = autoencoder.layers[-2].output_shape[1:] # get shape of encoded layer
-
-# centroids = deflatten_encoded(centroids, shape)
-
-# decoded_centroids = autoencoder.decode(centroids)
-
-# print(decoded_centroids)
-
-# decoded_centroids = flatten_encoded(decoded_centroids)
-
-# print(decoded_centroids.shape)
-
-# decoded_centroids = decoded_centroids.astype(np.float64)
-# decoded_centroids = decoded_centroids.flatten()
-# print(decoded_centroids.shape)
-# decoded_centroids = decoded_centroids.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-# decoded_centroids = convert_to_2d_array(decoded_centroids, 784)
-
-# stotal, sil = get_stotal(conf, dim, kmeans, decoded_centroids)
-# print("stotal: ", stotal.value)
-# print("silhouette: ", sil.val)
-# del sil
-
-# free_centroids(decoded_centroids)
-# free_kmeans(kmeans)
-
-# print('All ok')
+def free_kmeans(kmeans):
+    lib.free_kmeans.argtypes = (ctypes.c_void_p,)
+    lib.free_kmeans(kmeans)
