@@ -13,6 +13,7 @@
 #include "brute_force.hpp"
 #include "generic_search.hpp"
 
+// LSH configuration for the initial and latent space.
 #ifdef NEW
 #include "defines_latent_space.hpp"
 #else

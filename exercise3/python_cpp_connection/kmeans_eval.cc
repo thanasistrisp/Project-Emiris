@@ -9,7 +9,6 @@ using namespace std;
 KMeansEval::KMeansEval(const std::vector<std::vector<double>>& dataset) : KMeans(dataset) {}
 
 vector<variant<double, vector<double>>> KMeansEval::silhouette(vector<vector<double>> &initial_dataset, vector<vector<double>> &decoded_centroids) {
-	// compute silhouette
 	vector<double> si(clusters.size(), 0);
 	vector<double> sil(clusters.size(), 0);
     vector<vector<int>> clusters = get_clusters();
@@ -24,7 +23,7 @@ vector<variant<double, vector<double>>> KMeansEval::silhouette(vector<vector<dou
     }
     stotal /= initial_dataset.size();
 
-    // return stotal, sil
+    // Return stotal, sil.
     return {stotal, sil};
 }
 

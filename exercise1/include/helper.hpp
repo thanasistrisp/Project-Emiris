@@ -8,7 +8,7 @@
 std::vector<std::vector<double>> read_mnist_data(const std::string &filename, int num=0);
 // Same as above but reads the binary data as floats (float32).
 std::vector<std::vector<double>> read_mnist_data_float(const std::string &filename, int num=0);
-// Returns only the index-th image-vector from the dataset.
+// Returns only the i-th image-vector from the dataset.
 std::vector<double> get_mnist_float_index(const std::string &filename, int index);
 
 // Reads the config file and returns a tuple of the parameters (Important: it does not check if the file exists).

@@ -25,6 +25,11 @@
 
 using namespace std;
 
+// Connector functions that execute all non-clustering algorithms and return
+// the average query time, average aaf of all queries in latent space, min neighbors returned. 
+
+// Queries the algorithm specified by the given structure and parameters on the given query dataset.
+// The input dataset is used to calculate the aaf.
 vector<variant<double, int>> helper_arg(void *structure, const vector<vector<double>> &dataset, const vector<vector<double>> &queries,
 										vector<variant<int, bool>> &params)
 {
@@ -90,14 +95,13 @@ vector<variant<double, int>> helper_arg(void *structure, const vector<vector<dou
 		aaf += af;
 	}
 
-	// return average time, average aaf of all queries, min_neighbors returned by the algorithm.
-	
+	// Return average time, average aaf of all queries, min_neighbors returned by the algorithm.
 	return {elapsed_secs_ANN / queries.size(), aaf / queries.size(), min_neighbors};
 }
 
 extern "C" void get_lsh_results(const char *input, const char *query, int queries_num,
-										  int k, int L, int table_size, double window, bool query_trick, int N, int int_data,
-										  double *approximate_time, double *aaf, int *min_neighbors) {
+								int k, int L, int table_size, double window, bool query_trick, int N, int int_data,
+								double *approximate_time, double *aaf, int *min_neighbors) {
 	string input_str(input);
 	string query_str(query);
 
@@ -126,8 +130,8 @@ extern "C" void get_lsh_results(const char *input, const char *query, int querie
 }
 
 extern "C" void get_hypercube_results(const char *input, const char *query, int queries_num,
-										  int k, int probes, int M, int N, double window, int int_data, 
-										  double *approximate_time, double *aaf) {
+									  int k, int probes, int M, int N, double window, int int_data, 
+									  double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 
@@ -154,8 +158,8 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 }
 
 extern "C" void get_gnn_results(const char *input, const char *query, int queries_num,
-										  int k, int E, int R, int N, int int_data, const char *load_file,
-										  double *approximate_time, double *aaf) {
+								int k, int E, int R, int N, int int_data, const char *load_file,
+								double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -194,8 +198,8 @@ extern "C" void get_gnn_results(const char *input, const char *query, int querie
 }
 
 extern "C" void get_mrng_results(const char *input, const char *query, int queries_num,
-										  int l, int N, int int_data, const char *load_file,
-										  double *approximate_time, double *aaf) {
+								int l, int N, int int_data, const char *load_file,
+								double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -234,8 +238,8 @@ extern "C" void get_mrng_results(const char *input, const char *query, int queri
 }
 
 extern "C" void get_nsg_results(const char *input, const char *query, int queries_num,
-										  int m, int l, int lq, int k, int N, int int_data, const char *load_file,
-										  double *approximate_time, double *aaf) {
+								int m, int l, int lq, int k, int N, int int_data, const char *load_file,
+								double *approximate_time, double *aaf) {
 	string input_str(input);
 	string query_str(query);
 	string load_file_str(load_file);
@@ -317,6 +321,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		queries = read_mnist_data_float(query_str, queries_num);
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
 
+	// Initialize structure.
 	if (strcmp(config->model, "LSH") == 0) {
 		int k = config->vals[0];
 		int L = config->vals[1];
@@ -390,6 +395,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		exit(1);
 	}
 
+	// Calculate aaf.
 	double aaf_ = 0;
 	double time_ = 0;
 	for (int q = 0; q < queries_num; q++) {
@@ -440,7 +446,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
 		vector<double> ann_dec = get_mnist_float_index(decoded_dataset_str, get<0>(ann_enc_)[0]);
 		vector<double> ann_init = dataset[get<0>(brute_force(dataset, ann_dec, 1))[0]];
-		if (euclidean_distance(query_init, ann_init) == 0) { // very rare case: if the ANN from decoded is the same with query (same representation)
+		if (euclidean_distance(query_init, ann_init) == 0) { // Very rare case: the ANN from decoded is the same as query (same representation).
 			aaf_ += 1;
 		}
 		else {

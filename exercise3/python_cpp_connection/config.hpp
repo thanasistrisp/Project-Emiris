@@ -1,8 +1,8 @@
 struct config
 {
-    char* model;   // LSH, CUBE, MRNG, NSG, GNN, BRUTE
-    int *vals;     // algorithm integer only parameters
-    double window;
+    char* model;   // BRUTE, LSH, CUBE, MRNG, NSG, GNN options.
+    int *vals;     // Algorithm integer only parameters.
+    double window; // window parameter for LSH, CUBE.
     const char *dataset;
     const char *query;
     const char *encoded_dataset;

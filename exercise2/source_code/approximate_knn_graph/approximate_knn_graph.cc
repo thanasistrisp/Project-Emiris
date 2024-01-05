@@ -10,6 +10,7 @@
 #include "vector_utils.hpp"
 #include "set_utils.hpp"
 
+// LSH configuration for the initial and latent space.
 #ifdef NEW
 #include "defines_latent_space.hpp"
 #else

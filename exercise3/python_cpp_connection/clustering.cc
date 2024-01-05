@@ -26,6 +26,9 @@
 
 using namespace std;
 
+// Connector functions that execute the K-Means algorithm in latent space and return
+// the clustering time, total and per-cluster silhouette in latent space and the silhouette between the two spaces.
+
 vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config *config, double **sil)
 {
     string method_str = config->model;
@@ -65,7 +68,7 @@ vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config
     }
     stotal /= structure->get_dataset_size();
 
-    // Return time, aaf.
+    // Return time, stotal.
     return {clustering_time, stotal};
 }
 
@@ -109,7 +112,7 @@ extern "C" void get_stotal(struct config* config, int dim, double *stotal, doubl
         exit(1);
     }
 
-    // convert centroids to vector<vector<double>>
+    // Convert centroids to vector<vector<double>>.
     vector<vector<double>> centroids_;
     for (int i = 0; i < 10; i++) {
         vector<double> centroid;
@@ -130,6 +133,7 @@ extern "C" void get_stotal(struct config* config, int dim, double *stotal, doubl
         (*sil)[i] = sil_[i];
     }
 
+    // Return stotal.
     *stotal = stotal_;
 }
 
@@ -171,6 +175,7 @@ extern "C" void get_kmeans(struct config* config, void **kmeansnew)
 
     kmeans->compute_clusters(10, method, kmean_args);
     
+    // Return KMeansEval object.
     *kmeansnew = kmeans;
 }
 
@@ -201,6 +206,7 @@ extern "C" void free_centroids(double **centroids) {
     free(centroids);
 }
 
+// Converts a flattened 2d array given from Python to its original 2d form.
 extern "C" void convert_1d_to_2d(double *array, int dim, double ***array2d) {
     *array2d = (double**) malloc(10 * sizeof(double*));
     for (int i = 0; i < 10; i++) {
