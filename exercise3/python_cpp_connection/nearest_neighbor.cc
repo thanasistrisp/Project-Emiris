@@ -287,7 +287,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	string dataset_str(config->dataset);
 	string query_str(config->query);
 	string encoded_dataset_str(config->encoded_dataset);
-	string decoded_dataset_str(config->decoded_dataset);
 	string load_file_str(load_file);
 
 	if (!file_exists(dataset_str)) {
@@ -300,10 +299,6 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	}
 	if (!file_exists(encoded_dataset_str)) {
 		cout << "File " << encoded_dataset_str << " does not exist." << endl;
-		exit(1);
-	}
-	if (!file_exists(decoded_dataset_str)) {
-		cout << "File " << decoded_dataset_str << " does not exist." << endl;
 		exit(1);
 	}
 	if (!load_file_str.empty() && !file_exists(load_file_str)) {
@@ -440,13 +435,9 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 
 		time_ += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
-		// Let p be the ANN of q.
-		// Encode p and decode its encoding.
-		// Treat the decoding as a query and find its exact NN in the initial dataset, p' (initial space induction).
 		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
-		vector<double> ann_dec = get_mnist_float_index(decoded_dataset_str, get<0>(ann_enc_)[0]);
-		vector<double> ann_init = dataset[get<0>(brute_force(dataset, ann_dec, 1))[0]];
-		if (euclidean_distance(query_init, ann_init) == 0) { // Very rare case: the ANN from decoded is the same as query (same representation).
+		vector<double> ann_init = dataset[get<0>(ann_enc_)[0]];
+		if (euclidean_distance(query_init, ann_init) == 0) { // Very rare case: the ANN is the query itself (limited representation in the latent space)
 			aaf_ += 1;
 		}
 		else {
