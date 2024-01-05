@@ -16,7 +16,6 @@
 #include "approximate_knn_graph.hpp"
 #include "nsg.hpp"
 #include "mrng.hpp"
-#include "defines.hpp"
 #include "handling.hpp"
 #include "lsh.hpp"
 #include "hypercube.hpp"
@@ -219,7 +218,7 @@ extern "C" void get_hypercube_results(const char *input, const char *query, int 
 	cout << "Read MNIST data" << endl;
 	vector <vector<double>> dataset = read_mnist_data(input_str);
 	vector <vector<double>> queries = read_mnist_data(query_str, queries_num);
-	hypercube *cube = new hypercube(dataset, k, M, probes);
+	hypercube *cube = new hypercube(dataset, k, M, probes, 1000);
 	cout << "Done" << endl;
 
 	// Return time, MAF.
