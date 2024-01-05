@@ -6,5 +6,4 @@ struct config
     const char *dataset;
     const char *query;
     const char *encoded_dataset;
-    const char *decoded_dataset;
 };
