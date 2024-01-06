@@ -29,6 +29,30 @@ using namespace std;
 // Connector functions that execute the K-Means algorithm in latent space and return
 // the clustering time, total and per-cluster silhouette in latent space and the silhouette between the two spaces.
 
+double compute_objective_function(vector<vector<double>> dataset, vector<vector<double>> centroids)
+{
+    // compute min ||x - c||^2 for every x in dataset c \in centroids
+
+    // initialize to first centroid euclidean distance for every point
+    double dist = 0;
+    for (int i = 0; i < (int) dataset.size(); i++) {
+        dist += euclidean_distance(dataset[i], centroids[0]);
+    }
+    // find min total distance between every centroid
+    double min_dist = dist;
+    for (int i = 1; i < (int) centroids.size(); i++) {
+        dist = 0;
+        for (int j = 0; j < (int) dataset.size(); j++) {
+            dist += euclidean_distance(dataset[j], centroids[i]);
+        }
+        if (dist < min_dist) {
+            min_dist = dist;
+        }
+    }
+
+    return min_dist;
+}
+
 vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config *config, double **sil)
 {
     string method_str = config->model;
@@ -73,7 +97,7 @@ vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config
 }
 
 extern "C" void get_kmeans_results(struct config *config, int int_data,
-								   double *clustering_time, double *stotal, double **sil)
+								   double *clustering_time, double *stotal, double **sil, double *obj_func)
 {
     *sil = (double*) malloc(10 * sizeof(double));
 
@@ -95,12 +119,15 @@ extern "C" void get_kmeans_results(struct config *config, int int_data,
 	*clustering_time = get<double>(results[0]);
 	*stotal = get<double>(results[1]);
 
+    // Compute objective function.
+    *obj_func = compute_objective_function(dataset, kmeans->get_centroids());
+
 	delete kmeans;
 }
 
 extern "C" void free_double_array(double *sil) { free(sil); }
 
-extern "C" void get_stotal(struct config* config, int dim, double *stotal, double **sil, void *kmeansnew, double **centroids)
+extern "C" void get_stotal(struct config* config, int dim, double *stotal, double **sil, double *obj_func, void *kmeansnew, double **centroids)
 {
     *sil = (double*) malloc(10 * sizeof(double));
 
@@ -135,6 +162,9 @@ extern "C" void get_stotal(struct config* config, int dim, double *stotal, doubl
 
     // Return stotal.
     *stotal = stotal_;
+
+    // Compute objective function.
+    *obj_func = compute_objective_function(initial_dataset, centroids_);
 }
 
 extern "C" void get_kmeans(struct config* config, void **kmeansnew)

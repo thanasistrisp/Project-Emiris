@@ -91,15 +91,16 @@ def kmeans_test(conf, int_data=1): # returns kmeans results for a given dataset 
     if 'window' in conf:
         tmp.window = conf['window']
     tmp.dataset = conf['dataset']
-    lib.get_kmeans_results.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+    lib.get_kmeans_results.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_double))
     stotal = ctypes.c_double()
     clustering_time = ctypes.c_double()
     sil = ctypes.POINTER(ctypes.c_double)()
-    lib.get_kmeans_results(ctypes.byref(tmp), int_data, ctypes.byref(stotal), ctypes.byref(clustering_time), ctypes.byref(sil))
+    obj_func = ctypes.c_double()
+    lib.get_kmeans_results(ctypes.byref(tmp), int_data, ctypes.byref(stotal), ctypes.byref(clustering_time), ctypes.byref(sil), ctypes.byref(obj_func))
     silhouette = sil_struct()
     silhouette.pointer = sil
     silhouette.val = [sil[i] for i in range(10)]
-    return stotal, clustering_time, silhouette
+    return stotal, clustering_time, silhouette, obj_func
  
 def get_stotal(conf, dim, kmeans_eval, centroids): # takes encoded centroids and pointer of KmeansEval class and returns projected silhouette
     tmp = config()
@@ -108,14 +109,15 @@ def get_stotal(conf, dim, kmeans_eval, centroids): # takes encoded centroids and
     if 'window' in conf:
         tmp.window = conf['window']
     tmp.dataset = conf['dataset']
-    lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+    lib.get_stotal.argtypes = (ctypes.POINTER(config), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
     stotal = ctypes.c_double()
     sil = ctypes.POINTER(ctypes.c_double)()
-    lib.get_stotal(ctypes.byref(tmp), dim, ctypes.byref(stotal), ctypes.byref(sil), kmeans_eval, centroids)
+    obj_func = ctypes.c_double()
+    lib.get_stotal(ctypes.byref(tmp), dim, ctypes.byref(stotal), ctypes.byref(sil), ctypes.byref(obj_func), kmeans_eval, centroids)
     silhouette = sil_struct()
     silhouette.pointer = sil
     silhouette.val = [sil[i] for i in range(10)]
-    return stotal, silhouette
+    return stotal, silhouette, obj_func
 
 
 def get_kmeans_eval_object(conf): # returns pointer of KmeansEval class
