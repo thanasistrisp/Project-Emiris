@@ -19,10 +19,10 @@ import argparse
 
 # handle command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--dataset', help='dataset', type=str, default='MNIST/input.dat')
-parser.add_argument('-q', '--query', help='queryset', type=str, default='MNIST/query.dat')
-parser.add_argument('-od', '--output_dataset', help='output_dataset_file', type=str, default='MNIST/output_dataset.dat')
-parser.add_argument('-oq', '--output_query', help='output_query_file', type=str, default='MNIST/output_query.dat')
+parser.add_argument('-d', '--dataset', help='dataset', type=str)
+parser.add_argument('-q', '--query', help='queryset', type=str)
+parser.add_argument('-od', '--output_dataset', help='output_dataset_file', type=str)
+parser.add_argument('-oq', '--output_query', help='output_query_file', type=str)
 parser.add_argument('-m', '--model', help='model_file', type=str, default='models/model_conv_12.keras')
 
 args = parser.parse_args()

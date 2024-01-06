@@ -35,8 +35,8 @@ double compute_objective_function(const vector<vector<double>>& dataset, const s
 {
     // Compute J = \sum_{j=1}^{k} \sum_{x_i \in c_j} || x_i - c_j ||^{2}.
     double obj = 0.0;
-    for(int j = 0; j < centroids.size(); j++){
-        for(int i = 0; i < clusters[j].size(); i++){
+    for(int j = 0; j < (int)centroids.size(); j++){
+        for(int i = 0; i < (int)clusters[j].size(); i++){
             obj += euclidean_distance_squared(dataset[clusters[j][i]], centroids[j]);
         }
     }
