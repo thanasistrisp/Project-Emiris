@@ -30,30 +30,18 @@ using namespace std;
 // Connector functions that execute the K-Means algorithm in latent space and return
 // the clustering time, total and per-cluster silhouette in latent space and the silhouette between the two spaces.
 
-double compute_objective_function(vector<vector<double>> dataset, vector<vector<double>> centroids)
+double compute_objective_function(const vector<vector<double>>& dataset, const std::vector<std::vector<int>> clusters,
+                                  const vector<vector<double>>& centroids)
 {
-    double dist = std::numeric_limits<double>::max();
-    for (int c = 0; c < (int) centroids.size(); c++) {
-        double dist_ = 0;
-        for (int d = 0; d < (int) dataset[0].size(); d++) {
-            // calculate d(x_i,C)^2
-            double dist_temp = std::numeric_limits<double>::max();
-            for (int c_temp = 0; c_temp < (int) centroids.size(); c_temp++) {
-                double dist_temp_ = 0;
-                for (int d_temp = 0; d_temp < (int) dataset[0].size(); d_temp++) {
-                    dist_temp_ += euclidean_distance(dataset[d], centroids[c_temp]);
-                }
-                if (dist_temp_ < dist_temp) {
-                    dist_temp = dist_temp_;
-                }
-            }
-            dist_ += dist_temp * dist_temp;
-        }
-        if (dist_ < dist) {
-            dist = dist_;
+    // Compute J = \sum_{j=1}^{k} \sum_{x_i \in c_j} || x_i - c_j ||^{2}.
+    double obj = 0.0;
+    for(int j = 0; j < centroids.size(); j++){
+        for(int i = 0; i < clusters[j].size(); i++){
+            double dist = euclidean_distance(dataset[clusters[j][i]], centroids[j]);
+            obj += (dist * dist);
         }
     }
-    return dist;
+    return obj;
 }
 
 vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config *config, double **sil)
@@ -123,7 +111,7 @@ extern "C" void get_kmeans_results(struct config *config, int int_data,
 	*stotal = get<double>(results[1]);
 
     // Compute objective function.
-    *obj_func = compute_objective_function(dataset, kmeans->get_centroids());
+    *obj_func = compute_objective_function(dataset, kmeans->get_clusters(), kmeans->get_centroids());
 
 	delete kmeans;
 }
@@ -167,7 +155,7 @@ extern "C" void get_stotal(struct config* config, int dim, double *stotal, doubl
     *stotal = stotal_;
 
     // Compute objective function.
-    *obj_func = compute_objective_function(initial_dataset, centroids_);
+    *obj_func = compute_objective_function(initial_dataset, kmeans->get_clusters(), centroids_);
 }
 
 extern "C" void get_kmeans(struct config* config, void **kmeansnew)
