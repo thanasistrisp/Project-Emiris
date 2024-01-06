@@ -8,6 +8,7 @@
 #include <ctime>
 #include <limits>
 #include <vector>
+#include <cmath>
 
 #include "helper.hpp"
 #include "handling.hpp"
@@ -31,26 +32,28 @@ using namespace std;
 
 double compute_objective_function(vector<vector<double>> dataset, vector<vector<double>> centroids)
 {
-    // compute min ||x - c||^2 for every x in dataset c \in centroids
-
-    // initialize to first centroid euclidean distance for every point
-    double dist = 0;
-    for (int i = 0; i < (int) dataset.size(); i++) {
-        dist += euclidean_distance(dataset[i], centroids[0]);
-    }
-    // find min total distance between every centroid
-    double min_dist = dist;
-    for (int i = 1; i < (int) centroids.size(); i++) {
-        dist = 0;
-        for (int j = 0; j < (int) dataset.size(); j++) {
-            dist += euclidean_distance(dataset[j], centroids[i]);
+    double dist = std::numeric_limits<double>::max();
+    for (int c = 0; c < (int) centroids.size(); c++) {
+        double dist_ = 0;
+        for (int d = 0; d < (int) dataset[0].size(); d++) {
+            // calculate d(x_i,C)^2
+            double dist_temp = std::numeric_limits<double>::max();
+            for (int c_temp = 0; c_temp < (int) centroids.size(); c_temp++) {
+                double dist_temp_ = 0;
+                for (int d_temp = 0; d_temp < (int) dataset[0].size(); d_temp++) {
+                    dist_temp_ += euclidean_distance(dataset[d], centroids[c_temp]);
+                }
+                if (dist_temp_ < dist_temp) {
+                    dist_temp = dist_temp_;
+                }
+            }
+            dist_ += dist_temp * dist_temp;
         }
-        if (dist < min_dist) {
-            min_dist = dist;
+        if (dist_ < dist) {
+            dist = dist_;
         }
     }
-
-    return min_dist;
+    return dist;
 }
 
 vector<variant<double, int>> helper_arg_cluster(KMeans *structure, struct config *config, double **sil)
