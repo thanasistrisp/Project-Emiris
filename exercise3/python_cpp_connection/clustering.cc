@@ -117,7 +117,7 @@ extern "C" void get_kmeans_results(struct config *config, int int_data,
 
 extern "C" void free_double_array(double *sil) { free(sil); }
 
-extern "C" void get_stotal(struct config* config, int dim, double *stotal, double **sil, double *obj_func, void *kmeansnew, double **centroids)
+extern "C" void get_stotal(struct config* config, double *stotal, double **sil, double *obj_func, void *kmeansnew, double **centroids)
 {
     *sil = (double*) malloc(10 * sizeof(double));
 
@@ -133,7 +133,7 @@ extern "C" void get_stotal(struct config* config, int dim, double *stotal, doubl
     vector<vector<double>> centroids_;
     for (int i = 0; i < 10; i++) {
         vector<double> centroid;
-        for (int j = 0; j < dim; j++) {
+        for (int j = 0; j < 784; j++) {
             centroid.push_back(centroids[i][j]);
         }
         centroids_.push_back(centroid);
