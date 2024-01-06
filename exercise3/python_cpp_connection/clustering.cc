@@ -37,8 +37,7 @@ double compute_objective_function(const vector<vector<double>>& dataset, const s
     double obj = 0.0;
     for(int j = 0; j < centroids.size(); j++){
         for(int i = 0; i < clusters[j].size(); i++){
-            double dist = euclidean_distance(dataset[clusters[j][i]], centroids[j]);
-            obj += (dist * dist);
+            obj += euclidean_distance_squared(dataset[clusters[j][i]], centroids[j]);
         }
     }
     return obj;

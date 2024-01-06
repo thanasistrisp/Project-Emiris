@@ -23,6 +23,19 @@ double euclidean_distance(const std::vector<double>& v1, const std::vector<doubl
     return sqrt(sum);
 }
 
+double euclidean_distance_squared(const std::vector<double>& v1, const std::vector<double>& v2)
+{
+    if(v1.size() != v2.size() || v1.size() == 0){
+        return -1;
+    }
+
+    double sum = 0.0;
+    for(int i = 0; i < (int) v1.size(); i++){
+        sum += pow(fabs(v1.at(i) - v2.at(i)), 2);
+    }
+    return sum;
+}
+
 double lp_metric(vector<double>& v1, vector<double>& v2, int p = 2)
 {
     if(p < 0 || v1.size() != v2.size() || v1.size() == 0){
