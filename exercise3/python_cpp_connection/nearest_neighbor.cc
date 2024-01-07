@@ -286,6 +286,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	// Initialize structure.
 	string dataset_str(config->dataset);
 	string query_str(config->query);
+	string encoded_query_str(config->encoded_query);
 	string encoded_dataset_str(config->encoded_dataset);
 	string load_file_str(load_file);
 
@@ -295,6 +296,10 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	}
 	if (!file_exists(query_str)) {
 		cout << "File " << query_str << " does not exist." << endl;
+		exit(1);
+	}
+	if (!file_exists(encoded_query_str)) {
+		cout << "File " << encoded_query_str << " does not exist." << endl;
 		exit(1);
 	}
 	if (!file_exists(encoded_dataset_str)) {
@@ -310,10 +315,15 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 
 	vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
 	vector <vector<double>> queries;
-	if (queries_num == -1)
+	vector <vector<double>> encoded_queries;
+	if (queries_num == -1) {
 		queries = read_mnist_data_float(query_str);
-	else
+		encoded_queries = read_mnist_data_float(encoded_query_str);
+	}
+	else {
 		queries = read_mnist_data_float(query_str, queries_num);
+		encoded_queries = read_mnist_data_float(encoded_query_str, queries_num);
+	}
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
 
 	// Initialize structure.
@@ -397,7 +407,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 		vector<double> query_init = queries[q];
 		tuple<vector<int>, vector<double>> true_nn_init_ = brute_force(dataset, query_init, 1);
 		vector<double> true_nn_init = dataset[get<0>(true_nn_init_)[0]];
-		vector<double> query_enc = encoded_dataset[q];
+		vector<double> query_enc = encoded_queries[q];
 		tuple<vector<int>, vector<double>> ann_enc_;
 
 		clock_t start_ANN = clock();
