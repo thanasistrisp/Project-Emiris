@@ -61,7 +61,7 @@ Athanasios Trispiotis - 1115202000194
 │   ├── best_model_analysis.ipynb
 │   ├── common.mk			       # main (common) makefile
 │   ├── environment.yml		       # conda environment file for installing dependencies
-│   ├── grid_search_kmeans_latentnonproj_and_init.ipynb.ipynb
+│   ├── grid_search_kmeans_latentnonproj_and_init.ipynb
 │   ├── grid_search_kmeans_lat_init.ipynb
 │   ├── grid_search_lat_init.ipynb
 │   ├── helper_funcs.py		       # helper functions for loading/saving data, normalizing, plotting, numpy handling
@@ -127,6 +127,8 @@ For developing our Autoencoder model, we will use the Keras framework with Tenso
 
 Our unsupervised learning model is composed of two parts; the encoder and the decoder. First the input ($28\times28$ pixels flattened) passes through the encoder, to produce the latent layer. The decoder, which has the similar ANN structure, then produces the output only using the compressed representation. The dimensionality of the input and output are exactly the same. The goal is to get an output identical with the input.  The latent dimension will always be less than 50 to ensure that the encodings have a much smaller dimension than initial dimension of our data. Up to 5 hidden connected layers will be used. Other hyperparameters are explained in `best_model_analysis.ipynb`, where the model is optimized based on its validation loss using random search provided by the Optuna framework. Overfitting is also handled by using early stopping and manual observation of the training and validation loss in each epoch. Epochs are set to max 50 epochs for all models.
 
+For the autoencoder model developed, either by using `predict()` or `encode()` and then `decode()` functions, we get the same reconstructed image. In other words, using encoder and decoder separately or together in one step internally, we get the same result without overloading the `predict()` already implemented function.
+
 ### 4.1.1. Dense Autoencoder
 
 We start as a stack of fully-connected neural layers (a linear operation in which every input is connected to every output by a weight followed by a non-linear activation function). As we can see from the best trials Optuna returns, no model overfits. The lowest validation loss we can yield is about 0.075. For the best models, the ReLU or GELU activation functions and NAdam or Adamax optimizers are the most suitable for the hidden layers and the sigmoid function for the output layer (classification problem). Regarding the batch size, the model exhibits a better behavior with smaller batch sizes (32, 64). Simpler models with 1-2 hidden layers are better than more complex ones. Early stopping does not happen in most of the cases as epochs are not too many and the model does not overfit. As expected, better validation loss is achieved with higher latent space dimensionality, because a higher portion of the initial information is retained.
@@ -154,14 +156,14 @@ $$
 
 For finding the approximate nearest neighbor in latent space, we need to re-evaluate the hyperparameters for each algorithm as the previous hyperparameters do not perform well in significantly lower dimension space. We also calculate the true nearest neighbors in latent space for evaluation purposes.
 
-To apply nearest neighbor (nn) search in latent space, we need to encode whole dataset and query sets using the `encode()` function of the autoencoder model. Then, the encodings are saved to binary files as `float32` in interval $[0,1]$ and loaded back to C++. We can project nearest neighbor encoded back to initial space just by using its index in the initial dataset, as the datasets are not shuffled.
+To apply nearest neighbor search in latent space, we need to encode whole dataset and query sets using the `encode()` function of the autoencoder model. Then, the encodings are saved to binary files as `float32` in interval $[0,1]$ and loaded back to C++. We can project nearest neighbor encoded back to initial space just by using its index in the initial dataset, as the datasets are not shuffled.
 
 ## 5.2 Results
 
 Analysis is done in 3 notebooks:
 
-- `optimization_initial.ipynb`: recalculate the best hyparameters, AAF and average query time for each non-clustering algorithm (LSH, Hypercube, GNNS, MRNG, NSG) in the initial space using the AAF (Average Approximation Factor) instead of the MAF (Maximum Approximation Factor) metric.
-- `optimization_latent.ipynb`: calculate the best hyparameters, AAF and average query time for each non-clustering algorithm (LSH, Hypercube, GNNS, MRNG, NSG) only in the latent space. AAF evaluation in this case is only used for hyperparameter tuning, because the points are not projected back to initial space.
+- `optimization_initial.ipynb`: recalculate the best hyperparameters, AAF and average query time for each non-clustering algorithm (LSH, Hypercube, GNNS, MRNG, NSG) in the initial space using the AAF (Average Approximation Factor) instead of the MAF (Maximum Approximation Factor) metric.
+- `optimization_latent.ipynb`: calculate the best hyperparameters, AAF and average query time for each non-clustering algorithm (LSH, Hypercube, GNNS, MRNG, NSG) only in the latent space. AAF evaluation in this case is only used for hyperparameter tuning, because the points are not projected back to initial space.
 - `grid_search_lat_init.ipynb`: using the best hyperparameters for the latent space, for each of the 6 best autoencoder models and for each algorithm (Brute-force, LSH, Hypercube, GNNS, MRNG, NSG) we evaluate the AAF between initial and latent space and the time needed for the search in latent space.
 
 # 6. Clustering in Latent Space
