@@ -6,21 +6,17 @@
 
 #include "lp_metric.hpp"
 #include "hypercube.hpp"
-#include "defines.hpp"
 
 using namespace std;
 
-hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, 
+hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes, double w,
 					 double (*distance)(const std::vector<double> &, const std::vector<double> &)) : p(p)
 {
 	this->k = k;
 	this->M = M;
 	this->probes = probes;
 	this->distance = distance;
-	
-	clock_t start = clock();
-	cout << "Preprocessing..." << endl;
-	
+		
 	// Initialize h_i functions, i = 1, ..., k.
     HashFunction *h;
     for(int i = 0; i < k; i++){
@@ -54,10 +50,6 @@ hypercube::hypercube(const vector<vector<double>> &p, int k, int M, int probes,
 			hash_table->insert(pair<binary_string, vector<int>>(bs, v));
 		}
 	}
-
-	clock_t end = clock();
-	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-	cout << "Preprocessing time: " << elapsed_secs << endl;
 }
 
 hypercube::~hypercube() {

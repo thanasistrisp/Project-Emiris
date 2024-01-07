@@ -13,7 +13,7 @@ using std::vector;
 
 // ---------- Functions for class HashFunction ---------- //
 
-HashFunction::HashFunction(int number_of_dimensions, int window)
+HashFunction::HashFunction(int number_of_dimensions, double window)
 : number_of_dimensions(number_of_dimensions), window(window)
 {
     // t ~ U[0, w)
@@ -42,5 +42,5 @@ int HashFunction::hash(const vector<double>& p)
 
     // Use hash function h_i(p) = floor((p * v + t) / w)
     double result = std::inner_product(p.begin(), p.end(), v.begin(), t);
-    return floor(abs(result) / window);
+    return floor(fabs(result) / window);
 }

@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
 	int k = 14;
 	int M = 10;
 	int probes = 2;
+	double w = 1000;
 	int N = 1;
 	double R = 10000;
 
@@ -89,7 +90,7 @@ int main(int argc, char *argv[]) {
 	}
 	vector <vector<double>> dataset = read_mnist_data(input_file);
 
-	hypercube cube(dataset, k, M, probes);
+	hypercube cube(dataset, k, M, probes, w);
 
 	ofstream output(output_file);
 

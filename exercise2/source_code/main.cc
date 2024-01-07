@@ -13,7 +13,6 @@
 #include "approximate_knn_graph.hpp"
 #include "mrng.hpp"
 #include "nsg.hpp"
-#include "defines.hpp"
 #include "handling.hpp"
 
 using namespace std;

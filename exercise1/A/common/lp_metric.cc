@@ -3,7 +3,7 @@
 #include <string>
 #include <cmath>
 // iterator  is used for std::const_iterator, std::advance().
-// cmath     is used for abs(), pow().
+// cmath     is used for fabs(), pow().
 
 #include "lp_metric.hpp"
 
@@ -18,9 +18,23 @@ double euclidean_distance(const std::vector<double>& v1, const std::vector<doubl
 
     double sum = 0.0;
     for(int i = 0; i < (int) v1.size(); i++){
-        sum += pow(abs(v1.at(i) - v2.at(i)), 2);
+        sum += pow(fabs(v1.at(i) - v2.at(i)), 2);
     }
     return sqrt(sum);
+}
+
+double euclidean_distance_squared(const std::vector<double>& v1, const std::vector<double>& v2)
+{
+    if(v1.size() != v2.size() || v1.size() == 0){
+        return -1;
+    }
+
+    double sum = 0.0;
+    for(int i = 0; i < (int) v1.size(); i++){
+        double temp = v1.at(i) - v2.at(i);
+        sum += temp * temp;
+    }
+    return sum;
 }
 
 double lp_metric(vector<double>& v1, vector<double>& v2, int p = 2)
@@ -31,7 +45,7 @@ double lp_metric(vector<double>& v1, vector<double>& v2, int p = 2)
 
     double sum = 0.0;
     for(int i = 0; i < (int) v1.size(); i++){
-        sum += pow(abs(v1.at(i) - v2.at(i)), p);
+        sum += pow(fabs(v1.at(i) - v2.at(i)), p);
     }
     return pow(sum, 1 / p);
 }

@@ -7,27 +7,28 @@
 
 #include "mrng.hpp"
 #include "lsh.hpp"
-#include "defines.hpp"
 #include "set_utils.hpp"
 #include "lp_metric.hpp"
 #include "vector_utils.hpp"
 #include "brute_force.hpp"
 #include "generic_search.hpp"
 
+// LSH configuration for the initial and latent space.
+#ifdef NEW
+#include "defines_latent_space.hpp"
+#else
+#include "defines_initial_space.hpp"
+#endif
+
 using namespace std;
 
 MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 {
-	// Optimal hyperparameters for LSH yielded by fine tuning.
-	int k_lsh = 10;
-	int L = 5;
-	int table_size = 7500;
-	int window_size = 3276;
-	clock_t start = clock();
+	// clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
-	clock_t end_lsh = clock();
-	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
-	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
+	// clock_t end_lsh = clock();
+	// double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
+	// cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
 	// Initialize graph.
 	G = new DirectedGraph();
 	unordered_set<int> S;
@@ -40,7 +41,7 @@ MRNG::MRNG(const vector<vector<double>> &dataset): dataset(dataset)
 	unordered_set<int> *Lp = new unordered_set<int>();
 	for (int p: S) {
 		i++;
-		cout << i << endl;
+		// cout << i << endl;
 		// Rp is S - {p}.
 		for (int r : S) {
 			if (r != p) {
@@ -125,7 +126,7 @@ void MRNG::find_neighbors_with_min_distance(int p, unordered_set<int> *Lp)
 	// In case LSH returns no neighbors, pick a random one.
 	if((int) neighbors_indices.size() == 0){
 
-		cout << "LSH returned no neighbors, adding a random neighbor instead" << endl;
+		// cout << "LSH returned no neighbors, adding a random neighbor instead" << endl;
 
 		int r_index = rand() % dataset.size();
 		while(r_index != p){

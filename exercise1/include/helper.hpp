@@ -6,6 +6,10 @@
 
 // Reads the dataset from the given file and returns a vector of vectors (Important: it does not check if the file exists).
 std::vector<std::vector<double>> read_mnist_data(const std::string &filename, int num=0);
+// Same as above but reads the binary data as floats (float32).
+std::vector<std::vector<double>> read_mnist_data_float(const std::string &filename, int num=0);
+// Returns only the i-th image-vector from the dataset.
+std::vector<double> get_mnist_float_index(const std::string &filename, int index);
 
 // Reads the config file and returns a tuple of the parameters (Important: it does not check if the file exists).
 /* The tuple contains:
@@ -15,8 +19,10 @@ std::vector<std::vector<double>> read_mnist_data(const std::string &filename, in
  * 4. M of the Hypercube (number of candidates)
  * 5. k of the Hypercube (number of dimensions)
  * 6. number of probes of the Hypercube
+ * 7. window for LSH, Hypercube
+ * 8. limit queries option for LSH
  */
-std::tuple<int, int, int, int, int, int> read_config_file(const std::string &filename);
+std::tuple<int, int, int, int, int, int, double, int> read_config_file(const std::string &filename);
 
 void export_image(const std::vector<double> &image, std::string filename);
 

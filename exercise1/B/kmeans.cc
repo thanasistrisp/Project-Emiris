@@ -7,7 +7,6 @@
 using namespace std;
 
 #include "kmeans.hpp"
-#include "defines.hpp"
 #include "vector_utils.hpp"
 
 #include "lsh.hpp"
@@ -92,7 +91,7 @@ void KMeans::compute_clusters_reverse_lsh()
     int inner = 0, outer = 0; // For debugging.
 
     // Index n points into L hashtables: once for the entire algorithm.
-    LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, w, dataset);
+    LSH lsh(k_lsh, number_of_hash_tables, dataset.size() / 8, window, dataset);
 
     // Start with radius = min(dist between centroids) / 2.
     double radius = min_dist_centroids() / 2;
@@ -110,7 +109,7 @@ void KMeans::compute_clusters_reverse_lsh()
             for(int i = 0; i < (int) centroids.size(); i++){
                 // At each iteration, for each centroid c, range/ball queries centered at c.
                 // Avoid buckets with very few items.
-                tie(ball, distances) = lsh.query_range(centroids[i], radius, distance);
+                tie(ball, distances) = lsh.query_range(centroids[i], radius, distance, limit_queries);
                 for(int j = 0; j < (int) ball.size(); j++){
                     p_index = ball[j];
                     iter = point_2_cluster.find(p_index);
@@ -149,7 +148,7 @@ void KMeans::compute_clusters_reverse_hypercube()
     int inner = 0, outer = 0; // For debugging.
 
     // Index n points into the hypercube: once for the entire algorithm.
-    hypercube hypercube(dataset, k_hypercube, max_points_checked, probes);
+    hypercube hypercube(dataset, k_hypercube, max_points_checked, probes, window);
 
     // Start with radius = min(dist between centroids) / 2.
     double radius = min_dist_centroids() / 2;
@@ -285,8 +284,8 @@ void KMeans::compute_clusters_lloyds()
     std::cout << loops << " iterations" << std::endl;
 }
 
-void KMeans::compute_clusters(int k, update_method method, const tuple<int,int,int,int, int> &config) {
-    tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes) = config;
+void KMeans::compute_clusters(int k, update_method method, const tuple<int, int, int, int, int, double, int> &config) {
+    tie(number_of_hash_tables, k_lsh, max_points_checked, k_hypercube, probes, window, limit_queries) = config;
     // Again initialize with certain size to avoid reallocation.
     clusters.resize(k);
 

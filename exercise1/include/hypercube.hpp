@@ -37,8 +37,8 @@ private:
 
 public:
 	// Initializes an instance with the given dataset, number of dimensions k, maximum number of candidate data points checked,
-	// maximum number of hypercube vertices checked (probes) based on the given distance function.
-	hypercube(const std::vector<std::vector<double>> &p, int k, int M, int probes, 
+	// maximum number of hypercube vertices checked (probes), window and uses the given distance function.
+	hypercube(const std::vector<std::vector<double>> &p, int k, int M, int probes, double window,
 			  double (*distance)(const std::vector<double> &, const std::vector<double> &) = euclidean_distance);
 	~hypercube();
 

@@ -16,7 +16,7 @@ using namespace std;
 // Initializes an instance with the given number of hash functions,
 // number of hash tables, table size and window.
 // The last argument is the set of points the LSH algorithm will be applied to.
-LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int table_size, int window, const vector<vector<double>> &dataset)
+LSH::LSH(int number_of_hash_functions, int number_of_hash_tables, int table_size, double window, const vector<vector<double>> &dataset)
 : number_of_dimensions(dataset.at(0).size()), number_of_hash_functions(number_of_hash_functions),
   table_size(table_size), number_of_hash_tables(number_of_hash_tables), dataset(dataset)
 {
@@ -115,7 +115,8 @@ tuple<vector<int>, vector<double>> LSH::query(const vector<double>& q, unsigned 
 // and their distances to the query based on the given distance function.
 // All the neighbours returned lie within radius r.
 tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, double r,
-                                                    double (*distance)(const vector<double>&, const vector<double>&))
+                                                    double (*distance)(const vector<double>&, const vector<double>&),
+                                                    bool limit_queries)
 {
     auto compare = [](tuple<int, double> t1, tuple<int, double> t2){ return get<1>(t1) < get<1>(t2); };
     multiset<tuple<int, double>, decltype(compare)> s(compare);
@@ -140,9 +141,9 @@ tuple<vector<int>, vector<double>> LSH::query_range(const vector<double>& q, dou
                     unique_indices.insert(p_index);
                 }
             }
-            // if(s.size() > (unsigned int) 20 * number_of_hash_tables){ // Optional.
-            //     break;
-            // }
+            if(limit_queries && s.size() > (unsigned int) 20 * number_of_hash_tables){ // Optional.
+                break;
+            }
         }
     }
     vector<int> indices;

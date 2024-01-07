@@ -6,10 +6,16 @@
 
 #include "approximate_knn_graph.hpp"
 #include "lsh.hpp"
-#include "defines.hpp"
 #include "lp_metric.hpp"
 #include "vector_utils.hpp"
 #include "set_utils.hpp"
+
+// LSH configuration for the initial and latent space.
+#ifdef NEW
+#include "defines_latent_space.hpp"
+#else
+#include "defines_initial_space.hpp"
+#endif
 
 using namespace std;
 
@@ -19,17 +25,11 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 	unordered_set<int> unique_indices;
 
 	G = new DirectedGraph();
-	// Optimal hyperparameters for LSH yielded by fine tuning.
-	int k_lsh = 7;
-	int L = 4;
-	int table_size = 15000;
-	int window_size = 1815;
-	clock_t start = clock();
+	// clock_t start = clock();
 	lsh = new LSH(k_lsh, L, table_size, window_size, dataset);
-	clock_t end_lsh = clock();
-	double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
-	cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
-	start = clock();
+	// clock_t end_lsh = clock();
+	// double elapsed_secs_lsh = double(end_lsh - start) / CLOCKS_PER_SEC;
+	// cout << "LSH initialization time: " << elapsed_secs_lsh << endl;
 	
 	// Initialize G.
 	for (int i = 0; i < (int) dataset.size(); i++) {
@@ -72,10 +72,6 @@ ApproximateKNNGraph::ApproximateKNNGraph(const vector<vector<double>> &dataset, 
 		}
 		G->add_edge(i, neighbors_indices);
 	}
-
-	clock_t end = clock();
-	double elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-	cout << "ApproximateKNNGraph initialization time: " << elapsed_secs << endl;
 }
 
 ApproximateKNNGraph::~ApproximateKNNGraph()
@@ -137,7 +133,8 @@ tuple<vector<int>, vector<double>> ApproximateKNNGraph::query(const vector<doubl
 	unordered_set<int> unique_indices;
 
 	for (uint i = 0; i < R; i++) {
-		int y0, y1, y0_dist, y1_dist;
+		int y0, y1;
+		double y0_dist, y1_dist;
 		unordered_set<int> visited;
 
 		// Y_0: a random point (uniformly) over D.

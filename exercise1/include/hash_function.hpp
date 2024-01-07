@@ -7,13 +7,13 @@ class HashFunction
 {
     private:
         int number_of_dimensions; // Number of dimensions d.
-        int window;               // Window w for the entire algorithm.
+        double window;               // Window w for the entire algorithm.
         float t;                  // Shift t.
         std::vector<double> v;    // d-dimensional vector with coordinates in N(0, 1).
 
     public:
         // Initializes a hash function with the given number of dimensions and window.
-        HashFunction(int, int);
+        HashFunction(int, double);
         ~HashFunction();
 
         // Returns the hashed value of the given vector.

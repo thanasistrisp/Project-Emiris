@@ -25,7 +25,7 @@ class LSH
         // Initializes an instance with the given number of hash functions,
         // number of hash tables, table size and window.
         // The last argument is the set of points the LSH algorithm will be applied to.
-        LSH(int, int, int, int, const std::vector<std::vector<double>>&);
+        LSH(int, int, int, double, const std::vector<std::vector<double>>&);
         ~LSH();
 
         // Returns the indices of the k-approximate nearest neighbours (ANN) of the given query q
@@ -39,5 +39,6 @@ class LSH
         // and their distances to the query based on the given distance function.
         // All the neighbours returned lie within radius r.
         std::tuple<std::vector<int>, std::vector<double>> query_range(const std::vector<double>&, double r,
-                                                                double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance);
+                                                                      double (*distance)(const std::vector<double>&, const std::vector<double>&) = euclidean_distance,
+                                                                      bool limit_queries=false);
 };

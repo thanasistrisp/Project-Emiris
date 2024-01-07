@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 	vector<vector<double>> dataset = read_mnist_data(input_file);
 	
 	// read config file
-	tuple<int, int, int, int, int, int> config = read_config_file(config_file);
+	tuple<int, int, int, int, int, int, double, int> config = read_config_file(config_file);
 
 	// run kmeans
 	KMeans kmeans(dataset);
