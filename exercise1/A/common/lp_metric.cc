@@ -31,7 +31,8 @@ double euclidean_distance_squared(const std::vector<double>& v1, const std::vect
 
     double sum = 0.0;
     for(int i = 0; i < (int) v1.size(); i++){
-        sum += pow(fabs(v1.at(i) - v2.at(i)), 2);
+        double temp = v1.at(i) - v2.at(i);
+        sum += temp * temp;
     }
     return sum;
 }
