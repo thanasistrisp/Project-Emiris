@@ -115,7 +115,9 @@ By default, one of the best models is used for encoding. If you want to use a sp
 
 ## 3.2. C++ binaries
 
-For this exercise, there are no C++ binaries to be executed. Only the shared library is used through `ctypes` python library. If you want to calculate various metrics on other datasets, you will have to run the equivalent cells in the Jupyter notebooks and adjust them appropriately (e.g. change paths, parameters, run one model/dataset only bypassing hyperparameter tuning, etc.).
+For this exercise, there are no C++ binaries to be executed (no main is defined). Only the shared library is used through `ctypes` python library. If you want to calculate various metrics on other datasets, you will have to run the equivalent cells in the Jupyter notebooks and adjust them appropriately (e.g. change paths, parameters, run one model/dataset only bypassing hyperparameter tuning, etc.).
+
+NOTE: For previous assignments, it is not correct to run the executables with the normalized range datasets. The `main` function is designed to only work with the original MNIST datasets (integer values in range [0,255]).
 
 # 4. Neural Network: Autoencoder
 
@@ -123,11 +125,11 @@ For developing our Autoencoder model, we will use the Keras framework with Tenso
 
 ## 4.1. Architecture
 
-Our unsupervised learning model is comprised of two parts; the encoder and the decoder. The autoencoder that os developed in this project always has an input layer of 784 neurons (28x28 pixels flattened), a latent layer with as many neurons as the dimension of the latent space and an output layer of 784 neurons. The latent dimension will always be less than 50 to ensure that the encodings have a much smaller dimension than initial dimension of our data. Up to 5 hidden connected layers will be used. Other hyperparameters are explained in `best_model_analysis.ipynb`, where the model is optimized based on its validation loss using random search provided by the Optuna framework. Overfitting is also handled by using early stopping and manual observation of the training and validation loss in each epoch. Epochs are set to max 50 epochs for all models.
+Our unsupervised learning model is composed of two parts; the encoder and the decoder. First the input ($28\times28$ pixels flattened) passes through the encoder, to produce the latent layer. The decoder, which has the similar ANN structure, then produces the output only using the compressed representation. The dimensionality of the input and output are exactly the same. The goal is to get an output identical with the input.  The latent dimension will always be less than 50 to ensure that the encodings have a much smaller dimension than initial dimension of our data. Up to 5 hidden connected layers will be used. Other hyperparameters are explained in `best_model_analysis.ipynb`, where the model is optimized based on its validation loss using random search provided by the Optuna framework. Overfitting is also handled by using early stopping and manual observation of the training and validation loss in each epoch. Epochs are set to max 50 epochs for all models.
 
 ### 4.1.1. Dense Autoencoder
 
-We start as a stack of fully-connected neural layers (a linear operation in which every input is connected to every output by a weight followed by a non-linear activation function). As we can see from the best trials Optuna returns, no model overfits. The lowest validation loss we can yield is about 0.075. For the best models, the ReLU or GELU activation functions and NAdam or Adamax optimizers are the most sutitable for the hidden layers and the sigmoid function for the output layer (classification problem). Regarding the batch size, the model exhibits a better behavior with smaller batch sizes (32, 64). Simpler models with 1-2 hidden layers are better than more complex ones. Early stopping does not happen in most of the cases as epochs are not too many and the model does not overfit. As expected, better validation loss is achieved with higher latent space dimensionality, because a higher portion of the initial information is retained.
+We start as a stack of fully-connected neural layers (a linear operation in which every input is connected to every output by a weight followed by a non-linear activation function). As we can see from the best trials Optuna returns, no model overfits. The lowest validation loss we can yield is about 0.075. For the best models, the ReLU or GELU activation functions and NAdam or Adamax optimizers are the most suitable for the hidden layers and the sigmoid function for the output layer (classification problem). Regarding the batch size, the model exhibits a better behavior with smaller batch sizes (32, 64). Simpler models with 1-2 hidden layers are better than more complex ones. Early stopping does not happen in most of the cases as epochs are not too many and the model does not overfit. As expected, better validation loss is achieved with higher latent space dimensionality, because a higher portion of the initial information is retained.
 
 ### 4.1.2. Convolutional Autoencoder
 
@@ -139,7 +141,7 @@ Even though the convolutional autoencoder architecture is more complex than the 
 
 ## 4.2. Normalization of datasets
 
-We normalize all datasets (original data, encoded representations) for both training and testing sets and map them in interval $[0,1]$. It is necessary for the data to be in the same scale to be able to compare distances proportionally, otherwise the results will be biased.Normalization in same space does not affect the results. Normalization is done in Python and data are saved as `float32` in binary files (C++ `float` equivalent data type).
+We normalize all datasets (original data, encoded representations) for both training and testing sets and map them in interval $[0,1]$. It is necessary for the data to be in the same scale to be able to compare distances proportionally, otherwise the results will be biased. Normalization in same space does not affect the results. Normalization is done in Python and data are saved as `float32` in binary files (C++ `float` equivalent data type).
 
 # 5. Nearest Neighbor Search in Latent Space
 
@@ -166,7 +168,7 @@ Analysis is done in 3 notebooks:
 
 ## 6.1. Implementation - Evaluation
 
-For clustering in latent space, we use the same approach as in nearest neighbor search in latent space. We encode the whole dataset and query sets using the `encode()` function of the autoencoder model. Then, the encodings are saved to binary files as `float32` in interval $[0,1]$ and loaded  back to C++. All points inside clusters can be projected back to initial space just by using their index in the initial dataset. However, this is not the case for the centroids of the clusters as it is not guaranteed that they belong to the dataset. For this reason, we need to use the `decode()` function of the model to project them back to initial space where they can also not belong to the initial dataset. The decoding process is done in memory using `ctypes`.
+For clustering in latent space, we use the same approach as in nearest neighbor search in latent space. We encode the whole dataset and query sets using the `encode()` function of the autoencoder model. Then, the encodings are saved to binary files as `float32` in interval $[0,1]$ and loaded back to C++. All points inside clusters can be projected back to initial space just by using their index in the initial dataset. However, this is not the case for the centroids of the clusters as it is not guaranteed that they belong to the dataset. For this reason, we need to use the `decode()` function of the model to project them back to initial space where they can also not belong to the initial dataset. The decoding process is done in memory using `ctypes`.
 
 For the evaluation, we use both the silhouette metric and the objective function value, defined as:
 
