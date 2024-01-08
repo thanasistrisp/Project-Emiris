@@ -282,6 +282,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 ///////////////////////////////
 ///////////////////////////////
 
+// Returns the AAF between the two spaces.
 extern "C" void get_aaf(const char* load_file, int queries_num, struct config* config, double *aaf, double *time) {
 	// Initialize structure.
 	string dataset_str(config->dataset);
@@ -406,7 +407,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	for (int q = 0; q < queries_num; q++) {
 		vector<double> query_init = queries[q];
 		tuple<vector<int>, vector<double>> true_nn_init_ = brute_force(dataset, query_init, 1);
-		vector<double> true_nn_init = dataset[get<0>(true_nn_init_)[0]];
+		vector<double> true_nn_init = dataset[get<0>(true_nn_init_)[0]]; // Exact NN of q in initial space.
 		vector<double> query_enc = encoded_queries[q];
 		tuple<vector<int>, vector<double>> ann_enc_;
 
@@ -445,7 +446,7 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 
 		time_ += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
-		vector<double> ann_init = dataset[get<0>(ann_enc_)[0]];
+		vector<double> ann_init = dataset[get<0>(ann_enc_)[0]]; // ANN of q in latent space projected back to initial space.
 
 		// If query in initial space is the same with nn in latent space, add 1 to average (aaf >= 1).
 		// The only case that this happens is when the query is in the original dataset.
