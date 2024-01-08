@@ -19,6 +19,7 @@ class config(Structure):
                 ('window', c_double),
                 ('dataset', c_char_p), # initial dataset
                 ('query', c_char_p),
+                ('encoded_query', c_char_p),
                 ('encoded_dataset', c_char_p)]
 
 class sil_struct: # struct for silhouette (double array of size 10 for each cluster)
@@ -75,6 +76,7 @@ def get_aaf(queries_num, conf, load_file = b''): # calculates the fraction {P_ap
         tmp.window = conf['window']
     tmp.dataset = conf['dataset']
     tmp.query = conf['query']
+    tmp.encoded_query = conf['encoded_query']
     tmp.encoded_dataset = conf['encoded_dataset']
     lib.get_aaf.argtypes = (ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(config), ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double))
     aaf = ctypes.c_double()

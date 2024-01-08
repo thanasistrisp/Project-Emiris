@@ -164,7 +164,7 @@ Analysis is done in 3 notebooks:
 
 - `optimization_initial.ipynb`: recalculate the best hyperparameters, AAF and average query time for each non-clustering algorithm (LSH, Hypercube, GNNS, MRNG, NSG) in the initial space using the AAF (Average Approximation Factor) instead of the MAF (Maximum Approximation Factor) metric.
 - `optimization_latent.ipynb`: calculate the best hyperparameters, AAF and average query time for each non-clustering algorithm (LSH, Hypercube, GNNS, MRNG, NSG) only in the latent space. AAF evaluation in this case is only used for hyperparameter tuning, because the points are not projected back to initial space.
-- `grid_search_lat_init.ipynb`: using the best hyperparameters for the latent space, for each of the 6 best autoencoder models and for each algorithm (Brute-force, LSH, Hypercube, GNNS, MRNG, NSG) we evaluate the AAF between initial and latent space and the time needed for the search in latent space.
+- `grid_search_lat_init.ipynb`: using the best hyperparameters for the latent space, for each of the 6 best autoencoder models and for each algorithm (Brute-force, LSH, Hypercube, GNNS, MRNG, NSG) we evaluate the AAF in projected latent space and the time needed for the search in latent space.
 
 # 6. Clustering in Latent Space
 
@@ -193,7 +193,7 @@ The value of the objective function gives a local minimum for the clustering pro
 Analysis is done in 2 notebooks:
 
 - `grid_search_kmeans_latentnonproj_and_init.ipynb`: using the best hyperparameters for the LSH and Hypercube algorithms in both latent and initial space, we measure the difference in clustering time and metrics. In this case, comparing the metrics does not make sense as we calculate them without using projection to initial space, but they are indicative of the general performance of the algorithms in lower dimensions.
-- `grid_search_kmeans_lat_init.ipynb`: using the best hyperparameters for the LSH and Hypercube algorithms in latent space, for each of the 6 best autoencoder models and for each K-Means variation (Classic using Lloyd's method, Reverse LSH, Reverse Hypercube) we evaluate the silhouette metric between initial and latent space and the objective function value.
+- `grid_search_kmeans_lat_init.ipynb`: using the best hyperparameters for the LSH and Hypercube algorithms in latent space, for each of the 6 best autoencoder models and for each K-Means variation (Classic using Lloyd's method, Reverse LSH, Reverse Hypercube) we evaluate the silhouette metric and the objective value in the two spaces.
 
 # References
 

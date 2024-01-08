@@ -282,10 +282,12 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 ///////////////////////////////
 ///////////////////////////////
 
+// Returns the AAF in projected latent space.
 extern "C" void get_aaf(const char* load_file, int queries_num, struct config* config, double *aaf, double *time) {
 	// Initialize structure.
 	string dataset_str(config->dataset);
 	string query_str(config->query);
+	string encoded_query_str(config->encoded_query);
 	string encoded_dataset_str(config->encoded_dataset);
 	string load_file_str(load_file);
 
@@ -295,6 +297,10 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	}
 	if (!file_exists(query_str)) {
 		cout << "File " << query_str << " does not exist." << endl;
+		exit(1);
+	}
+	if (!file_exists(encoded_query_str)) {
+		cout << "File " << encoded_query_str << " does not exist." << endl;
 		exit(1);
 	}
 	if (!file_exists(encoded_dataset_str)) {
@@ -310,10 +316,15 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 
 	vector <vector<double>> dataset = read_mnist_data_float(dataset_str);
 	vector <vector<double>> queries;
-	if (queries_num == -1)
+	vector <vector<double>> encoded_queries;
+	if (queries_num == -1) {
 		queries = read_mnist_data_float(query_str);
-	else
+		encoded_queries = read_mnist_data_float(encoded_query_str);
+	}
+	else {
 		queries = read_mnist_data_float(query_str, queries_num);
+		encoded_queries = read_mnist_data_float(encoded_query_str, queries_num);
+	}
 	vector <vector<double>> encoded_dataset = read_mnist_data_float(encoded_dataset_str);
 
 	// Initialize structure.
@@ -396,8 +407,8 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 	for (int q = 0; q < queries_num; q++) {
 		vector<double> query_init = queries[q];
 		tuple<vector<int>, vector<double>> true_nn_init_ = brute_force(dataset, query_init, 1);
-		vector<double> true_nn_init = dataset[get<0>(true_nn_init_)[0]];
-		vector<double> query_enc = encoded_dataset[q];
+		vector<double> true_nn_init = dataset[get<0>(true_nn_init_)[0]]; // Exact NN of q in initial space.
+		vector<double> query_enc = encoded_queries[q];
 		tuple<vector<int>, vector<double>> ann_enc_;
 
 		clock_t start_ANN = clock();
@@ -435,9 +446,11 @@ extern "C" void get_aaf(const char* load_file, int queries_num, struct config* c
 
 		time_ += double(end_ANN - start_ANN) / CLOCKS_PER_SEC;
 
-		vector<double> ann_enc = encoded_dataset[get<0>(ann_enc_)[0]];
-		vector<double> ann_init = dataset[get<0>(ann_enc_)[0]];
-		if (euclidean_distance(query_init, ann_init) == 0) { // Very rare case: the ANN is the query itself (limited representation in the latent space)
+		vector<double> ann_init = dataset[get<0>(ann_enc_)[0]]; // ANN of q in latent space projected back to initial space.
+
+		// If query in initial space is the same with nn in latent space, add 1 to average (aaf >= 1).
+		// The only case that this happens is when the query is in the original dataset.
+		if (euclidean_distance(query_init, ann_init) == 0) {
 			aaf_ += 1;
 		}
 		else {

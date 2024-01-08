@@ -5,5 +5,6 @@ struct config
     double window; // window parameter for LSH, CUBE.
     const char *dataset;
     const char *query;
+    const char *encoded_query;
     const char *encoded_dataset;
 };
