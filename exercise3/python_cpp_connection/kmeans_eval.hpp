@@ -1,7 +1,7 @@
 #include "kmeans.hpp"
 #include <variant>
 
-// For evaluating the K-Means algorithm between the initial and latent space.
+// For evaluating the K-Means algorithm in projected latent space.
 class KMeansEval : public KMeans {
 	private:
 		// Returns the silhouette of the cluster with the given index.

@@ -282,7 +282,7 @@ extern "C" void get_nsg_results(const char *input, const char *query, int querie
 ///////////////////////////////
 ///////////////////////////////
 
-// Returns the AAF between the two spaces.
+// Returns the AAF in projected latent space.
 extern "C" void get_aaf(const char* load_file, int queries_num, struct config* config, double *aaf, double *time) {
 	// Initialize structure.
 	string dataset_str(config->dataset);

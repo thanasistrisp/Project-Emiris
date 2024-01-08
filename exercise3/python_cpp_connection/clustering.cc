@@ -28,7 +28,8 @@
 using namespace std;
 
 // Connector functions that execute the K-Means algorithm in latent space and return
-// the clustering time, total and per-cluster silhouette in latent space and the silhouette between the two spaces.
+// the clustering time, total and per-cluster silhouette in latent space and in projected latent space
+// and the value of the objective function.
 
 double compute_objective_function(const vector<vector<double>>& dataset, const std::vector<std::vector<int>> clusters,
                                   const vector<vector<double>>& centroids)
