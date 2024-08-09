@@ -1,8 +1,6 @@
-# Αγνοούμε όλα τα αρχεία (όχι τα directories)
 *
 !*/
 
-# Εκτός από τα παρακάτω
 !*.cpp
 !*.cc
 !*.h
@@ -16,7 +14,6 @@
 !*.bin
 !*.ipynb
 
-# vscode directory
 !launch.json
 !tasks.json
 !settings.json
@@ -24,7 +21,6 @@
 !set_program_args.pl
 !visualize*
 
-# MNIST directory
 *ubyte
 
 !*.keras
